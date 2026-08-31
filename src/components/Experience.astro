@@ -1,0 +1,64 @@
+---
+import { education, experienceIntro, roles, skills } from '../data/site';
+---
+
+<section class="section notebook" id="experience">
+  <div class="section-head">
+    <h2>Experience</h2>
+    <p class="note">{experienceIntro}</p>
+  </div>
+  <div class="timeline">
+    {
+      roles.map((role) => (
+        <article class="role" data-reveal>
+          <div class="when-col">
+            <p class="when">{role.dates}</p>
+            {role.location && <p class="when">{role.location}</p>}
+          </div>
+          <div>
+            <h3>{role.title}</h3>
+            <p class="company">{role.company}</p>
+            {role.note && <p class="role-note">{role.note}</p>}
+            <ul>
+              {role.bullets.map((bullet) => (
+                <li>{bullet}</li>
+              ))}
+            </ul>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+
+  <div class="resume-extras" data-reveal>
+    <div>
+      <h3 class="kicker">Education</h3>
+      <ul class="edu-list">
+        {
+          education.map((item) => (
+            <li>
+              <p class="when">{item.dates}</p>
+              <p class="edu-degree">{item.degree}</p>
+              <p class="edu-school">{item.school}</p>
+              {item.note && <p class="edu-note">{item.note}</p>}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <aside class="skills-panel">
+      {
+        Object.entries(skills).map(([group, items]) => (
+          <div class="skill-block">
+            <h3>{group}</h3>
+            <div class="tags">
+              {items.map((item) => (
+                <span class="tag">{item}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </aside>
+  </div>
+</section>

@@ -1,0 +1,13 @@
+---
+import { nav } from '../data/site';
+---
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/">Chris <em>Swim</em> Lee</a>
+    <nav class="nav-links" aria-label="Primary">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a class="nav-resume" href="/resume/">Resume</a>
+    </nav>
+  </div>
+</header>

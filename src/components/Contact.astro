@@ -1,0 +1,18 @@
+---
+import { briefMail, contact, site } from '../data/site';
+---
+
+<section class="section contact-section" id="contact">
+  <div class="contact-box">
+    <div>
+      <h2>{contact.heading}</h2>
+      <p data-reveal>{contact.lede}</p>
+    </div>
+    <div class="contact-actions" data-reveal>
+      <a class="mail" href={`mailto:${site.email}`}>{site.email}</a>
+      <div class="card-links">
+        <a class="btn btn-solid" href={briefMail}>{contact.projectCta}</a>
+      </div>
+    </div>
+  </div>
+</section>

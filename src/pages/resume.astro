@@ -1,0 +1,188 @@
+---
+import Layout from '../layouts/Layout.astro';
+import {
+  achievements,
+  education,
+  range,
+  roles,
+  services,
+  site,
+  skills,
+} from '../data/site';
+---
+
+<Layout
+  title={`Resume — ${site.name}`}
+  description={`Resume for ${site.legalName}: six years of engineering experience — technical lead in New York working across pure mathematics, enterprise systems, and strategic intelligence.`}
+>
+  <main id="main" class="resume-page wrap">
+    <div class="resume-top">
+      <div>
+        <p class="kicker">Resume</p>
+        <h1>{site.legalName}</h1>
+      </div>
+      <div class="resume-meta">
+        <p>{site.location}</p>
+        <p>
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+        </p>
+        <p>
+          <a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          {' · '}
+          <a href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+          {' · '}
+          <a href={site.url}>{site.url.replace('https://', '')}</a>
+        </p>
+        <div class="hero-actions">
+          <a class="btn" href="/">Back to site</a>
+          <button class="btn" type="button" onclick="window.print()">Print / PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="resume-block">
+      <h2>Profile</h2>
+      <p style="color: var(--muted); max-width: 70ch;">
+        Six years of engineering across math, Goldman infrastructure, and a #1 competitive rank. I
+        use that mix to pick a direction and ship.
+      </p>
+      <ul style="color: var(--muted); max-width: 70ch; margin: 0.75rem 0 0; padding-left: 1.1rem;">
+        {
+          range.spikes.map((spike) => (
+            <li>
+              <strong style="color: var(--text);">{spike.label}.</strong> {spike.domain} — {spike.trains}
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="resume-block">
+      <h2>Experience</h2>
+      <div class="timeline">
+        {
+          roles.map((role) => (
+            <article class="role">
+              <div class="when-col">
+                <p class="when">{role.dates}</p>
+                {role.location && <p class="when">{role.location}</p>}
+              </div>
+              <div>
+                <h3>{role.title}</h3>
+                <p class="company">{role.company}</p>
+                {role.note && <p class="role-note">{role.note}</p>}
+                <ul>
+                  {role.bullets.map((bullet) => (
+                    <li>{bullet}</li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="resume-block">
+      <h2>Education</h2>
+      {
+        education.map((item) => (
+          <article class="role">
+            <div>
+              <p class="when">{item.dates}</p>
+            </div>
+            <div>
+              <h3>{item.degree}</h3>
+              <p class="company">{item.school}</p>
+              {item.note && <p style="color: var(--muted);">{item.note}</p>}
+            </div>
+          </article>
+        ))
+      }
+    </section>
+
+    <section class="resume-block">
+      <h2>Skills</h2>
+      {
+        Object.entries(skills).map(([group, items]) => (
+          <div class="skill-block">
+            <h3>{group}</h3>
+            <div class="tags">
+              {items.map((item) => (
+                <span class="tag">{item}</span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </section>
+
+    <section class="resume-block">
+      <h2>Consulting</h2>
+      <p style="color: var(--muted); max-width: 70ch;">
+        Technical lead for funded teams with a stuck system — data, automation, or agents. A
+        diagnostic to start. A scoped build or a retainer once the work is clear.
+      </p>
+      <ul style="color: var(--muted); max-width: 70ch; margin: 0.75rem 0 0; padding-left: 1.1rem;">
+        {
+          services.engagements.map((item) => (
+            <li>
+              <strong style="color: var(--text);">{item.name}.</strong> {item.price} · {item.unit}. {item.summary}
+            </li>
+          ))
+        }
+        <li>
+          <strong style="color: var(--text);">Day rate.</strong> {services.day.price} / {services.day.unit}. {services.day.note}
+        </li>
+      </ul>
+      <p style="color: var(--muted); max-width: 70ch; margin-top: 0.75rem;">
+        Write
+        {' '}
+        <a href={services.href}>{site.email}</a>
+        {' '}
+        with what the company does and what’s stuck.
+      </p>
+    </section>
+
+    <section class="resume-block">
+      <h2>Open source</h2>
+      <p style="color: var(--muted); max-width: 70ch;">
+        <strong style="color: var(--text);">Local Lattice</strong> — local-first OpenAI-compatible
+        capability gateway (Apache-2.0). Agents ask for a role, not a model string. Capability
+        routing, admission queue, hybrid local + cloud swarm.
+        {' '}
+        <a href="https://github.com/chrisswimlee/local-lattice" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-lattice</a>
+      </p>
+    </section>
+
+    <section class="resume-block">
+      <h2>Digital work</h2>
+      <p style="color: var(--muted); max-width: 70ch;">
+        <strong style="color: var(--text);">HAIT</strong> — public site for Hebron Asia
+        International Institute of Technology, the AI university where I teach.
+        Redesigned the front-end, upgraded the PHP, and fixed performance so recruiting works before
+        there is a campus.
+        {' '}
+        <a href="https://haitedu.com" target="_blank" rel="noopener noreferrer">haitedu.com</a>
+      </p>
+      <p style="color: var(--muted); max-width: 70ch; margin-top: 0.75rem;">
+        <strong style="color: var(--text);">D22-soso</strong> — site for Wayne “D22-soso” Chiang,
+        1999 Brood War World Champion, WSOP talent manager, and inventor of 2 Hand Hold’em.
+        {' '}
+        <a href="https://d22soso.com" target="_blank" rel="noopener noreferrer">d22soso.com</a>
+      </p>
+    </section>
+
+    <section class="resume-block">
+      <h2>Competitive achievements</h2>
+      {
+        achievements.map((item) => (
+          <p style="color: var(--muted); max-width: 70ch;">
+            <strong style="color: var(--text);">{item.title}.</strong> {item.detail}
+          </p>
+        ))
+      }
+    </section>
+
+  </main>
+</Layout>

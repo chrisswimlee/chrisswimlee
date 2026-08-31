@@ -1,0 +1,9 @@
+---
+import { tutor } from '../data/site';
+---
+
+<article class="offer tone-warm tutor-block" data-reveal>
+  <div class="prose tutor-prose">
+    {tutor.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+</article>

@@ -1,0 +1,172 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { education, site } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const title = Astro.props.title ?? site.title;
+const description = Astro.props.description ?? site.description;
+const noindex = Astro.props.noindex ?? false;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const og = new URL(site.ogImage, site.url).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name}, ${site.location}`} />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={og} />
+    <meta name="twitter:image:alt" content={`${site.name}, ${site.location}`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#cfc0a8" />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: site.legalName,
+      alternateName: site.name,
+      url: site.url,
+      email: `mailto:${site.email}`,
+      jobTitle: site.jobTitle,
+      knowsAbout: [
+        'Technical consulting',
+        'Automation',
+        'Data systems',
+        'Agents',
+        'Apache Kafka',
+        'Machine learning',
+        'Local Lattice',
+      ],
+      knowsLanguage: ['en', 'ko'],
+      alumniOf: education.map((item) => ({
+        '@type': 'CollegeOrUniversity',
+        name: item.school,
+      })),
+      hasOccupation: {
+        '@type': 'Occupation',
+        name: site.jobTitle,
+        occupationLocation: { '@type': 'City', name: 'New York' },
+      },
+      address: { '@type': 'PostalAddress', addressLocality: 'New York', addressRegion: 'NY' },
+      sameAs: [site.github, site.linkedin],
+      image: new URL(site.photo, site.url).href,
+    })} />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div class="lamp" aria-hidden="true"></div>
+    <Nav />
+    <slot />
+    <Footer />
+    <script is:inline type="module">
+      (() => {
+        const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const view =
+          CSS.supports('animation-timeline', 'view()') ||
+          CSS.supports('animation-timeline: view()');
+        if (motion && !view) {
+          const io = new IntersectionObserver((entries, obs) => {
+            for (const e of entries) {
+              if (!e.isIntersecting) continue;
+              e.target.classList.add('is-in');
+              obs.unobserve(e.target);
+            }
+          }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+          document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+        }
+        const items = [];
+        for (const a of document.querySelectorAll('.nav-links a')) {
+          if (!a.hash) continue;
+          const el = document.getElementById(a.hash.slice(1));
+          if (el) items.push({ el, a });
+        }
+        if (!items.length) return;
+        const visible = new Set();
+        const sync = () => {
+          const current = items.find((item) => visible.has(item.el));
+          for (const item of items) {
+            const on = item === current;
+            item.a.classList.toggle('is-active', on);
+            if (on) item.a.setAttribute('aria-current', 'location');
+            else item.a.removeAttribute('aria-current');
+          }
+        };
+        const spy = new IntersectionObserver((entries) => {
+          for (const e of entries) e.isIntersecting ? visible.add(e.target) : visible.delete(e.target);
+          sync();
+        }, { rootMargin: '-28% 0px -58% 0px' });
+        for (const item of items) spy.observe(item.el);
+      })();
+    </script>
+    <script is:inline type="module">
+      (() => {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (matchMedia('(hover: none)').matches) return;
+        const lamp = document.querySelector('.lamp');
+        if (!lamp) return;
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight * 0.3;
+        let cx = x;
+        let cy = y;
+        let running = false;
+        let idleAt = 0;
+        let last = 0;
+        const frame = (now) => {
+          const dt = Math.min(32, last ? now - last : 16.67) / 16.67;
+          last = now;
+          cx += (x - cx) * (1 - Math.pow(0.86, dt));
+          cy += (y - cy) * (1 - Math.pow(0.86, dt));
+          lamp.style.setProperty('--lamp-x', cx.toFixed(1) + 'px');
+          lamp.style.setProperty('--lamp-y', cy.toFixed(1) + 'px');
+          const settled = Math.abs(x - cx) < 0.4 && Math.abs(y - cy) < 0.4;
+          if (settled && performance.now() > idleAt) {
+            running = false;
+            return;
+          }
+          requestAnimationFrame(frame);
+        };
+        addEventListener(
+          'pointermove',
+          (e) => {
+            x = e.clientX;
+            y = e.clientY;
+            idleAt = performance.now() + 200;
+            if (running) return;
+            running = true;
+            last = 0;
+            requestAnimationFrame(frame);
+          },
+          { passive: true },
+        );
+      })();
+    </script>
+  </body>
+</html>

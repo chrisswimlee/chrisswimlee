@@ -1,0 +1,118 @@
+---
+import { range } from '../data/site';
+
+const peaks = [
+  { id: 'theory', x: 155, y: 56 },
+  { id: 'build', x: 460, y: 28 },
+  { id: 'strategy', x: 772, y: 62 },
+] as const;
+
+const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? '';
+---
+
+<section class="section range" id="range" data-range>
+  <div class="section-head">
+    <h2>Range</h2>
+    <p class="note">{range.lede}</p>
+  </div>
+
+  <p class="range-thread" data-reveal>{range.thread}</p>
+
+  <figure class="range-plot" data-reveal>
+    <svg viewBox="0 0 920 260" role="img" aria-label="A profile with three spikes: math, implementation, and strategy. Deep in each, not shallow across all.">
+      <g class="plot-axis" aria-hidden="true">
+        <path d="M26 18V214H900" />
+        <path class="plot-baseline" d="M26 214H900" />
+      </g>
+
+      {
+        peaks.map((peak) => (
+          <g class="peak" data-peak={peak.id}>
+            <path class="peak-drop" d={`M${peak.x} ${peak.y}V214`} />
+            <circle class="peak-dot" cx={peak.x} cy={peak.y} r="7" />
+            <text class="peak-label" x={peak.x} y="238">
+              {label(peak.id)}
+            </text>
+          </g>
+        ))
+      }
+
+      <path
+        class="plot-curve"
+        pathLength="1"
+        d="M26 208C76 208 100 64 155 56C212 48 232 152 306 160C386 168 404 32 460 28C518 24 544 152 618 160C698 168 718 70 772 62C828 54 858 200 896 208"
+      />
+
+      <text class="plot-axis-note" x="34" y="34">depth</text>
+      <text class="plot-axis-note" x="820" y="206">breadth</text>
+    </svg>
+    <figcaption>Three peaks. The useful part is the overlap.</figcaption>
+  </figure>
+
+  <div class="spikes">
+    {
+      range.spikes.map((spike) => (
+        <article class="spike" data-spike={spike.id} tabindex="0" data-reveal>
+          <p class="kicker">{spike.domain}</p>
+          <h3>{spike.label}</h3>
+          <p class="spike-trains">{spike.trains}</p>
+          <ul class="points">
+            {spike.proof.map((line) => (
+              <li>{line}</li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+  </div>
+
+  <div class="synthesis" data-reveal>
+        <h3 class="synthesis-head">Where they meet</h3>
+    <div class="synthesis-grid">
+      {
+        range.synthesis.map((item, i) => (
+          <article class="bridge">
+            <span class="bridge-num">{String(i + 1).padStart(2, '0')}</span>
+            <h4>{item.title}</h4>
+            <p>{item.detail}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-range]');
+  if (root) {
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-spike]')];
+    const groups = [...root.querySelectorAll<SVGGElement>('[data-peak]')];
+
+    const setActive = (id: string | null) => {
+      if (id) root.dataset.active = id;
+      else delete root.dataset.active;
+    };
+
+    for (const card of cards) {
+      const id = card.dataset.spike!;
+      card.addEventListener('pointerenter', () => setActive(id));
+      card.addEventListener('focus', () => setActive(id));
+      card.addEventListener('pointerleave', () => setActive(null));
+      card.addEventListener('blur', () => setActive(null));
+    }
+
+    // The plotted peaks are the same control surface as the cards below them.
+    for (const group of groups) {
+      const id = group.dataset.peak!;
+      group.addEventListener('pointerenter', () => setActive(id));
+      group.addEventListener('pointerleave', () => setActive(null));
+      group.addEventListener('click', () => {
+        const card = cards.find((c) => c.dataset.spike === id);
+        if (!card) return;
+        setActive(id);
+        card.focus({ preventScroll: true });
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }
+</script>

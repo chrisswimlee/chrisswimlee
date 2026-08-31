@@ -1,0 +1,38 @@
+---
+import { services } from '../data/site';
+---
+
+<section class="section" id="services">
+  <div class="section-head">
+    <h2>Services</h2>
+    <p data-reveal>{services.lede}</p>
+  </div>
+  <p class="services-promise" data-reveal>{services.promise}</p>
+  <div class="rate-grid">
+    {
+      services.engagements.map((item, i) => (
+        <article class={`rate-card rate-${i}`} data-reveal>
+          {i === 0 && <p class="hero-stamp stamp-sm">start here</p>}
+          <p class="kicker">{item.unit}</p>
+          <h3>{item.name}</h3>
+          <p class="rate-price">{item.price}</p>
+          <p>{item.summary}</p>
+        </article>
+      ))
+    }
+  </div>
+  <div class="services-day" data-reveal>
+    <p>
+      <strong>{services.day.price}</strong>
+      <span> / {services.day.unit}</span>
+      {' — '}
+      {services.day.note}
+    </p>
+  </div>
+  <ul class="services-notes" data-reveal>
+    {services.notes.map((note) => <li>{note}</li>)}
+  </ul>
+  <div class="card-links" data-reveal>
+    <a class="btn btn-solid" href={services.href}>{services.cta}</a>
+  </div>
+</section>

@@ -1,0 +1,478 @@
+---
+import { projects, systems } from '../data/site';
+
+const pieces = [
+  {
+    id: 'trading',
+    kind: 'System',
+    year: '2025–26',
+    title: systems[0].title,
+    kicker: systems[0].kicker,
+    summary: systems[0].summary,
+    metric: systems[0].metric,
+    href: '/#experience',
+    diagram: 'trading' as const,
+  },
+  {
+    id: 'goldman',
+    kind: 'System',
+    year: '2022–25',
+    title: systems[1].title,
+    kicker: systems[1].kicker,
+    summary: systems[1].summary,
+    metric: systems[1].metric,
+    href: '/#experience',
+    diagram: 'goldman' as const,
+  },
+  {
+    id: 'lattice',
+    kind: projects[0].kind,
+    year: projects[0].year,
+    title: projects[0].title,
+    kicker: 'Apache-2.0 · PyPI',
+    summary: projects[0].summary,
+    metric: 'role:*',
+    href: projects[0].links[0].href,
+    diagram: 'lattice' as const,
+  },
+  {
+    id: 'haitedu',
+    kind: projects[1].kind,
+    year: projects[1].year,
+    title: projects[1].title,
+    kicker: projects[1].url,
+    summary: projects[1].summary,
+    metric: 'the public site',
+    href: projects[1].links[0].href,
+    image: projects[1].image,
+  },
+  {
+    id: 'd22soso',
+    kind: projects[2].kind,
+    year: projects[2].year,
+    title: projects[2].title,
+    kicker: projects[2].url,
+    summary: projects[2].summary,
+    metric: 'Record + playable table',
+    href: projects[2].links[0].href,
+    image: projects[2].image,
+  },
+];
+
+const tilts = [-2.6, 1.9, -1.2, 2.8, -3.1];
+const n = pieces.length;
+const step = (Math.PI * 2) / n;
+const previewR = 340;
+
+const place = (i: number) => {
+  const a = i * step;
+  return `translate(-50%, -50%) translate3d(${Math.sin(a) * previewR}px, 0, ${Math.cos(a) * previewR}px) rotateY(${(-a * 180) / Math.PI}deg)`;
+};
+
+const runs = {
+  trading: ['M48 28H96V80H158V36H240', 'M48 80H240', 'M48 132H96V80H158V124H240'],
+  goldman: ['M28 80H148V28H248', 'M28 80H248', 'M28 80H148V132H248'],
+  lattice: ['M48 30H96V80H160V30H244', 'M48 80H244', 'M48 130H96V80H160V130H244'],
+} as const;
+---
+
+<section class="gallery-section" id="gallery">
+  <div class="gallery-head">
+    <p class="kicker">Five pieces</p>
+    <h2>Gallery</h2>
+    <p class="note gallery-scribble">drag to turn</p>
+  </div>
+
+  <div class="gallery-stage" data-gallery>
+    <div class="gallery-world" data-world>
+      <div class="gallery-plinth" aria-hidden="true">
+        <span class="gallery-orbit"></span>
+      </div>
+
+      <div class="gallery-ring" data-ring>
+        {
+          pieces.map((piece, i) => (
+            <article
+              class="gal-card"
+              data-index={i}
+              data-title={piece.title}
+              data-summary={piece.summary}
+              data-href={piece.href}
+              data-kind={`${piece.kind} · ${piece.year}`}
+              style={`--tilt: ${tilts[i]}deg; --i: ${i}; transform: ${place(i)}`}
+            >
+              <span class="tape" aria-hidden="true" />
+              <span class="gal-index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              {
+                piece.image ? (
+                  <img src={piece.image} alt="" width="640" height="400" loading="lazy" decoding="async" />
+                ) : (
+                  <div class="gal-schematic" aria-hidden="true">
+                    {piece.diagram === 'trading' && (
+                      <svg viewBox="0 0 280 160" fill="none">
+                        <path class="gal-wire" d="M20 28H96M20 80H96M20 132H96M96 28V132M96 80H158M158 36V124M158 36H252M158 80H252M158 124H252" />
+                        <circle class="gal-node" cx="96" cy="80" r="5" />
+                        <circle class="gal-node" cx="158" cy="80" r="6" />
+                        <text x="20" y="20">crypto</text>
+                        <text x="20" y="72">equities</text>
+                        <text x="20" y="124">sql</text>
+                        <text x="104" y="76">agents</text>
+                        <text x="196" y="32">signals</text>
+                        <text x="196" y="76">process</text>
+                        <text x="196" y="120">brief</text>
+                        {runs.trading.map((d, p) => (
+                          <circle class="gal-pkt" r="3.6" style={`offset-path: path('${d}'); animation-delay: ${-p * 0.7}s`} />
+                        ))}
+                      </svg>
+                    )}
+                    {piece.diagram === 'goldman' && (
+                      <svg viewBox="0 0 280 160" fill="none">
+                        <path class="gal-wire" d="M16 80H78M78 40V120M78 80H148M148 28V132M148 28H260M148 80H260M148 132H260" />
+                        <circle class="gal-node" cx="78" cy="80" r="5" />
+                        <circle class="gal-node" cx="148" cy="80" r="6" />
+                        <text x="16" y="72">ingest</text>
+                        <text x="86" y="76">kafka</text>
+                        <text x="188" y="24">10k accts</text>
+                        <text x="188" y="76">50+ teams</text>
+                        <text x="188" y="128">testng</text>
+                        {runs.goldman.map((d, p) => (
+                          <circle class="gal-pkt" r="3.6" style={`offset-path: path('${d}'); animation-delay: ${-p * 0.7}s`} />
+                        ))}
+                      </svg>
+                    )}
+                    {piece.diagram === 'lattice' && (
+                      <svg viewBox="0 0 280 160" fill="none">
+                        <path class="gal-wire" d="M20 30H96M20 80H96M20 130H96M96 30V130M96 80H160M160 30V130M160 30H256M160 80H256M160 130H256" />
+                        <circle class="gal-node" cx="96" cy="80" r="5" />
+                        <circle class="gal-node" cx="160" cy="80" r="6" />
+                        <text x="20" y="22">mlx</text>
+                        <text x="20" y="72">lms</text>
+                        <text x="20" y="122">cloud</text>
+                        <text x="108" y="76">lattice</text>
+                        <text x="176" y="26">role:coder</text>
+                        <text x="176" y="76">role:reasoner</text>
+                        <text x="176" y="126">role:fast</text>
+                        {runs.lattice.map((d, p) => (
+                          <circle class="gal-pkt" r="3.6" style={`offset-path: path('${d}'); animation-delay: ${-p * 0.7}s`} />
+                        ))}
+                      </svg>
+                    )}
+                  </div>
+                )
+              }
+              <p class="gal-kind">{piece.kicker}</p>
+              <h3>{piece.title}</h3>
+              <p class="gal-metric">{piece.metric}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="gallery-dock">
+    <button class="btn" type="button" data-gal-prev aria-label="Previous piece">←</button>
+    <div class="gallery-caption">
+      <p class="kicker" data-gal-kind>{pieces[0].kind} · {pieces[0].year}</p>
+      <p class="gallery-caption-title" data-gal-title>{pieces[0].title}</p>
+      <p data-gal-summary>{pieces[0].summary}</p>
+      <a class="btn" data-gal-link href={pieces[0].href}>Open</a>
+    </div>
+    <button class="btn" type="button" data-gal-next aria-label="Next piece">→</button>
+    <div class="gallery-meter">
+      <span class="gallery-count" data-gal-count>01 / {String(pieces.length).padStart(2, '0')}</span>
+      <span class="gallery-dots" role="tablist" aria-label="Pieces">
+        {
+          pieces.map((piece, i) => (
+            <button
+              type="button"
+              class="gallery-dot"
+              data-gal-dot={i}
+              role="tab"
+              aria-selected={i === 0 ? 'true' : 'false'}
+              aria-label={piece.title}
+            />
+          ))
+        }
+      </span>
+    </div>
+  </div>
+</section>
+
+<script>
+  function initGallery(root: HTMLElement) {
+    const cards = [...root.querySelectorAll<HTMLElement>('.gal-card')];
+    if (!cards.length) return;
+
+    const n = cards.length;
+    const step = (Math.PI * 2) / n;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const coarse = matchMedia('(pointer: coarse)').matches;
+    const world = root.querySelector<HTMLElement>('[data-world]');
+
+    const kindEl = document.querySelector('[data-gal-kind]');
+    const titleEl = document.querySelector('[data-gal-title]');
+    const sumEl = document.querySelector('[data-gal-summary]');
+    const linkEl = document.querySelector<HTMLAnchorElement>('[data-gal-link]');
+    const countEl = document.querySelector('[data-gal-count]');
+    const dots = [...document.querySelectorAll<HTMLElement>('[data-gal-dot]')];
+
+    let pos = 0;
+    let target = 0;
+    let vel = 0;
+    let shown = -1;
+    let dragging = false;
+    let moved = 0;
+    let lastX = 0;
+    let lastT = 0;
+    let pointerVel = 0;
+    let radius = 340;
+    let depth = 300;
+    let hoverLift = 0;
+    let hoverTarget = 0;
+    let camX = 0;
+    let camY = 0;
+    let camTX = 0;
+    let camTY = 0;
+    let looping = false;
+    let visible = true;
+    let lastFrame = 0;
+    const frontAt = new Array(n).fill(false);
+
+    function measure() {
+      const w = root.clientWidth;
+      radius = Math.max(168, Math.min(400, w * 0.4));
+      depth = Math.max(130, Math.min(340, w * 0.3));
+    }
+
+    function caption(i: number) {
+      if (i === shown) return;
+      shown = i;
+      const card = cards[i];
+      if (!card) return;
+      if (kindEl) kindEl.textContent = card.dataset.kind || '';
+      if (titleEl) titleEl.textContent = card.dataset.title || '';
+      if (sumEl) sumEl.textContent = card.dataset.summary || '';
+      if (linkEl) {
+        const href = card.dataset.href || '#';
+        linkEl.href = href;
+        linkEl.textContent = href.startsWith('http') ? 'Open' : 'Read';
+      }
+      if (countEl) {
+        countEl.textContent = `${String(i + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`;
+      }
+      dots.forEach((dot, j) => dot.setAttribute('aria-selected', j === i ? 'true' : 'false'));
+    }
+
+    function render() {
+      for (let i = 0; i < n; i++) {
+        const card = cards[i];
+        const a = (i - pos) * step;
+        const abs = Math.abs(Math.atan2(Math.sin(a), Math.cos(a)));
+        const front = Math.max(0, 1 - abs / 0.95);
+        const tilt = Number(card.dataset.tilt || 0);
+        const x = Math.sin(a) * radius;
+        const z = Math.cos(a) * depth;
+        const y = (1 - Math.cos(a)) * 12 - front * hoverLift;
+        const ry = (-a * 180) / Math.PI;
+        const rz = tilt * front;
+        card.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) rotateY(${ry.toFixed(2)}deg) rotateZ(${rz.toFixed(2)}deg)`;
+        card.style.zIndex = String(Math.round(100 + z));
+        card.style.opacity = abs > 2.35 ? '0' : abs > 1.85 ? String((2.35 - abs) / 0.5) : '1';
+        const isFront = abs < 0.55;
+        if (frontAt[i] !== isFront) {
+          frontAt[i] = isFront;
+          card.setAttribute('aria-current', isFront ? 'true' : 'false');
+          card.toggleAttribute('inert', !isFront);
+          card.toggleAttribute('data-live', isFront);
+        }
+      }
+
+      if (world) {
+        world.style.transform = `rotateX(${camX.toFixed(2)}deg) rotateY(${camY.toFixed(2)}deg)`;
+      }
+      caption(((Math.round(pos) % n) + n) % n);
+    }
+
+    function go(i: number) {
+      const d = ((i - target) % n + n) % n;
+      target += d > n / 2 ? d - n : d;
+      kick();
+    }
+
+    function busy() {
+      return (
+        dragging ||
+        Math.abs(target - pos) > 0.0008 ||
+        Math.abs(vel) > 0.0008 ||
+        Math.abs(hoverTarget - hoverLift) > 0.08 ||
+        Math.abs(camTX - camX) > 0.03 ||
+        Math.abs(camTY - camY) > 0.03
+      );
+    }
+
+    function kick() {
+      if (looping) return;
+      looping = true;
+      lastFrame = 0;
+      requestAnimationFrame(frame);
+    }
+
+    if (reduce) {
+      root.classList.add('is-flat');
+      cards.forEach((c) => c.removeAttribute('style'));
+      caption(0);
+      dots.forEach((dot, j) => {
+        dot.addEventListener('click', () => {
+          cards[j].scrollIntoView({ block: 'center' });
+          caption(j);
+        });
+      });
+      return;
+    }
+
+    cards.forEach((card) => {
+      const t = getComputedStyle(card).getPropertyValue('--tilt').trim();
+      card.dataset.tilt = String(parseFloat(t) || 0);
+    });
+
+    measure();
+    render();
+
+    root.addEventListener('pointerdown', (e) => {
+      if ((e.target as HTMLElement).closest('a, button')) return;
+      dragging = true;
+      moved = 0;
+      pointerVel = 0;
+      lastX = e.clientX;
+      lastT = performance.now();
+      vel = 0;
+      root.setPointerCapture(e.pointerId);
+      root.classList.add('is-grabbing');
+      kick();
+    });
+
+    root.addEventListener('pointermove', (e) => {
+      if (!dragging) {
+        if (!coarse) {
+          const r = root.getBoundingClientRect();
+          const nx = (e.clientX - r.left) / r.width - 0.5;
+          const ny = (e.clientY - r.top) / r.height - 0.5;
+          camTX = ny * -4;
+          camTY = nx * 6;
+          hoverTarget = Math.abs(nx) < 0.18 ? 10 : 3;
+          kick();
+        }
+        return;
+      }
+      const now = performance.now();
+      const dx = e.clientX - lastX;
+      const dt = Math.max(8, now - lastT);
+      moved += Math.abs(dx);
+      pointerVel = -(dx / radius) * (1000 / dt) * 0.14;
+      pos -= dx / Math.max(160, radius * 0.72);
+      target = pos;
+      lastX = e.clientX;
+      lastT = now;
+    });
+
+    const endDrag = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      root.classList.remove('is-grabbing');
+      if (moved < 8) {
+        const card = (e.target as HTMLElement).closest<HTMLElement>('.gal-card');
+        if (card?.dataset.index) go(Number(card.dataset.index));
+        return;
+      }
+      target = Math.round(pos + Math.max(-2, Math.min(2, pointerVel * 6)));
+      kick();
+    };
+
+    root.addEventListener('pointerup', endDrag);
+    root.addEventListener('pointercancel', endDrag);
+    root.addEventListener('pointerleave', () => {
+      hoverTarget = 0;
+      camTX = 0;
+      camTY = 0;
+      kick();
+    });
+
+    root.addEventListener(
+      'wheel',
+      (e) => {
+        if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+        e.preventDefault();
+        vel += e.deltaX * 0.0012;
+        kick();
+      },
+      { passive: false },
+    );
+
+    document.querySelector('[data-gal-prev]')?.addEventListener('click', () => {
+      target = Math.round(target) - 1;
+      kick();
+    });
+    document.querySelector('[data-gal-next]')?.addEventListener('click', () => {
+      target = Math.round(target) + 1;
+      kick();
+    });
+    dots.forEach((dot, j) => dot.addEventListener('click', () => go(j)));
+
+    window.addEventListener('keydown', (e) => {
+      if (!root.matches(':hover')) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        target = Math.round(target) - 1;
+        kick();
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        target = Math.round(target) + 1;
+        kick();
+      }
+    });
+
+    new IntersectionObserver((entries) => {
+      visible = entries.some((en) => en.isIntersecting);
+      if (visible) kick();
+    }, { threshold: 0.05 }).observe(root);
+
+    new ResizeObserver(() => {
+      measure();
+      render();
+    }).observe(root);
+
+    function frame(now: number) {
+      if (!visible) {
+        looping = false;
+        return;
+      }
+      const raw = lastFrame ? now - lastFrame : 16.67;
+      lastFrame = now;
+      const dt = Math.min(32, raw) / 16.67;
+
+      hoverLift += (hoverTarget - hoverLift) * (1 - Math.pow(0.88, dt));
+      camX += (camTX - camX) * (1 - Math.pow(0.92, dt));
+      camY += (camTY - camY) * (1 - Math.pow(0.92, dt));
+
+      if (!dragging) {
+        vel += (target - pos) * 0.09 * dt;
+        vel *= Math.pow(0.82, dt);
+        pos += vel * dt;
+        if (Math.abs(target - pos) < 0.0005 && Math.abs(vel) < 0.0005) {
+          pos = target;
+          vel = 0;
+        }
+      }
+
+      render();
+
+      if (busy()) requestAnimationFrame(frame);
+      else looping = false;
+    }
+  }
+
+  const stage = document.querySelector<HTMLElement>('[data-gallery]');
+  if (stage) initGallery(stage);
+</script>

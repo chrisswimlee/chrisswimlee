@@ -1,0 +1,106 @@
+---
+import { projects, work } from '../data/site';
+
+const featured = projects.filter((project) => project.featured);
+---
+
+<section class="section" id="work">
+  <div class="section-head">
+    <h2>Selected work</h2>
+    <p class="note">{work.lede}</p>
+  </div>
+  <div class="work-board">
+    {
+      featured.map((project, index) => {
+        const live = project.links[0];
+        return (
+          <article class={`work-piece piece-${index}`} data-reveal>
+            <span class="tape" aria-hidden="true" />
+            {
+              project.image && live ? (
+                <a class="polaroid" href={live.href} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={project.image}
+                    alt={`Homepage of ${project.url}, designed by Chris Swim Lee`}
+                    width="1200"
+                    height="750"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+              ) : (
+                <div class="polaroid polaroid-schematic" aria-hidden="true">
+                  <svg viewBox="0 0 320 180" fill="none">
+                    <path d="M24 36H110M24 90H110M24 144H110M110 36V144M110 90H186M186 36V144M186 36H300M186 90H300M186 144H300" />
+                    <text x="24" y="28">mlx</text>
+                    <text x="24" y="82">lms</text>
+                    <text x="24" y="136">cloud</text>
+                    <text x="128" y="86">lattice</text>
+                    <text x="210" y="32">role:coder</text>
+                    <text x="210" y="86">role:reasoner</text>
+                    <text x="210" y="140">role:fast</text>
+                  </svg>
+                </div>
+              )
+            }
+            <p class="kicker">
+              {project.kind} · {project.year}
+            </p>
+            <h3>{project.title}</h3>
+            {project.url && <p class="case-url">{project.url}</p>}
+            <p>{project.summary}</p>
+            {
+              project.points.length > 0 && (
+                <ul class="points">
+                  {project.points.map((point) => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+              )
+            }
+            {
+              project.command && (
+                <p class="cmd">
+                  <code>{project.command}</code>
+                  <button class="cmd-copy" type="button" data-copy={project.command}>
+                    Copy
+                  </button>
+                </p>
+              )
+            }
+            <div class="card-links">
+              {project.links.map((link) => (
+                <a
+                  class:list={['btn', link === live && 'btn-solid']}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </article>
+        );
+      })
+    }
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const text = btn.dataset.copy;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = 'Copied';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+        }, 1400);
+      } catch {
+        btn.textContent = 'Copy failed';
+      }
+    });
+  });
+</script>

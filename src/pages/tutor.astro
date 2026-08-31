@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Tutor from '../components/Tutor.astro';
+import { site, tutor } from '../data/site';
+---
+
+<Layout
+  title={`Tutoring — ${site.name}`}
+  description={`${site.name} tutors software and math. One-to-one, separate from the consulting. Remote or in New York.`}
+>
+  <main id="main" class="resume-page wrap">
+    <div class="resume-top">
+      <div>
+        <p class="kicker">Tutoring</p>
+        <h1>{tutor.title}</h1>
+      </div>
+      <div class="resume-meta">
+        <p>{tutor.lede}</p>
+        <div class="hero-actions">
+          <a class="btn" href="/">Back to site</a>
+          <a class="btn btn-solid" href={tutor.href}>{tutor.cta}</a>
+        </div>
+      </div>
+    </div>
+    <Tutor />
+  </main>
+</Layout>
