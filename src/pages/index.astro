@@ -1,12 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import Gallery from '../components/Gallery.astro';
+import Systems from '../components/Systems.astro';
 import Range from '../components/Range.astro';
-import Pipeline from '../components/Pipeline.astro';
-import Experience from '../components/Experience.astro';
 import Work from '../components/Work.astro';
-import Services from '../components/Services.astro';
+import Experience from '../components/Experience.astro';
 import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 ---
@@ -14,19 +12,11 @@ import Contact from '../components/Contact.astro';
 <Layout>
   <main id="main" class="desk">
     <Hero />
-    <Gallery />
     <div class="paper">
+      <Systems />
       <Range />
-      <section class="section" id="systems">
-        <div class="section-head">
-          <h2>Systems</h2>
-          <p class="note">The maps. Flip a tab.</p>
-        </div>
-        <Pipeline />
-      </section>
-      <Experience />
       <Work />
-      <Services />
+      <Experience />
       <About />
       <Contact />
     </div>

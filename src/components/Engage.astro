@@ -1,0 +1,25 @@
+---
+import { engage, site } from '../data/site';
+---
+
+<div class="engage-block">
+  <p>{engage.promise}</p>
+  <ul class="engage-rates">
+    {
+      engage.rates.map((item) => (
+        <li>
+          <p class="kicker">{item.unit}</p>
+          <strong>{item.name}</strong>
+          <p class="engage-price">{item.price}</p>
+        </li>
+      ))
+    }
+  </ul>
+  <ul class="services-notes">
+    {engage.notes.map((note) => <li>{note}</li>)}
+  </ul>
+  <div class="card-links" style="margin-top: 1.6rem;">
+    <a class="btn btn-solid" href={engage.href}>{engage.cta}</a>
+    <a class="btn" href={`mailto:${site.email}`}>{site.email}</a>
+  </div>
+</div>

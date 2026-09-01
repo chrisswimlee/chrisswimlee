@@ -1,204 +1,42 @@
 ---
-import { briefMail, hero, proof, site } from '../data/site';
+import { hero, proof, site } from '../data/site';
 
-const tilts = ['-2.8deg', '3.2deg', '-1.1deg', '2.4deg'];
-
-// Built here so the number renders tight — separate expressions pick up whitespace.
-const tickets = proof.map((item, i) => ({
-  ...item,
-  tilt: tilts[i],
-  display: `${'prefix' in item ? item.prefix : ''}${item.value.toLocaleString('en-US')}${item.suffix}`,
-}));
+const stats = proof.map((item) => {
+  const prefix = 'prefix' in item && item.prefix ? item.prefix : '';
+  const display =
+    typeof item.value === 'number'
+      ? `${prefix}${item.value.toLocaleString('en-US')}${item.suffix}`
+      : `${prefix}${item.value}${item.suffix}`;
+  return { ...item, display };
+});
 ---
 
-<header class="hero" id="top" data-hero>
-  <p class="hero-kicker">{hero.kicker}</p>
-  <h1 class="hero-name">
-    Chris <em>Swim</em>
-    <span>Lee</span>
-  </h1>
-  <p class="hero-stamp">{hero.stamp}</p>
-
-  <figure class="hero-polaroid" data-depth="0.55">
-    <img src={site.photo} alt={site.name} width="640" height="640" fetchpriority="high" decoding="async" />
-    <figcaption>{site.location}</figcaption>
-  </figure>
-
-  <div class="hero-lede-card" data-depth="0.22">
-    <p class="lede">{hero.lede}</p>
-    <p class="now">{hero.now}</p>
-    <div class="hero-actions">
-      <a class="btn btn-solid" href="/#gallery">The gallery</a>
-      <a class="btn" href={briefMail}>Email me</a>
+<header class="hero" id="top">
+  <div class="hero-identity">
+    <div class="hero-copy">
+      <p class="hero-kicker">{hero.kicker}</p>
+      <h1 class="hero-name">Chris <em>Swim</em> Lee</h1>
+      <p class="lede">{hero.lede}</p>
+      <p class="hero-stack">{hero.stack.join(' · ')}</p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="/#systems">Systems</a>
+        <a class="btn" href="/resume/">Resume</a>
+        <a class="btn" href={`mailto:${site.email}`}>Email</a>
+      </div>
     </div>
-    <p class="hero-stack">{hero.stack.join(' · ')}</p>
+    <figure class="hero-photo">
+      <img src={site.photo} alt={site.name} width="320" height="320" fetchpriority="high" decoding="async" />
+    </figure>
   </div>
-
-  <div class="tickets">
+  <ul class="hero-stats">
     {
-      tickets.map((item) => (
-        <article class="ticket" style={`--tilt: ${item.tilt}`} data-toss>
+      stats.map((item) => (
+        <li>
           <p class="proof-value">{item.display}</p>
           <p class="proof-label">{item.label}</p>
           <p class="proof-hint">{item.hint}</p>
-        </article>
+        </li>
       ))
     }
-    <p class="tickets-hint" aria-hidden="true">pick one up</p>
-  </div>
+  </ul>
 </header>
-
-<script>
-  const hero = document.querySelector<HTMLElement>('[data-hero]');
-  if (hero && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    type Toss = {
-      el: HTMLElement;
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      spin: number;
-      vSpin: number;
-      held: boolean;
-      grabX: number;
-      grabY: number;
-    };
-
-    const items: Toss[] = [...hero.querySelectorAll<HTMLElement>('[data-toss]')].map((el) => ({
-      el,
-      x: 0,
-      y: 0,
-      vx: 0,
-      vy: 0,
-      spin: 0,
-      vSpin: 0,
-      held: false,
-      grabX: 0,
-      grabY: 0,
-    }));
-
-    let lastPointer = { x: 0, y: 0, t: 0 };
-    let looping = false;
-    let lastFrame = 0;
-    let mx = 0;
-    let my = 0;
-    let mxT = 0;
-    let myT = 0;
-    let onScreen = true;
-
-    const kick = () => {
-      if (looping) return;
-      looping = true;
-      lastFrame = 0;
-      requestAnimationFrame(tick);
-    };
-
-    hero.addEventListener('pointermove', (e) => {
-      const r = hero.getBoundingClientRect();
-      mxT = (e.clientX - r.left) / r.width - 0.5;
-      myT = (e.clientY - r.top) / r.height - 0.5;
-      kick();
-    });
-
-    hero.addEventListener('pointerleave', () => {
-      mxT = 0;
-      myT = 0;
-      kick();
-    });
-
-    for (const item of items) {
-      item.el.addEventListener('pointerdown', (e) => {
-        item.held = true;
-        item.grabX = e.clientX - item.x;
-        item.grabY = e.clientY - item.y;
-        item.vx = 0;
-        item.vy = 0;
-        lastPointer = { x: e.clientX, y: e.clientY, t: performance.now() };
-        item.el.classList.add('is-held');
-        item.el.setPointerCapture(e.pointerId);
-        kick();
-      });
-
-      item.el.addEventListener('pointermove', (e) => {
-        if (!item.held) return;
-        const now = performance.now();
-        const dt = Math.max(8, now - lastPointer.t);
-        item.vx = ((e.clientX - lastPointer.x) / dt) * 16;
-        item.vy = ((e.clientY - lastPointer.y) / dt) * 16;
-        item.x = e.clientX - item.grabX;
-        item.y = e.clientY - item.grabY;
-        lastPointer = { x: e.clientX, y: e.clientY, t: now };
-      });
-
-      const release = () => {
-        if (!item.held) return;
-        item.held = false;
-        item.el.classList.remove('is-held');
-        item.vSpin += item.vx * 0.22;
-        kick();
-      };
-
-      item.el.addEventListener('pointerup', release);
-      item.el.addEventListener('pointercancel', release);
-    }
-
-    new IntersectionObserver((entries) => {
-      onScreen = entries.some((en) => en.isIntersecting);
-      if (onScreen) kick();
-    }, { threshold: 0.02 }).observe(hero);
-
-    function tick(now: number) {
-      if (!onScreen) {
-        looping = false;
-        return;
-      }
-      const raw = lastFrame ? now - lastFrame : 16.67;
-      lastFrame = now;
-      const dt = Math.min(32, raw) / 16.67;
-
-      mx += (mxT - mx) * (1 - Math.pow(0.86, dt));
-      my += (myT - my) * (1 - Math.pow(0.86, dt));
-      hero.style.setProperty('--mx', mx.toFixed(3));
-      hero.style.setProperty('--my', my.toFixed(3));
-
-      for (const item of items) {
-        if (!item.held) {
-          item.vx += -item.x * 0.055 * dt;
-          item.vy += -item.y * 0.055 * dt;
-          item.vSpin += -item.spin * 0.06 * dt;
-          item.vx *= Math.pow(0.86, dt);
-          item.vy *= Math.pow(0.86, dt);
-          item.vSpin *= Math.pow(0.87, dt);
-          item.x += item.vx * dt;
-          item.y += item.vy * dt;
-          item.spin += item.vSpin * dt;
-          if (
-            Math.abs(item.x) < 0.05 &&
-            Math.abs(item.y) < 0.05 &&
-            Math.abs(item.spin) < 0.05 &&
-            Math.abs(item.vx) < 0.05
-          ) {
-            item.x = 0;
-            item.y = 0;
-            item.spin = 0;
-            item.vx = 0;
-            item.vy = 0;
-            item.vSpin = 0;
-          }
-        } else {
-          item.spin += (item.vx * 0.6 - item.spin) * (1 - Math.pow(0.85, dt));
-        }
-        item.el.style.setProperty('--dx', `${item.x.toFixed(2)}px`);
-        item.el.style.setProperty('--dy', `${item.y.toFixed(2)}px`);
-        item.el.style.setProperty('--dr', `${Math.max(-24, Math.min(24, item.spin)).toFixed(2)}deg`);
-      }
-
-      const tossing = items.some(
-        (item) => item.held || Math.abs(item.x) > 0.05 || Math.abs(item.vx) > 0.05,
-      );
-      const looking = Math.abs(mxT - mx) > 0.002 || Math.abs(myT - my) > 0.002;
-      if (tossing || looking) requestAnimationFrame(tick);
-      else looping = false;
-    }
-  }
-</script>

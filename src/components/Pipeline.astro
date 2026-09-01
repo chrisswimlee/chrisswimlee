@@ -1,17 +1,17 @@
 ---
 const topos = [
-  { id: 'trading', label: 'Trading engine' },
-  { id: 'goldman', label: 'Goldman' },
   { id: 'lattice', label: 'Lattice' },
+  { id: 'goldman', label: 'Goldman' },
+  { id: 'trading', label: 'Trading engine' },
 ];
 ---
 
 <div class="plane" data-plane>
   <div class="plane-chrome">
     <span class="plane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span class="plane-title" data-plane-title>sys / trading-engine</span>
-    <span class="plane-stat" data-plane-stat>0 pkt/s</span>
-    <span class="plane-live"><i aria-hidden="true"></i> live</span>
+    <span class="plane-title" data-plane-title>sys / local-lattice</span>
+    <span class="plane-stat" data-plane-stat>model</span>
+    <span class="plane-live"><i aria-hidden="true"></i> sim</span>
   </div>
   <div class="plane-tabs" role="tablist" aria-label="Systems">
     {
@@ -32,7 +32,7 @@ const topos = [
     class="plane-canvas"
     data-plane-canvas
     role="img"
-    aria-label="Animated architecture of the trading engine, Goldman beneficiary system, and Local Lattice"
+    aria-label="Simulated architecture of Local Lattice, the Goldman beneficiary system, and the trading engine"
   ></canvas>
   <p class="plane-log" data-plane-log aria-hidden="true"></p>
 </div>
@@ -145,8 +145,8 @@ const topos = [
     },
   };
 
-  const ACCENT = { r: 139, g: 30, b: 30 };
-  const WARM = { r: 42, g: 69, b: 112 };
+  const ACCENT = { r: 107, g: 159, b: 255 };
+  const WARM = { r: 224, g: 177, b: 92 };
 
   function rgba(c: { r: number; g: number; b: number }, a: number) {
     return `rgba(${c.r}, ${c.g}, ${c.b}, ${a})`;
@@ -164,7 +164,7 @@ const topos = [
     if (!ctx) return;
 
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let topoId = 'trading';
+    let topoId = 'lattice';
     let w = 0;
     let h = 0;
     let dpr = 1;
@@ -304,7 +304,7 @@ const topos = [
       ctx.strokeStyle = rgba(c, 0.45 + n.pulse * 0.4);
       ctx.lineWidth = 1;
       ctx.stroke();
-      ctx.fillStyle = n.kind === 'core' ? rgba(ACCENT, 1) : '#f3ead7';
+      ctx.fillStyle = n.kind === 'core' ? rgba(ACCENT, 1) : '#e8f4f5';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(n.label, n.px, n.py + 0.5);
@@ -329,10 +329,10 @@ const topos = [
 
     function draw() {
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = '#1c2418';
+      ctx.fillStyle = '#070e1a';
       ctx.fillRect(0, 0, w, h);
 
-      ctx.strokeStyle = 'rgba(243, 234, 215, 0.06)';
+      ctx.strokeStyle = 'rgba(232, 244, 245, 0.05)';
       ctx.lineWidth = 1;
       const gap = 28;
       ctx.beginPath();
@@ -348,7 +348,7 @@ const topos = [
 
       for (let i = 1; i < 4; i++) {
         const y = (h / 4) * i;
-        ctx.fillStyle = 'rgba(243, 234, 215, 0.035)';
+        ctx.fillStyle = 'rgba(107, 159, 255, 0.035)';
         ctx.fillRect(0, y - 10, w, 20);
       }
 
@@ -388,7 +388,7 @@ const topos = [
       if (statEl) {
         const now = performance.now();
         hits = hits.filter((t) => now - t < 1000);
-        statEl.textContent = `${hits.length} pkt/s`;
+        statEl.textContent = `${hits.length}/s sim`;
       }
     }
 
@@ -429,10 +429,14 @@ const topos = [
     io.observe(root);
 
     for (const tab of tabs) {
-      tab.addEventListener('click', () => setTopo(tab.dataset.topo || 'trading'));
+      tab.addEventListener('click', () => {
+        const id = tab.dataset.topo || 'lattice';
+        setTopo(id);
+        window.dispatchEvent(new CustomEvent('system-select', { detail: { id } }));
+      });
     }
 
-    setTopo('trading');
+    setTopo('lattice');
     start();
   }
 

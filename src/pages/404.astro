@@ -3,15 +3,13 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Not found — Chris Swim Lee" description="This page is not on chrisswimlee.com." noindex>
-  <main id="main" class="wrap" style="padding: 6rem 0 8rem;">
+  <main id="main" class="wrap missing">
     <p class="kicker">404</p>
-    <h1 style="font-family: var(--sans); font-size: clamp(3.2rem, 9vw, 5.6rem); font-weight: 500; letter-spacing: -0.04em; line-height: 0.92; margin: 0.5rem 0 1.1rem;">
-      This page isn’t here.
-    </h1>
-    <p style="color: var(--muted); max-width: 36ch;">That URL is not on this site. Back to the work, or email me if something should be.</p>
+    <h1 class="missing-title">This page isn’t here.</h1>
+    <p class="missing-copy">That URL is not on this site. Back to the work, or email me if something should be.</p>
     <div class="hero-actions">
       <a class="btn btn-solid" href="/">Home</a>
-      <a class="btn" href="/#gallery">Gallery</a>
+      <a class="btn" href="/resume/">Resume</a>
     </div>
   </main>
 </Layout>

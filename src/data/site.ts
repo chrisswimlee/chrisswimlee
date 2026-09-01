@@ -3,7 +3,7 @@ export const site = {
   legalName: 'Chris Su-Young Lee',
   title: 'Chris Swim Lee, New York',
   description:
-    'Technical lead in New York with six years of engineering experience. Pure mathematics, Goldman Sachs infrastructure, a #1 competitive rank, and a professor at an AI university.',
+    'Senior engineer in New York. Six years in data pipelines, agents, and application systems — Goldman infrastructure, a founding year on an agent stack, and Local Lattice on PyPI.',
   url: 'https://chrisswimlee.com',
   location: 'New York, NY',
   email: 'suyoung.lee99@gmail.com',
@@ -11,27 +11,24 @@ export const site = {
   linkedin: 'https://www.linkedin.com/in/chris-suyoung-lee',
   photo: '/images/chris.jpg',
   ogImage: '/images/chris-og.jpg',
-  jobTitle: 'Technical Lead',
+  jobTitle: 'Senior Engineer',
+  built: 'Astro. No React. Custom canvas topologies. Printable CV.',
 };
 
 export const nav = [
-  { href: '/#gallery', label: 'Gallery' },
-  { href: '/#range', label: 'Range' },
   { href: '/#systems', label: 'Systems' },
-  { href: '/#experience', label: 'Experience' },
   { href: '/#work', label: 'Work' },
-  { href: '/#services', label: 'Services' },
+  { href: '/#experience', label: 'Experience' },
+  { href: '/#about', label: 'About' },
 ];
 
 export const briefMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Consulting — Chris Swim Lee')}&body=${encodeURIComponent('What the company does:\n\nWhat’s stuck (data / automation / agents):\n\nWhere you are (city / remote):\n')}`;
 export const tutorMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Tutoring — software and math')}`;
 
 export const hero = {
-  kicker: 'Engineer · New York',
-  lede: 'Six years of engineering. Pure math, three years at Goldman, #1 on a competitive ladder, and I teach at an AI university.',
-  now: 'I work with companies that need a technical lead — data, automation, agents — not a ticket queue.',
-  stack: ['Mathematics', 'Java', 'Python', 'Kafka', 'PyTorch', 'MLX'],
-  stamp: 'AVAILABLE',
+  kicker: 'Senior engineer · New York',
+  lede: 'Data pipelines, agents, and the systems under them. Six years — Goldman infrastructure, then a founding year on an agent stack.',
+  stack: ['Java', 'Python', 'Kafka', 'PyTorch', 'MLX', 'SQL'],
 };
 
 export const tutor = {
@@ -45,48 +42,7 @@ export const tutor = {
   href: tutorMail,
 };
 
-export const services = {
-  lede: 'Technical lead work for funded teams with a stuck system — data, automation, or agents.',
-  promise:
-    'Most engagements start with a diagnostic. You get everything in writing before I start.',
-  engagements: [
-    {
-      id: 'map',
-      name: 'Diagnostic',
-      price: '$1,000',
-      unit: '90 minutes',
-      summary: 'We look at what is stuck and I tell you what to do first. You leave with that in writing.',
-    },
-    {
-      id: 'build',
-      name: 'Build',
-      price: 'From $20,000',
-      unit: 'Scoped project',
-      summary: 'An internal tool, an agent, or the pipeline under them. A public site alone is not the job.',
-    },
-    {
-      id: 'retain',
-      name: 'Retainer',
-      price: '$12,000',
-      unit: 'per month',
-      summary: 'I stay on it. Priorities, reviews, and shipping every month.',
-    },
-  ],
-  day: {
-    price: '$3,000',
-    unit: 'day',
-    note: 'A workshop, a review, or a day in the room to ship something.',
-  },
-  notes: [
-    'For companies that already pay for software. Not for brochure sites, students, or equity-only work.',
-    'New York or remote. Builds start with a diagnostic unless the scope is already clear.',
-    'Diagnostic, retainer, and day rate are listed. Builds start at $20,000.',
-  ],
-  cta: 'Email about a project',
-  href: briefMail,
-};
-
-export const experienceIntro = 'Six years in. Banking infrastructure, a founding year on an agent stack, and a classroom.';
+export const experienceIntro = 'Goldman, a founding year on an agent stack, then the systems I can put a URL on.';
 
 type Spike = {
   id: 'theory' | 'build' | 'strategy';
@@ -99,7 +55,8 @@ type Spike = {
 export const range = {
   lede: 'Math, systems, and a competitive streak. Deep in each.',
   thread:
-    'The degree, the ladder, Goldman, and the classroom look unrelated until you watch how I work.',
+    'The degree, the ladder, and Goldman look unrelated until you watch how I work.',
+  meet: 'Read what you cannot see. Prove the constraint. Ship before the brief goes stale.',
   spikes: [
     {
       id: 'theory',
@@ -126,42 +83,64 @@ export const range = {
     {
       id: 'strategy',
       label: 'Strategic execution',
-      domain: 'Competitive meta and pedagogy',
-      trains: 'A clock, a hidden hand, then getting a room to move.',
+      domain: 'Competitive meta and rapid learning',
+      trains: 'A clock, a hidden hand, then a system I have not seen yet.',
       proof: [
         '#1 on the Hearthstone Americas Wild ladder — January 2019, again November 2025.',
         '#1 seed for the 2019 Wild Open. HCT Tavern Champion, 2017.',
-        'Professor at an AI university.',
+        'New stack, new constraint — I learn it and ship.',
       ],
     },
   ] as Spike[],
-  synthesis: [
-    {
-      title: 'Reading a hidden hand',
-      detail:
-        'Ladder play is risk on a clock. I read a system the same way: what I cannot see, what being wrong costs, what I do first.',
-    },
-    {
-      title: 'Proof, then the migration',
-      detail: 'I find the constraint before I write the change, not after it pages someone at 3am.',
-    },
-    {
-      title: 'A school can teach it',
-      detail: 'Something that changed six months ago becomes a class, and a budget, and a site that runs.',
-    },
-  ],
 };
 
-// One ticket per spike, so the fold shows range rather than four banking metrics.
-export const proof = [
-  { prefix: '#', value: 1, suffix: '', label: 'Americas Wild ladder', hint: 'Hearthstone, 2019 and 2025' },
+type Proof = {
+  prefix?: string;
+  value: number | string;
+  suffix: string;
+  label: string;
+  hint: string;
+};
+
+export const proof: Proof[] = [
   { value: 10000, suffix: '+', label: 'client accounts', hint: 'Goldman beneficiary system' },
-  { value: 100, suffix: '%', label: 'scholarship, full ride', hint: '1823 Scholar, Trinity' },
   { value: 80, suffix: '%', label: 'faster processing', hint: 'data pipeline rewrite' },
+  { value: 50, suffix: '+', label: 'internal teams', hint: 'Java and Kafka APIs' },
+  { value: 'PyPI', suffix: '', label: 'local-lattice', hint: 'OpenAI-compatible gateway' },
 ];
 
+type CaseBrief = {
+  problem: string;
+  constraint: string;
+  decision: string;
+  outcome: string;
+};
+
+export const cases: Record<'lattice' | 'goldman' | 'trading', CaseBrief> = {
+  lattice: {
+    problem: 'Agents were bound to model strings. Switching a backend meant rewriting the call site.',
+    constraint: 'Local-first — MLX and LM Studio — without locking out cloud when a role needs it.',
+    decision: 'An OpenAI-compatible gateway. Assign role:coder, role:reasoner, role:fast. Swarm primitives over HTTP.',
+    outcome: 'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back.',
+  },
+  goldman: {
+    problem: 'Beneficiary data for 10,000+ client accounts was too slow to operate.',
+    constraint: 'Compliance, 50+ internal consumers, and the pager after it shipped.',
+    decision: 'Java and Kafka pipelines plus REST. A Selenium and TestNG suite for the financial and compliance cases. Stayed on the line.',
+    outcome: '80% faster processing. 15% lower data-access latency. Test accuracy up 22%.',
+  },
+  trading: {
+    problem: 'A stealth desk needed a live agent stack — market-data in, signals and a pre-market brief out — with no existing pipeline.',
+    constraint: 'Multiple exchanges, a legacy SQL book, and a founding year. The product cannot be shown.',
+    decision: 'Python and Kafka across the feeds. An agent loop that audits portfolios against SQL. PyTorch time-series, backtests, and a daily brief.',
+    outcome: 'Zero to one: market-data to live signals on a clock the desk can run.',
+  },
+};
+
 type System = {
-  id: 'trading' | 'goldman' | 'lattice';
+  id: 'lattice' | 'goldman' | 'trading';
+  kind: string;
+  year: string;
   kicker: string;
   title: string;
   metric: string;
@@ -169,21 +148,28 @@ type System = {
   summary: string;
   stack: string[];
   href?: string;
+  command?: string;
 };
 
 export const systems: System[] = [
   {
-    id: 'trading',
-    kicker: 'Stealth fintech · founding',
-    title: 'Agentic trading engine',
-    metric: '0 → 1',
-    metricLabel: 'market-data to live signals',
+    id: 'lattice',
+    kind: 'Open source',
+    year: '2026',
+    kicker: 'Apache-2.0 · PyPI',
+    title: 'Local Lattice',
+    metric: 'role:*',
+    metricLabel: 'capability, not a model string',
     summary:
-      'Python and Kafka across multiple exchanges. Agents that audit portfolios against legacy SQL. PyTorch time-series, backtests, and a daily pre-market brief.',
-    stack: ['Python', 'Kafka', 'PyTorch', 'LLMs'],
+      'Local-first OpenAI-compatible gateway. Plug MLX, LM Studio, or cloud into Lattice, then assign the role switch. Agents ask for coder or reasoner — not a model string.',
+    stack: ['Python', 'MLX', 'OpenAI API', 'Swarm'],
+    href: 'https://github.com/chrisswimlee/local-lattice',
+    command: 'pip install local-lattice',
   },
   {
     id: 'goldman',
+    kind: 'System',
+    year: '2022–25',
     kicker: 'Goldman Sachs · 2022–2025',
     title: 'Beneficiary management',
     metric: '80%',
@@ -193,20 +179,21 @@ export const systems: System[] = [
     stack: ['Java', 'Kafka', 'REST', 'Selenium'],
   },
   {
-    id: 'lattice',
-    kicker: 'Open source · Apache-2.0',
-    title: 'Local Lattice',
-    metric: 'role:*',
-    metricLabel: 'capability, not a model string',
+    id: 'trading',
+    kind: 'System',
+    year: '2025–26',
+    kicker: 'Stealth fintech · founding',
+    title: 'Agentic trading engine',
+    metric: '0 → 1',
+    metricLabel: 'market-data to live signals',
     summary:
-      'Local-first OpenAI-compatible gateway. Plug MLX, LM Studio, or cloud into Lattice, then assign the role switch. Agents ask for coder or reasoner — not a model string.',
-    stack: ['Python', 'MLX', 'OpenAI API', 'Swarm'],
-    href: 'https://github.com/chrisswimlee/local-lattice',
+      'Python and Kafka across multiple exchanges. Agents that audit portfolios against legacy SQL. PyTorch time-series, backtests, and a daily pre-market brief.',
+    stack: ['Python', 'Kafka', 'PyTorch', 'LLMs'],
   },
 ];
 
 export const work = {
-  lede: 'Local Lattice on PyPI. Then the sites I can put a URL on.',
+  lede: 'What you can open. Lattice on PyPI, then two sites.',
 };
 
 type Project = {
@@ -252,12 +239,12 @@ export const projects: Project[] = [
     id: 'haitedu',
     featured: true,
     tone: 'accent',
-    kind: 'University',
+    kind: 'Site',
     title: 'HAIT',
     url: 'haitedu.com',
     year: '2025',
     summary:
-      'The public site for HAIT, an AI university in Chiang Rai still recruiting before there is a campus. I teach there, and I built the site and the systems behind it.',
+      'The public site for HAIT, an AI university in Chiang Rai still recruiting before there is a campus. I built the site and the systems behind it.',
     image: '/images/work/haitedu.jpg',
     points: [
       'Redesigned the front-end and upgraded the PHP underneath it.',
@@ -271,7 +258,7 @@ export const projects: Project[] = [
     id: 'd22soso',
     featured: true,
     tone: 'warm',
-    kind: 'Archive',
+    kind: 'Site',
     title: 'D22-soso',
     url: 'd22soso.com',
     year: '2025',
@@ -287,21 +274,18 @@ export const projects: Project[] = [
   },
 ];
 
-export const hearthstone = {
-  lede: 'Hearthstone at the top of the Americas Wild ladder — #1 in January 2019 and again in November 2025. The record is public.',
-};
-
 export const roles = [
   {
     company: 'HAIT',
-    title: 'Professor',
+    title: 'Technical Lead',
     dates: '2025 — present',
     location: 'Chiang Rai, remote',
-    note: 'AI university',
+    note: 'Public site and IT systems',
+    scan: 'Public site, hosting, and the stack before there is a campus.',
     bullets: [
-      'Teach at an AI university still standing up.',
       'Own the IT — hosting, security, and the stack the school runs on.',
       'Rebuilt the public site and the PHP under it so recruiting works.',
+      'Standing up the systems a new institution needs before it has a campus.',
     ],
   },
   {
@@ -310,6 +294,7 @@ export const roles = [
     dates: 'Sep 2025 — Aug 2026',
     location: 'New York',
     note: 'Agentic stock trading engine, zero to one',
+    scan: 'Zero to one: market-data to live signals on a founding clock.',
     bullets: [
       'Built the Python and Kafka market-data pipeline the agents traded on, across multiple exchanges.',
       'Built the agent loop that audits portfolios against legacy SQL with modern LLMs.',
@@ -322,6 +307,7 @@ export const roles = [
     dates: 'May 2022 — Jul 2025',
     location: 'New York',
     note: 'Forward deployment and automation',
+    scan: '80% faster processing. 10,000+ accounts. 50+ internal teams.',
     bullets: [
       'Designed and shipped a beneficiary management system serving 10,000+ client accounts and cut data processing time by 80%.',
       'Scaled Java and Kafka pipelines and REST APIs used by 50+ internal teams, cutting data-access latency by 15%.',
@@ -334,6 +320,7 @@ export const roles = [
     dates: 'Oct 2020 — May 2022',
     location: '',
     note: '',
+    scan: 'Full-stack for defense and nuclear. Email path 70% faster.',
     bullets: [
       'Built and maintained full-stack web applications for clients in national defense and nuclear energy.',
       'Led a system-wide upgrade that improved email server response time by 70%.',
@@ -375,14 +362,32 @@ export const about = {
   lede: 'Chris Su-Young Lee.',
   paragraphs: [
     'Chris Swim Lee is 수영 — swim — said in English.',
-    'I studied mathematics and computer science at Trinity on a full-ride scholarship. Six years of engineering since — three of them on Goldman Sachs infrastructure, then a founding seat on an agentic trading stack. In between I played Hearthstone to #1 in the Americas.',
-    'Math taught me to find the constraint. The ladder taught me to bet when the information is incomplete. Goldman taught me what happens when either one is wrong at scale.',
-    'Now I consult in New York and teach at an AI university. Same job in both rooms: look at the stuck system, decide the direction, and ship.',
+    'Mathematics at Trinity on a full-ride. The ladder and Goldman taught the same lesson: find the constraint, then ship.',
   ],
+};
+
+export const engage = {
+  heading: 'Engage',
+  lede: 'Technical lead work for funded teams with a stuck system — data, automation, or agents.',
+  promise:
+    'Most engagements start with a diagnostic. You get everything in writing before I start.',
+  rates: [
+    { name: 'Diagnostic', price: '$1,000', unit: '90 minutes' },
+    { name: 'Build', price: 'From $20,000', unit: 'scoped project' },
+    { name: 'Retainer', price: '$12,000', unit: 'per month' },
+    { name: 'Day', price: '$3,000', unit: 'day' },
+  ],
+  notes: [
+    'For companies that already pay for software. Not for brochure sites, students, or equity-only work.',
+    'New York or remote. Builds start with a diagnostic unless the scope is already clear.',
+    'Diagnostic, retainer, and day rate are listed. Builds start at $20,000.',
+  ],
+  cta: 'Email about a project',
+  href: briefMail,
 };
 
 export const contact = {
   heading: 'Email',
-  lede: 'Tell me what’s stuck. Data, automation, agents — I’ll tell you what to do first.',
+  lede: 'Roles, systems, or a question. I’ll tell you if I’m the person.',
   projectCta: 'Email me',
 };

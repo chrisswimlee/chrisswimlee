@@ -1,0 +1,118 @@
+---
+import { cases, projects, systems } from '../data/site';
+import Pipeline from './Pipeline.astro';
+
+const lattice = projects[0];
+
+const pieces = systems.map((system) => ({
+  id: system.id,
+  kind: system.kind,
+  year: system.year,
+  title: system.title,
+  kicker: system.kicker,
+  summary: system.summary,
+  metric: system.metric,
+  metricLabel: system.metricLabel,
+  brief: cases[system.id],
+  command: system.command,
+  links: system.id === 'lattice' ? lattice.links : [],
+}));
+---
+
+<section class="section systems-section" id="systems">
+  <div class="section-head">
+    <h2>Systems</h2>
+    <p class="note">Lattice is public. Goldman shipped. The trading engine cannot be shown.</p>
+  </div>
+
+  <div class="case-dock">
+    <Pipeline />
+    <div class="case-briefs">
+      {
+        pieces.map((piece, i) => (
+          <article class="case-brief" data-case={piece.id} hidden={i !== 0}>
+            <p class="kicker">{piece.kicker}</p>
+            <h3 class="case-title">{piece.title}</h3>
+            <p class="gal-metric">{piece.metric} · {piece.metricLabel}</p>
+            <dl class="case-steps">
+              <div>
+                <dt>Problem</dt>
+                <dd>{piece.brief.problem}</dd>
+              </div>
+              <div>
+                <dt>Constraint</dt>
+                <dd>{piece.brief.constraint}</dd>
+              </div>
+              <div>
+                <dt>Decision</dt>
+                <dd>{piece.brief.decision}</dd>
+              </div>
+              <div>
+                <dt>Outcome</dt>
+                <dd>{piece.brief.outcome}</dd>
+              </div>
+            </dl>
+            {
+              piece.command && (
+                <p class="cmd">
+                  <code>{piece.command}</code>
+                  <button class="cmd-copy" type="button" data-copy={piece.command}>
+                    Copy
+                  </button>
+                </p>
+              )
+            }
+            {
+              piece.links.length > 0 && (
+                <div class="case-links">
+                  {piece.links.map((link, li) => (
+                    <a
+                      class:list={['btn', li === 0 && 'btn-solid']}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              )
+            }
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  const briefs = [...document.querySelectorAll<HTMLElement>('[data-case]')];
+
+  function show(id: string) {
+    for (const brief of briefs) {
+      brief.hidden = brief.dataset.case !== id;
+    }
+  }
+
+  window.addEventListener('system-select', (e) => {
+    const id = (e as CustomEvent<{ id?: string }>).detail?.id;
+    if (id) show(id);
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const value = btn.dataset.copy;
+      if (!value) return;
+      try {
+        await navigator.clipboard.writeText(value);
+        const prior = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => {
+          btn.textContent = prior;
+        }, 1400);
+      } catch {
+        btn.textContent = 'Copy failed';
+      }
+    });
+  });
+</script>

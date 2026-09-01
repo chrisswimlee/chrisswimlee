@@ -6,7 +6,7 @@ const featured = projects.filter((project) => project.featured);
 
 <section class="section" id="work">
   <div class="section-head">
-    <h2>Selected work</h2>
+    <h2>Work</h2>
     <p class="note">{work.lede}</p>
   </div>
   <div class="work-board">
@@ -15,7 +15,6 @@ const featured = projects.filter((project) => project.featured);
         const live = project.links[0];
         return (
           <article class={`work-piece piece-${index}`} data-reveal>
-            <span class="tape" aria-hidden="true" />
             {
               project.image && live ? (
                 <a class="polaroid" href={live.href} target="_blank" rel="noopener noreferrer">
@@ -86,21 +85,3 @@ const featured = projects.filter((project) => project.featured);
     }
   </div>
 </section>
-
-<script>
-  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const text = btn.dataset.copy;
-      if (!text) return;
-      try {
-        await navigator.clipboard.writeText(text);
-        btn.textContent = 'Copied';
-        setTimeout(() => {
-          btn.textContent = 'Copy';
-        }, 1400);
-      } catch {
-        btn.textContent = 'Copy failed';
-      }
-    });
-  });
-</script>

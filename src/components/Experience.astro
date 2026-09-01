@@ -10,7 +10,7 @@ import { education, experienceIntro, roles, skills } from '../data/site';
   <div class="timeline">
     {
       roles.map((role) => (
-        <article class="role" data-reveal>
+        <article class="role role-scan" data-reveal>
           <div class="when-col">
             <p class="when">{role.dates}</p>
             {role.location && <p class="when">{role.location}</p>}
@@ -18,17 +18,16 @@ import { education, experienceIntro, roles, skills } from '../data/site';
           <div>
             <h3>{role.title}</h3>
             <p class="company">{role.company}</p>
-            {role.note && <p class="role-note">{role.note}</p>}
-            <ul>
-              {role.bullets.map((bullet) => (
-                <li>{bullet}</li>
-              ))}
-            </ul>
+            <p class="role-note">{role.scan}</p>
           </div>
         </article>
       ))
     }
   </div>
+
+  <p class="resume-jump" data-reveal>
+    <a class="btn" href="/resume/">Full resume</a>
+  </p>
 
   <div class="resume-extras" data-reveal>
     <div>
@@ -46,7 +45,8 @@ import { education, experienceIntro, roles, skills } from '../data/site';
         }
       </ul>
     </div>
-    <aside class="skills-panel">
+    <div class="skills-panel">
+      <h3 class="kicker">Skills</h3>
       {
         Object.entries(skills).map(([group, items]) => (
           <div class="skill-block">
@@ -59,6 +59,6 @@ import { education, experienceIntro, roles, skills } from '../data/site';
           </div>
         ))
       }
-    </aside>
+    </div>
   </div>
 </section>

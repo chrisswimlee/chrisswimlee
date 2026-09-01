@@ -46,7 +46,7 @@ const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? ''
       <text class="plot-axis-note" x="34" y="34">depth</text>
       <text class="plot-axis-note" x="820" y="206">breadth</text>
     </svg>
-    <figcaption>Three peaks. The useful part is the overlap.</figcaption>
+    <figcaption>{range.meet}</figcaption>
   </figure>
 
   <div class="spikes">
@@ -64,21 +64,6 @@ const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? ''
         </article>
       ))
     }
-  </div>
-
-  <div class="synthesis" data-reveal>
-        <h3 class="synthesis-head">Where they meet</h3>
-    <div class="synthesis-grid">
-      {
-        range.synthesis.map((item, i) => (
-          <article class="bridge">
-            <span class="bridge-num">{String(i + 1).padStart(2, '0')}</span>
-            <h4>{item.title}</h4>
-            <p>{item.detail}</p>
-          </article>
-        ))
-      }
-    </div>
   </div>
 </section>
 
@@ -101,7 +86,6 @@ const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? ''
       card.addEventListener('blur', () => setActive(null));
     }
 
-    // The plotted peaks are the same control surface as the cards below them.
     for (const group of groups) {
       const id = group.dataset.peak!;
       group.addEventListener('pointerenter', () => setActive(id));

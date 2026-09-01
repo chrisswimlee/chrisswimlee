@@ -5,7 +5,6 @@ import {
   education,
   range,
   roles,
-  services,
   site,
   skills,
 } from '../data/site';
@@ -13,7 +12,7 @@ import {
 
 <Layout
   title={`Resume — ${site.name}`}
-  description={`Resume for ${site.legalName}: six years of engineering experience — technical lead in New York working across pure mathematics, enterprise systems, and strategic intelligence.`}
+  description={`Resume for ${site.legalName}: senior engineer in New York with six years in data pipelines, agents, and application systems.`}
 >
   <main id="main" class="resume-page wrap">
     <div class="resume-top">
@@ -42,15 +41,16 @@ import {
 
     <section class="resume-block">
       <h2>Profile</h2>
-      <p style="color: var(--muted); max-width: 70ch;">
-        Six years of engineering across math, Goldman infrastructure, and a #1 competitive rank. I
-        use that mix to pick a direction and ship.
+      <p class="resume-copy">
+        Senior engineer with six years in data pipelines, agents, and application
+        systems. Goldman infrastructure, then a founding seat on an agentic trading stack.
+        I learn the unfamiliar system on the fly, pick a direction, and ship.
       </p>
-      <ul style="color: var(--muted); max-width: 70ch; margin: 0.75rem 0 0; padding-left: 1.1rem;">
+      <ul class="resume-copy resume-list">
         {
           range.spikes.map((spike) => (
             <li>
-              <strong style="color: var(--text);">{spike.label}.</strong> {spike.domain} — {spike.trains}
+              <strong>{spike.label}.</strong> {spike.domain} — {spike.trains}
             </li>
           ))
         }
@@ -84,6 +84,35 @@ import {
     </section>
 
     <section class="resume-block">
+      <h2>Open source</h2>
+      <p class="resume-copy">
+        <strong>Local Lattice</strong> — local-first OpenAI-compatible
+        capability gateway (Apache-2.0). Agents ask for a role, not a model string. Capability
+        routing, admission queue, hybrid local + cloud swarm.
+        {' '}
+        <a href="https://github.com/chrisswimlee/local-lattice" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-lattice</a>
+      </p>
+    </section>
+
+    <section class="resume-block">
+      <h2>Public work</h2>
+      <p class="resume-copy">
+        <strong>HAIT</strong> — public site for Hebron Asia
+        International Institute of Technology, an AI university in Chiang Rai.
+        Redesigned the front-end, upgraded the PHP, and fixed performance so recruiting works before
+        there is a campus.
+        {' '}
+        <a href="https://haitedu.com" target="_blank" rel="noopener noreferrer">haitedu.com</a>
+      </p>
+      <p class="resume-copy resume-copy-gap">
+        <strong>D22-soso</strong> — site for Wayne “D22-soso” Chiang,
+        1999 Brood War World Champion, WSOP talent manager, and inventor of 2 Hand Hold’em.
+        {' '}
+        <a href="https://d22soso.com" target="_blank" rel="noopener noreferrer">d22soso.com</a>
+      </p>
+    </section>
+
+    <section class="resume-block">
       <h2>Education</h2>
       {
         education.map((item) => (
@@ -94,7 +123,7 @@ import {
             <div>
               <h3>{item.degree}</h3>
               <p class="company">{item.school}</p>
-              {item.note && <p style="color: var(--muted);">{item.note}</p>}
+              {item.note && <p class="resume-copy">{item.note}</p>}
             </div>
           </article>
         ))
@@ -118,67 +147,11 @@ import {
     </section>
 
     <section class="resume-block">
-      <h2>Consulting</h2>
-      <p style="color: var(--muted); max-width: 70ch;">
-        Technical lead for funded teams with a stuck system — data, automation, or agents. A
-        diagnostic to start. A scoped build or a retainer once the work is clear.
-      </p>
-      <ul style="color: var(--muted); max-width: 70ch; margin: 0.75rem 0 0; padding-left: 1.1rem;">
-        {
-          services.engagements.map((item) => (
-            <li>
-              <strong style="color: var(--text);">{item.name}.</strong> {item.price} · {item.unit}. {item.summary}
-            </li>
-          ))
-        }
-        <li>
-          <strong style="color: var(--text);">Day rate.</strong> {services.day.price} / {services.day.unit}. {services.day.note}
-        </li>
-      </ul>
-      <p style="color: var(--muted); max-width: 70ch; margin-top: 0.75rem;">
-        Write
-        {' '}
-        <a href={services.href}>{site.email}</a>
-        {' '}
-        with what the company does and what’s stuck.
-      </p>
-    </section>
-
-    <section class="resume-block">
-      <h2>Open source</h2>
-      <p style="color: var(--muted); max-width: 70ch;">
-        <strong style="color: var(--text);">Local Lattice</strong> — local-first OpenAI-compatible
-        capability gateway (Apache-2.0). Agents ask for a role, not a model string. Capability
-        routing, admission queue, hybrid local + cloud swarm.
-        {' '}
-        <a href="https://github.com/chrisswimlee/local-lattice" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-lattice</a>
-      </p>
-    </section>
-
-    <section class="resume-block">
-      <h2>Digital work</h2>
-      <p style="color: var(--muted); max-width: 70ch;">
-        <strong style="color: var(--text);">HAIT</strong> — public site for Hebron Asia
-        International Institute of Technology, the AI university where I teach.
-        Redesigned the front-end, upgraded the PHP, and fixed performance so recruiting works before
-        there is a campus.
-        {' '}
-        <a href="https://haitedu.com" target="_blank" rel="noopener noreferrer">haitedu.com</a>
-      </p>
-      <p style="color: var(--muted); max-width: 70ch; margin-top: 0.75rem;">
-        <strong style="color: var(--text);">D22-soso</strong> — site for Wayne “D22-soso” Chiang,
-        1999 Brood War World Champion, WSOP talent manager, and inventor of 2 Hand Hold’em.
-        {' '}
-        <a href="https://d22soso.com" target="_blank" rel="noopener noreferrer">d22soso.com</a>
-      </p>
-    </section>
-
-    <section class="resume-block">
       <h2>Competitive achievements</h2>
       {
         achievements.map((item) => (
-          <p style="color: var(--muted); max-width: 70ch;">
-            <strong style="color: var(--text);">{item.title}.</strong> {item.detail}
+          <p class="resume-copy">
+            <strong>{item.title}.</strong> {item.detail}
           </p>
         ))
       }
