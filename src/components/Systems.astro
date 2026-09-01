@@ -1,8 +1,9 @@
 ---
 import { cases, projects, systems } from '../data/site';
+import LatticeConsole from './LatticeConsole.astro';
 import Pipeline from './Pipeline.astro';
 
-const lattice = projects[0];
+const lattice = projects.find((project) => project.id === 'lattice');
 
 const pieces = systems.map((system) => ({
   id: system.id,
@@ -10,12 +11,11 @@ const pieces = systems.map((system) => ({
   year: system.year,
   title: system.title,
   kicker: system.kicker,
-  summary: system.summary,
   metric: system.metric,
   metricLabel: system.metricLabel,
   brief: cases[system.id],
   command: system.command,
-  links: system.id === 'lattice' ? lattice.links : [],
+  links: system.id === 'lattice' ? lattice?.links ?? [] : [],
 }));
 ---
 
@@ -25,15 +25,41 @@ const pieces = systems.map((system) => ({
     <p class="note">Lattice is public. Goldman shipped. The trading engine cannot be shown.</p>
   </div>
 
+  <div class="systems-tabs" role="tablist" aria-label="Systems">
+    {
+      pieces.map((piece, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`sys-tab-${piece.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-controls={`sys-panel-${piece.id}`}
+          data-sys={piece.id}
+        >
+          {piece.id === 'lattice' ? 'Lattice' : piece.id === 'goldman' ? 'Goldman' : 'Trading engine'}
+        </button>
+      ))
+    }
+  </div>
+
   <div class="case-dock">
-    <Pipeline />
+    <div class="systems-instrument">
+      <div id="sys-panel-lattice" data-instrument="lattice" role="tabpanel" aria-labelledby="sys-tab-lattice">
+        <LatticeConsole />
+      </div>
+      <div id="sys-panel-sim" data-instrument="sim" role="tabpanel" hidden>
+        <Pipeline />
+      </div>
+    </div>
     <div class="case-briefs">
       {
         pieces.map((piece, i) => (
           <article class="case-brief" data-case={piece.id} hidden={i !== 0}>
             <p class="kicker">{piece.kicker}</p>
             <h3 class="case-title">{piece.title}</h3>
-            <p class="gal-metric">{piece.metric} · {piece.metricLabel}</p>
+            <p class="gal-metric">
+              {piece.metric} · {piece.metricLabel}
+            </p>
             <dl class="case-steps">
               <div>
                 <dt>Problem</dt>
@@ -51,6 +77,22 @@ const pieces = systems.map((system) => ({
                 <dt>Outcome</dt>
                 <dd>{piece.brief.outcome}</dd>
               </div>
+              {
+                piece.brief.interfaces && (
+                  <div>
+                    <dt>Interfaces</dt>
+                    <dd>{piece.brief.interfaces}</dd>
+                  </div>
+                )
+              }
+              {
+                piece.brief.again && (
+                  <div>
+                    <dt>Would not again</dt>
+                    <dd>{piece.brief.again}</dd>
+                  </div>
+                )
+              }
             </dl>
             {
               piece.command && (
@@ -87,16 +129,34 @@ const pieces = systems.map((system) => ({
 
 <script>
   const briefs = [...document.querySelectorAll<HTMLElement>('[data-case]')];
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-sys]')];
+  const latticePane = document.querySelector<HTMLElement>('[data-instrument="lattice"]');
+  const simPane = document.querySelector<HTMLElement>('[data-instrument="sim"]');
 
   function show(id: string) {
-    for (const brief of briefs) {
-      brief.hidden = brief.dataset.case !== id;
+    for (const brief of briefs) brief.hidden = brief.dataset.case !== id;
+    for (const tab of tabs) {
+      const on = tab.dataset.sys === id;
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
     }
+    const lattice = id === 'lattice';
+    if (latticePane) latticePane.hidden = !lattice;
+    if (simPane) {
+      simPane.hidden = lattice;
+      simPane.setAttribute('aria-labelledby', `sys-tab-${id}`);
+    }
+    window.dispatchEvent(new CustomEvent('system-select', { detail: { id } }));
   }
 
-  window.addEventListener('system-select', (e) => {
-    const id = (e as CustomEvent<{ id?: string }>).detail?.id;
-    if (id) show(id);
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => show(tab.dataset.sys || 'lattice'));
+    tab.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      e.preventDefault();
+      const next = e.key === 'ArrowRight' ? (i + 1) % tabs.length : (i - 1 + tabs.length) % tabs.length;
+      tabs[next].focus();
+      show(tabs[next].dataset.sys || 'lattice');
+    });
   });
 
   document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {

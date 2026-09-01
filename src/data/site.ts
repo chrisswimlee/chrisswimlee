@@ -23,6 +23,7 @@ export const nav = [
 ];
 
 export const briefMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Consulting — Chris Swim Lee')}&body=${encodeURIComponent('What the company does:\n\nWhat’s stuck (data / automation / agents):\n\nWhere you are (city / remote):\n')}`;
+export const hireMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Role — Chris Swim Lee')}&body=${encodeURIComponent('Role / company:\n\nWhat you need:\n\nWhere (city / remote):\n')}`;
 export const tutorMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Tutoring — software and math')}`;
 
 export const hero = {
@@ -114,6 +115,8 @@ type CaseBrief = {
   constraint: string;
   decision: string;
   outcome: string;
+  interfaces?: string;
+  again?: string;
 };
 
 export const cases: Record<'lattice' | 'goldman' | 'trading', CaseBrief> = {
@@ -121,19 +124,22 @@ export const cases: Record<'lattice' | 'goldman' | 'trading', CaseBrief> = {
     problem: 'Agents were bound to model strings. Switching a backend meant rewriting the call site.',
     constraint: 'Local-first — MLX and LM Studio — without locking out cloud when a role needs it.',
     decision: 'An OpenAI-compatible gateway. Assign role:coder, role:reasoner, role:fast. Swarm primitives over HTTP.',
-    outcome: 'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back.',
+    outcome: 'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back. The console on this page runs the same router.',
   },
   goldman: {
     problem: 'Beneficiary data for 10,000+ client accounts was too slow to operate.',
     constraint: 'Compliance, 50+ internal consumers, and the pager after it shipped.',
-    decision: 'Java and Kafka pipelines plus REST. A Selenium and TestNG suite for the financial and compliance cases. Stayed on the line.',
+    decision:
+      'Java and Kafka on beneficiary.* plus REST /v1/accounts. TestNG and Selenium on the KYC and compliance cases. Stayed on the line.',
     outcome: '80% faster processing. 15% lower data-access latency. Test accuracy up 22%.',
+    interfaces: 'kafka topic beneficiary.* · REST /v1/accounts · TestNG + Selenium KYC',
+    again: 'I would split the batch job from the serving path earlier. The 80% was the pipeline; the pager was the coupling.',
   },
   trading: {
-    problem: 'A stealth desk needed a live agent stack — market-data in, signals and a pre-market brief out — with no existing pipeline.',
-    constraint: 'Multiple exchanges, a legacy SQL book, and a founding year. The product cannot be shown.',
-    decision: 'Python and Kafka across the feeds. An agent loop that audits portfolios against SQL. PyTorch time-series, backtests, and a daily brief.',
-    outcome: 'Zero to one: market-data to live signals on a clock the desk can run.',
+    problem: 'A stealth desk needed market-data in and signals out. No pipeline existed.',
+    constraint: 'Multiple exchanges, a legacy SQL book. The product cannot be shown.',
+    decision: 'Python and Kafka across the feeds. Agents audit SQL. A PyTorch brief on a clock.',
+    outcome: 'Zero to one on a clock the desk can run.',
   },
 };
 
@@ -193,7 +199,7 @@ export const systems: System[] = [
 ];
 
 export const work = {
-  lede: 'What you can open. Lattice on PyPI, then two sites.',
+  lede: 'Two sites you can open.',
 };
 
 type Project = {
@@ -215,7 +221,7 @@ type Project = {
 export const projects: Project[] = [
   {
     id: 'lattice',
-    featured: true,
+    featured: false,
     tone: 'accent',
     kind: 'Open source',
     title: 'Local Lattice',
@@ -389,5 +395,13 @@ export const engage = {
 export const contact = {
   heading: 'Email',
   lede: 'Roles, systems, or a question. I’ll tell you if I’m the person.',
-  projectCta: 'Email me',
+  projectCta: 'Email about a role',
+  href: hireMail,
+};
+
+export const built = {
+  lede: 'This site.',
+  detail:
+    'Astro. No React. A custom canvas DAG and a Lattice router that runs in the page. Printable CV. The source is the proof.',
+  href: 'https://github.com/chrisswimlee/chrisswimlee',
 };

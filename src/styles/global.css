@@ -5,7 +5,7 @@
   --surface-2: #18263a;
   --ink: #e8f0f8;
   --muted: #93a6bc;
-  --faint: #6d8096;
+  --faint: #8ea3b8;
   --accent: #6b9fff;
   --accent-dim: rgba(107, 159, 255, 0.14);
   --cobalt: #8eb0e0;
@@ -281,7 +281,7 @@ a.btn-solid:hover {
 
 .hero {
   position: relative;
-  padding: clamp(1.6rem, 4vw, 2.8rem) var(--space) 2.4rem;
+  padding: clamp(1rem, 2.5vw, 1.7rem) var(--space) 1.35rem;
 }
 
 .hero-identity {
@@ -304,7 +304,7 @@ a.btn-solid:hover {
 .hero-name {
   margin: 0.25rem 0 0.7rem;
   font-family: var(--display);
-  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  font-size: clamp(2rem, 5vw, 3.2rem);
   font-weight: 400;
   font-style: italic;
   line-height: 0.92;
@@ -341,7 +341,7 @@ a.btn-solid:hover {
 
 .hero-photo {
   margin: 0;
-  width: 148px;
+  width: 112px;
   border: 1px solid var(--line);
   background: var(--surface);
 }
@@ -358,15 +358,15 @@ a.btn-solid:hover {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem 1.4rem;
   width: min(var(--max), 100%);
-  margin: 1.8rem auto 0;
-  padding: 1.1rem 0 0;
+  margin: 1.15rem auto 0;
+  padding: 0.75rem 0 0;
   border-top: 1px solid var(--line);
   list-style: none;
 }
 
 .proof-value {
   font-family: var(--display);
-  font-size: 1.7rem;
+  font-size: 1.45rem;
   font-weight: 600;
   font-style: italic;
   letter-spacing: -0.04em;
@@ -397,6 +397,208 @@ a.btn-solid:hover {
 
 .paper > .section:first-child {
   border-top: none;
+}
+
+.systems-section {
+  padding-top: clamp(1.4rem, 3.5vw, 2.4rem);
+}
+
+.systems-tabs {
+  display: flex;
+  margin: 0 0 1.2rem;
+  border: 1px solid var(--line);
+}
+
+.systems-tabs button {
+  flex: 1;
+  margin: 0;
+  padding: 0.65rem 0.4rem;
+  border: 0;
+  border-right: 1px solid var(--line);
+  background: transparent;
+  color: var(--faint);
+  font: 500 0.78rem/1 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.systems-tabs button:last-child {
+  border-right: 0;
+}
+
+.systems-tabs button[aria-selected='true'] {
+  color: var(--ink);
+  background: var(--accent-dim);
+}
+
+.lattice {
+  border: 1px solid var(--line-strong);
+  background: #070e1a;
+}
+
+.lattice-banner {
+  padding: 0.4rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warm);
+}
+
+.lattice-chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.lattice-live {
+  margin-left: auto;
+  color: var(--warm);
+}
+
+.lattice-roles,
+.lattice-backends {
+  margin: 0;
+  padding: 0.7rem 0.85rem 0.2rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.lattice-roles legend,
+.lattice-backends legend {
+  padding: 0;
+}
+
+.lattice-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.lattice-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+  font: 500 0.78rem/1.2 var(--mono);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.lattice-chip span {
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.lattice-chip[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.lattice-backends {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.2rem;
+}
+
+.lattice-backends label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  min-height: 44px;
+}
+
+.lattice-backends span {
+  color: var(--faint);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.lattice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.lattice-editor {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.7rem 0.85rem 0.85rem;
+  border-right: 1px solid var(--line);
+}
+
+.lattice-editor:last-child {
+  border-right: 0;
+}
+
+.lattice-editor textarea,
+.lattice-editor pre {
+  margin: 0.45rem 0 0;
+  padding: 0.55rem;
+  min-height: 168px;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: rgba(7, 14, 26, 0.7);
+  color: var(--cobalt);
+  font: 400 0.72rem/1.45 var(--mono);
+  resize: vertical;
+}
+
+.lattice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.7rem 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.lattice-swarms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lattice-log {
+  margin: 0;
+  padding: 0.5rem 0.9rem 0.62rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--warm);
+  min-height: 2.15rem;
+  white-space: pre;
+}
+
+.built {
+  margin-top: 1.8rem;
+  max-width: 58ch;
+}
+
+.built p {
+  color: var(--muted);
+  margin-top: 0.4rem;
 }
 
 .section-head {
@@ -807,7 +1009,7 @@ a.btn-solid:hover {
 }
 
 .piece-1 {
-  margin-top: 2.5rem;
+  margin-top: 0;
 }
 
 .piece-2 {
@@ -1326,8 +1528,14 @@ a.btn-solid:hover {
   .contact-box,
   .role,
   .spikes,
-  .case-dock {
+  .case-dock,
+  .lattice-grid {
     grid-template-columns: 1fr;
+  }
+
+  .lattice-editor {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
 
   .hero-photo {
@@ -1577,6 +1785,7 @@ a.btn-solid:hover {
   .hero-photo,
   .hero-stats,
   .work-piece,
+  .lattice-chip,
   .nav-links a::after,
   .section-head h2 {
     animation: none !important;

@@ -1,45 +1,22 @@
----
-const topos = [
-  { id: 'lattice', label: 'Lattice' },
-  { id: 'goldman', label: 'Goldman' },
-  { id: 'trading', label: 'Trading engine' },
-];
----
-
 <div class="plane" data-plane>
   <div class="plane-chrome">
     <span class="plane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span class="plane-title" data-plane-title>sys / local-lattice</span>
-    <span class="plane-stat" data-plane-stat>model</span>
+    <span class="plane-title" data-plane-title>sys / beneficiary-mgmt</span>
+    <span class="plane-stat" data-plane-stat>sim</span>
     <span class="plane-live"><i aria-hidden="true"></i> sim</span>
-  </div>
-  <div class="plane-tabs" role="tablist" aria-label="Systems">
-    {
-      topos.map((topo, i) => (
-        <button
-          type="button"
-          role="tab"
-          id={`plane-tab-${topo.id}`}
-          aria-selected={i === 0 ? 'true' : 'false'}
-          data-topo={topo.id}
-        >
-          {topo.label}
-        </button>
-      ))
-    }
   </div>
   <canvas
     class="plane-canvas"
     data-plane-canvas
     role="img"
-    aria-label="Simulated architecture of Local Lattice, the Goldman beneficiary system, and the trading engine"
+    aria-label="Simulated architecture. Click a node for its contract."
   ></canvas>
-  <p class="plane-log" data-plane-log aria-hidden="true"></p>
+  <p class="plane-log" data-plane-log>click a node for the contract</p>
 </div>
 
 <script>
   type Kind = 'src' | 'bus' | 'core' | 'out';
-  type NodeDef = { id: string; x: number; y: number; label: string; kind: Kind };
+  type NodeDef = { id: string; x: number; y: number; label: string; kind: Kind; contract: string };
   type EdgeDef = { from: string; to: string; warm?: boolean };
   type Topo = {
     title: string;
@@ -52,15 +29,15 @@ const topos = [
     trading: {
       title: 'sys / trading-engine',
       nodes: [
-        { id: 'nyse', x: 0.12, y: 0.2, label: 'NYSE', kind: 'src' },
-        { id: 'nasdaq', x: 0.12, y: 0.44, label: 'NASDAQ', kind: 'src' },
-        { id: 'crypto', x: 0.12, y: 0.68, label: 'CRYPTO', kind: 'src' },
-        { id: 'sql', x: 0.36, y: 0.84, label: 'SQL', kind: 'src' },
-        { id: 'kafka', x: 0.36, y: 0.44, label: 'KAFKA', kind: 'bus' },
-        { id: 'agents', x: 0.62, y: 0.5, label: 'AGENTS', kind: 'core' },
-        { id: 'signal', x: 0.88, y: 0.22, label: 'SIGNALS', kind: 'out' },
-        { id: 'process', x: 0.88, y: 0.5, label: 'PROCESS', kind: 'out' },
-        { id: 'brief', x: 0.88, y: 0.78, label: 'BRIEFING', kind: 'out' },
+        { id: 'nyse', x: 0.12, y: 0.2, label: 'NYSE', kind: 'src', contract: 'equity tape → kafka md.equity' },
+        { id: 'nasdaq', x: 0.12, y: 0.44, label: 'NASDAQ', kind: 'src', contract: 'equity tape → kafka md.equity' },
+        { id: 'crypto', x: 0.12, y: 0.68, label: 'CRYPTO', kind: 'src', contract: 'venue feed → kafka md.crypto' },
+        { id: 'sql', x: 0.36, y: 0.84, label: 'SQL', kind: 'src', contract: 'legacy book. agents read, never write live' },
+        { id: 'kafka', x: 0.36, y: 0.44, label: 'KAFKA', kind: 'bus', contract: 'topics md.*  p99 target < 20ms' },
+        { id: 'agents', x: 0.62, y: 0.5, label: 'AGENTS', kind: 'core', contract: 'audit SQL + emit signal / process / brief' },
+        { id: 'signal', x: 0.88, y: 0.22, label: 'SIGNALS', kind: 'out', contract: 'live bias + confidence. product not shown.' },
+        { id: 'process', x: 0.88, y: 0.5, label: 'PROCESS', kind: 'out', contract: 'pytorch infer on the clock' },
+        { id: 'brief', x: 0.88, y: 0.78, label: 'BRIEFING', kind: 'out', contract: 'pre-market note the desk can run' },
       ],
       edges: [
         { from: 'nyse', to: 'kafka' },
@@ -85,14 +62,14 @@ const topos = [
     goldman: {
       title: 'sys / beneficiary-mgmt',
       nodes: [
-        { id: 'ingest', x: 0.12, y: 0.5, label: 'INGEST', kind: 'src' },
-        { id: 'kafka', x: 0.36, y: 0.5, label: 'KAFKA', kind: 'bus' },
-        { id: 'core', x: 0.62, y: 0.2, label: 'BENEFICIARY', kind: 'core' },
-        { id: 'rest', x: 0.62, y: 0.42, label: 'REST', kind: 'core' },
-        { id: 'tests', x: 0.62, y: 0.78, label: 'TESTNG', kind: 'out' },
-        { id: 'accts', x: 0.88, y: 0.2, label: '10k ACCTS', kind: 'out' },
-        { id: 'teams', x: 0.88, y: 0.5, label: '50+ TEAMS', kind: 'out' },
-        { id: 'sel', x: 0.88, y: 0.78, label: 'SELENIUM', kind: 'out' },
+        { id: 'ingest', x: 0.12, y: 0.5, label: 'INGEST', kind: 'src', contract: 'batch account file → beneficiary.*' },
+        { id: 'kafka', x: 0.36, y: 0.5, label: 'KAFKA', kind: 'bus', contract: 'topic beneficiary.*  fanout to core / rest / tests' },
+        { id: 'core', x: 0.62, y: 0.2, label: 'BENEFICIARY', kind: 'core', contract: 'write path. 10k+ accounts. pager after ship.' },
+        { id: 'rest', x: 0.62, y: 0.42, label: 'REST', kind: 'core', contract: 'GET/PUT /v1/accounts  50+ internal consumers' },
+        { id: 'tests', x: 0.62, y: 0.78, label: 'TESTNG', kind: 'out', contract: 'financial + compliance cases. +22% accuracy' },
+        { id: 'accts', x: 0.88, y: 0.2, label: '10k ACCTS', kind: 'out', contract: 'serving path. should have been split from batch earlier.' },
+        { id: 'teams', x: 0.88, y: 0.5, label: '50+ TEAMS', kind: 'out', contract: 'REST consumers. −15% p99 vs prior' },
+        { id: 'sel', x: 0.88, y: 0.78, label: 'SELENIUM', kind: 'out', contract: 'KYC browser suite on the same cases' },
       ],
       edges: [
         { from: 'ingest', to: 'kafka' },
@@ -117,13 +94,13 @@ const topos = [
     lattice: {
       title: 'sys / local-lattice',
       nodes: [
-        { id: 'mlx', x: 0.14, y: 0.22, label: 'MLX', kind: 'src' },
-        { id: 'lms', x: 0.14, y: 0.5, label: 'LM STUDIO', kind: 'src' },
-        { id: 'cloud', x: 0.14, y: 0.78, label: 'CLOUD', kind: 'src' },
-        { id: 'gw', x: 0.5, y: 0.5, label: 'LATTICE', kind: 'core' },
-        { id: 'coder', x: 0.86, y: 0.22, label: 'role:coder', kind: 'out' },
-        { id: 'reason', x: 0.86, y: 0.5, label: 'role:reasoner', kind: 'out' },
-        { id: 'fast', x: 0.86, y: 0.78, label: 'role:fast', kind: 'out' },
+        { id: 'mlx', x: 0.14, y: 0.22, label: 'MLX', kind: 'src', contract: 'local Apple Silicon. preferred backend.' },
+        { id: 'lms', x: 0.14, y: 0.5, label: 'LM STUDIO', kind: 'src', contract: 'local HTTP. second in prefer_local.' },
+        { id: 'cloud', x: 0.14, y: 0.78, label: 'CLOUD', kind: 'src', contract: 'fallback only. never the default.' },
+        { id: 'gw', x: 0.5, y: 0.5, label: 'LATTICE', kind: 'core', contract: 'POST /v1/chat/completions  model=role:*' },
+        { id: 'coder', x: 0.86, y: 0.22, label: 'role:coder', kind: 'out', contract: 'capability → qwen2.5-coder on mlx' },
+        { id: 'reason', x: 0.86, y: 0.5, label: 'role:reasoner', kind: 'out', contract: 'capability → plan / judge' },
+        { id: 'fast', x: 0.86, y: 0.78, label: 'role:fast', kind: 'out', contract: 'capability → low-latency local model' },
       ],
       edges: [
         { from: 'mlx', to: 'gw' },
@@ -157,14 +134,14 @@ const topos = [
     const titleEl = root.querySelector('[data-plane-title]');
     const statEl = root.querySelector('[data-plane-stat]');
     const logEl = root.querySelector('[data-plane-log]');
-    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-topo]')];
     if (!canvas || !titleEl || !statEl || !logEl) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let topoId = 'lattice';
+    let topoId = 'goldman';
+    let armed = false;
     let w = 0;
     let h = 0;
     let dpr = 1;
@@ -234,10 +211,6 @@ const topos = [
       spawnAcc = 0;
       logIdx = 0;
       logEl.textContent = TOPOS[id].logs[0];
-      for (const tab of tabs) {
-        const on = tab.dataset.topo === id;
-        tab.setAttribute('aria-selected', on ? 'true' : 'false');
-      }
       layout();
       draw();
     }
@@ -393,7 +366,7 @@ const topos = [
     }
 
     function loop(now: number) {
-      if (!visible) return;
+      if (!visible || !armed) return;
       const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
       last = now;
       if (!reduce) tick(dt);
@@ -401,8 +374,15 @@ const topos = [
       raf = requestAnimationFrame(loop);
     }
 
+    function stop() {
+      armed = false;
+      cancelAnimationFrame(raf);
+      particles = [];
+    }
+
     function start() {
       cancelAnimationFrame(raf);
+      armed = true;
       last = performance.now();
       if (reduce) {
         draw();
@@ -410,6 +390,15 @@ const topos = [
         return;
       }
       raf = requestAnimationFrame(loop);
+    }
+
+    function hit(x: number, y: number) {
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const n = nodes[i];
+        const boxW = n.tw + 20;
+        if (Math.abs(x - n.px) <= boxW / 2 && Math.abs(y - n.py) <= 14) return n;
+      }
+      return null;
     }
 
     const ro = new ResizeObserver(() => {
@@ -421,23 +410,43 @@ const topos = [
     const io = new IntersectionObserver(
       (entries) => {
         visible = entries.some((e) => e.isIntersecting);
-        if (visible) start();
-        else cancelAnimationFrame(raf);
+        if (visible && armed) start();
+        else if (!visible) stop();
       },
       { threshold: 0.05 },
     );
     io.observe(root);
 
-    for (const tab of tabs) {
-      tab.addEventListener('click', () => {
-        const id = tab.dataset.topo || 'lattice';
-        setTopo(id);
-        window.dispatchEvent(new CustomEvent('system-select', { detail: { id } }));
-      });
-    }
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const node = hit(e.clientX - rect.left, e.clientY - rect.top);
+      if (!node) return;
+      logEl.textContent = `${node.label.padEnd(18)} ${node.contract}`;
+    });
 
-    setTopo('lattice');
-    start();
+    canvas.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const front = nodes.find((n) => n.kind === 'core') ?? nodes[0];
+      if (!front) return;
+      e.preventDefault();
+      logEl.textContent = `${front.label.padEnd(18)} ${front.contract}`;
+    });
+    canvas.tabIndex = 0;
+
+    window.addEventListener('system-select', (e) => {
+      const id = (e as CustomEvent<{ id?: string }>).detail?.id;
+      if (!id) return;
+      if (id === 'lattice') {
+        stop();
+        return;
+      }
+      if (!TOPOS[id]) return;
+      setTopo(id);
+      if (visible) start();
+    });
+
+    setTopo('goldman');
+    stop();
   }
 
   document.querySelectorAll<HTMLElement>('[data-plane]').forEach(initPlane);

@@ -1,0 +1,173 @@
+---
+import { BACKENDS, ROLES, SWARMS } from '../data/lattice';
+---
+
+<div class="lattice" data-lattice>
+  <p class="lattice-banner">fixture responses · routing is real</p>
+  <div class="lattice-chrome">
+    <span class="plane-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="plane-title">POST /v1/chat/completions</span>
+    <span class="lattice-live">router</span>
+  </div>
+
+  <fieldset class="lattice-roles">
+    <legend class="kicker">Capability</legend>
+    {
+      ROLES.map((role, i) => (
+        <button
+          type="button"
+          class="lattice-chip"
+          data-role={role.id}
+          aria-pressed={i === 0 ? 'true' : 'false'}
+        >
+          {role.label}
+          <span>{role.hint}</span>
+        </button>
+      ))
+    }
+  </fieldset>
+
+  <fieldset class="lattice-backends">
+    <legend class="kicker">Backends · uncheck to fail over</legend>
+    {
+      BACKENDS.map((backend) => (
+        <label>
+          <input type="checkbox" data-backend={backend.id} checked />
+          {backend.label}
+          <span>{backend.kind}</span>
+        </label>
+      ))
+    }
+  </fieldset>
+
+  <div class="lattice-grid">
+    <label class="lattice-editor">
+      <span class="kicker">Request</span>
+      <textarea data-lattice-req rows="8" spellcheck="false"></textarea>
+    </label>
+    <div class="lattice-editor">
+      <span class="kicker">Response</span>
+      <pre data-lattice-res tabindex="0"></pre>
+    </div>
+  </div>
+
+  <div class="lattice-actions">
+    <button class="btn btn-solid" type="button" data-lattice-send>
+      Send
+    </button>
+    <div class="lattice-swarms" role="group" aria-label="Swarm primitives">
+      {
+        SWARMS.map((swarm) => (
+          <button type="button" class="btn" data-swarm={swarm.id} title={swarm.hint}>
+            {swarm.path}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <p class="lattice-log" data-lattice-log></p>
+</div>
+
+<script>
+  import {
+    BACKENDS,
+    assignLog,
+    chatRequest,
+    complete,
+    parseRole,
+    route,
+    swarm,
+    type BackendId,
+    type RoleId,
+    type SwarmVerb,
+  } from '../data/lattice';
+
+  function init(root: HTMLElement) {
+    const reqEl = root.querySelector<HTMLTextAreaElement>('[data-lattice-req]');
+    const resEl = root.querySelector<HTMLElement>('[data-lattice-res]');
+    const logEl = root.querySelector<HTMLElement>('[data-lattice-log]');
+    const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-role]')];
+    const boxes = [...root.querySelectorAll<HTMLInputElement>('[data-backend]')];
+    if (!reqEl || !resEl || !logEl) return;
+
+    let role: RoleId = 'role:coder';
+
+    function down(): BackendId[] {
+      const on = new Set(
+        boxes.filter((box) => box.checked).map((box) => box.dataset.backend as BackendId),
+      );
+      return BACKENDS.map((backend) => backend.id).filter((id) => !on.has(id));
+    }
+
+    function live() {
+      const gone = new Set(down());
+      return BACKENDS.map((backend) => ({ ...backend, available: !gone.has(backend.id) }));
+    }
+
+    function write(roleId: RoleId) {
+      reqEl.value = JSON.stringify(chatRequest(roleId, promptFor(roleId)), null, 2);
+    }
+
+    function promptFor(roleId: RoleId) {
+      if (roleId === 'role:fast') return 'ping';
+      if (roleId === 'role:reasoner') return 'What constraint does capability routing remove?';
+      return 'Write route(role, backends) in Python.';
+    }
+
+    function runChat() {
+      let model = role;
+      try {
+        const body = JSON.parse(reqEl.value) as { model?: string };
+        const parsed = body.model ? parseRole(body.model) : null;
+        if (parsed) model = parsed;
+      } catch {
+        /* keep selected role */
+      }
+      try {
+        const assignment = route(model, live(), { localDown: down() });
+        resEl.textContent = JSON.stringify(complete(assignment, promptFor(model)), null, 2);
+        logEl.textContent = assignLog(assignment);
+      } catch (err) {
+        resEl.textContent = JSON.stringify({ error: err instanceof Error ? err.message : 'route failed' }, null, 2);
+        logEl.textContent = 'assign             no backend';
+      }
+    }
+
+    function runSwarm(verb: SwarmVerb) {
+      try {
+        const body = swarm(verb, promptFor(role), live());
+        resEl.textContent = JSON.stringify(body, null, 2);
+        logEl.textContent = `swarm              ${verb}`;
+      } catch (err) {
+        resEl.textContent = JSON.stringify({ error: err instanceof Error ? err.message : 'swarm failed' }, null, 2);
+      }
+    }
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        role = chip.dataset.role as RoleId;
+        chips.forEach((item) => item.setAttribute('aria-pressed', item === chip ? 'true' : 'false'));
+        write(role);
+        runChat();
+      });
+    });
+
+    boxes.forEach((box) => box.addEventListener('change', () => runChat()));
+    root.querySelector('[data-lattice-send]')?.addEventListener('click', () => runChat());
+    reqEl.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runChat();
+      }
+    });
+
+    root.querySelectorAll<HTMLButtonElement>('[data-swarm]').forEach((btn) => {
+      btn.addEventListener('click', () => runSwarm(btn.dataset.swarm as SwarmVerb));
+    });
+
+    write(role);
+    runChat();
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-lattice]').forEach(init);
+</script>

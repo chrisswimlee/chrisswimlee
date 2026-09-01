@@ -1,5 +1,5 @@
 ---
-import { briefMail, contact, site } from '../data/site';
+import { contact, site } from '../data/site';
 ---
 
 <section class="section contact-section" id="contact">
@@ -11,8 +11,9 @@ import { briefMail, contact, site } from '../data/site';
     <div class="contact-actions" data-reveal>
       <a class="mail" href={`mailto:${site.email}`}>{site.email}</a>
       <div class="card-links">
-        <a class="btn btn-solid" href={briefMail}>{contact.projectCta}</a>
+        <a class="btn btn-solid" href={contact.href}>{contact.projectCta}</a>
         <a class="btn" href="/resume/">Resume</a>
+        <a class="btn" href="/engage/">Consulting</a>
       </div>
     </div>
   </div>
