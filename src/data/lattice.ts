@@ -234,7 +234,11 @@ export function swarm(verb: SwarmVerb, content: string, backends: Backend[] = BA
   };
 }
 
+export function logLine(verb: string, detail: string) {
+  return `${verb.padEnd(19)}${detail}`;
+}
+
 export function assignLog(assignment: Assignment) {
   const via = assignment.fallback ? 'cloud fallback' : assignment.backend;
-  return `assign             ${assignment.role} → ${via}:${assignment.model}`;
+  return logLine('assign', `${assignment.role} → ${via}:${assignment.model}`);
 }

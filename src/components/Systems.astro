@@ -34,6 +34,7 @@ const pieces = systems.map((system) => ({
           id={`sys-tab-${piece.id}`}
           aria-selected={i === 0 ? 'true' : 'false'}
           aria-controls={`sys-panel-${piece.id}`}
+          tabindex={i === 0 ? 0 : -1}
           data-sys={piece.id}
         >
           {piece.id === 'lattice' ? 'Lattice' : piece.id === 'goldman' ? 'Goldman' : 'Trading engine'}
@@ -138,6 +139,7 @@ const pieces = systems.map((system) => ({
     for (const tab of tabs) {
       const on = tab.dataset.sys === id;
       tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
     }
     const lattice = id === 'lattice';
     if (latticePane) latticePane.hidden = !lattice;

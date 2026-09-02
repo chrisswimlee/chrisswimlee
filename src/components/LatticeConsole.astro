@@ -47,7 +47,7 @@ import { BACKENDS, ROLES, SWARMS } from '../data/lattice';
     </label>
     <div class="lattice-editor">
       <span class="kicker">Response</span>
-      <pre data-lattice-res tabindex="0"></pre>
+      <pre data-lattice-res tabindex="0" aria-live="polite"></pre>
     </div>
   </div>
 
@@ -58,14 +58,14 @@ import { BACKENDS, ROLES, SWARMS } from '../data/lattice';
     <div class="lattice-swarms" role="group" aria-label="Swarm primitives">
       {
         SWARMS.map((swarm) => (
-          <button type="button" class="btn" data-swarm={swarm.id} title={swarm.hint}>
+          <button type="button" class="lattice-swarm" data-swarm={swarm.id} title={swarm.hint}>
             {swarm.path}
           </button>
         ))
       }
     </div>
   </div>
-  <p class="lattice-log" data-lattice-log></p>
+  <p class="lattice-log" data-lattice-log aria-live="polite"></p>
 </div>
 
 <script>
@@ -74,6 +74,7 @@ import { BACKENDS, ROLES, SWARMS } from '../data/lattice';
     assignLog,
     chatRequest,
     complete,
+    logLine,
     parseRole,
     route,
     swarm,
@@ -129,7 +130,7 @@ import { BACKENDS, ROLES, SWARMS } from '../data/lattice';
         logEl.textContent = assignLog(assignment);
       } catch (err) {
         resEl.textContent = JSON.stringify({ error: err instanceof Error ? err.message : 'route failed' }, null, 2);
-        logEl.textContent = 'assign             no backend';
+        logEl.textContent = logLine('assign', 'no backend');
       }
     }
 
@@ -137,7 +138,7 @@ import { BACKENDS, ROLES, SWARMS } from '../data/lattice';
       try {
         const body = swarm(verb, promptFor(role), live());
         resEl.textContent = JSON.stringify(body, null, 2);
-        logEl.textContent = `swarm              ${verb}`;
+        logEl.textContent = logLine('swarm', verb);
       } catch (err) {
         resEl.textContent = JSON.stringify({ error: err instanceof Error ? err.message : 'swarm failed' }, null, 2);
       }
