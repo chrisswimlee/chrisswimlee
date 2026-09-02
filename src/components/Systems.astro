@@ -129,6 +129,8 @@ const pieces = systems.map((system) => ({
 </section>
 
 <script>
+  import '../scripts/copy-buttons';
+
   const briefs = [...document.querySelectorAll<HTMLElement>('[data-case]')];
   const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-sys]')];
   const latticePane = document.querySelector<HTMLElement>('[data-instrument="lattice"]');
@@ -161,20 +163,4 @@ const pieces = systems.map((system) => ({
     });
   });
 
-  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const value = btn.dataset.copy;
-      if (!value) return;
-      try {
-        await navigator.clipboard.writeText(value);
-        const prior = btn.textContent;
-        btn.textContent = 'Copied';
-        setTimeout(() => {
-          btn.textContent = prior;
-        }, 1400);
-      } catch {
-        btn.textContent = 'Copy failed';
-      }
-    });
-  });
 </script>
