@@ -248,7 +248,7 @@ export const projects: Project[] = [
     kind: 'Site',
     title: 'HAIT',
     url: 'haitedu.com',
-    year: '2025',
+    year: '2026',
     summary:
       'The public site for HAIT, an AI university in Chiang Rai still recruiting before there is a campus. I built the site and the systems behind it.',
     image: '/images/work/haitedu.jpg',
@@ -284,7 +284,7 @@ export const roles = [
   {
     company: 'HAIT',
     title: 'Technical Lead',
-    dates: '2025 — present',
+    dates: '2026 — present',
     location: 'Chiang Rai, remote',
     note: 'Public site and IT systems',
     scan: 'Public site, hosting, and the stack before there is a campus.',
