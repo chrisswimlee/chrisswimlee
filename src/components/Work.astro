@@ -7,14 +7,14 @@ const featured = projects.filter((project) => project.featured);
 <section class="section" id="work">
   <div class="section-head">
     <h2>Work</h2>
-    <p class="note">{work.lede}</p>
+    <p class="note" data-reveal>{work.lede}</p>
   </div>
   <div class="work-board">
     {
       featured.map((project, index) => {
         const live = project.links[0];
         return (
-          <article class={`work-piece piece-${index}`} data-reveal>
+          <article class={`work-piece chrome piece-${index}`} data-reveal>
             {
               project.image && live ? (
                 <a class="polaroid" href={live.href} target="_blank" rel="noopener noreferrer">

@@ -5,9 +5,33 @@ import { nav } from '../data/site';
 <header class="nav">
   <div class="wrap nav-inner">
     <a class="brand" href="/">Chris <em>Swim</em> Lee</a>
-    <nav class="nav-links" aria-label="Primary">
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+      Menu
+    </button>
+    <nav class="nav-links" id="nav-menu" aria-label="Primary">
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
     </nav>
     <a class="nav-resume" href="/resume/">Resume</a>
   </div>
 </header>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('.nav');
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const menu = document.getElementById('nav-menu');
+  if (nav && toggle && menu) {
+    const setOpen = (open: boolean) => {
+      nav.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.textContent = open ? 'Close' : 'Menu';
+    };
+    toggle.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
+    menu.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.tagName === 'A') setOpen(false);
+    });
+    addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+  }
+</script>

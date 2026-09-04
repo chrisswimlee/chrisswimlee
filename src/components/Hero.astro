@@ -1,5 +1,5 @@
 ---
-import { hero, proof, site } from '../data/site';
+import { hero, proof, site, thesis } from '../data/site';
 
 const stats = proof.map((item) => {
   const prefix = 'prefix' in item && item.prefix ? item.prefix : '';
@@ -9,17 +9,23 @@ const stats = proof.map((item) => {
       : `${prefix}${item.value}${item.suffix}`;
   return { ...item, display };
 });
+
+const pillars = [thesis.why, thesis.how, thesis.what];
 ---
 
 <header class="hero" id="top">
   <div class="hero-identity">
     <div class="hero-copy">
       <p class="hero-kicker">{hero.kicker}</p>
-      <h1 class="hero-name">Chris <em>Swim</em> Lee</h1>
+      <h1 class="hero-name">
+        <span class="hero-word">Chris</span>
+        <em class="hero-word hero-word-swim">Swim</em>
+        <span class="hero-word">Lee</span>
+      </h1>
       <p class="lede">{hero.lede}</p>
       <p class="hero-stack">{hero.stack.join(' · ')}</p>
       <div class="hero-actions">
-        <a class="btn btn-solid" href="/#systems">Try Lattice</a>
+        <a class="btn btn-solid" href="/#systems">See the work</a>
         <a class="btn" href="/resume/">Resume</a>
         <a class="btn" href={`mailto:${site.email}`}>Email</a>
       </div>
@@ -28,11 +34,28 @@ const stats = proof.map((item) => {
       <img src={site.photo} alt={site.name} width="320" height="320" fetchpriority="high" decoding="async" />
     </figure>
   </div>
-  <ul class="hero-stats">
+  <ol class="thesis bento">
+    {
+      pillars.map((pillar) => (
+        <li class="glass" data-depth="1">
+          <p class="thesis-line">{pillar.line}</p>
+          <p class="thesis-detail">{pillar.detail}</p>
+        </li>
+      ))
+    }
+  </ol>
+  <ul class="hero-stats bento">
     {
       stats.map((item) => (
-        <li>
-          <p class="proof-value">{item.display}</p>
+        <li class="glass" data-depth="2">
+          <p
+            class="proof-value"
+            data-count-to={typeof item.value === 'number' ? item.value : undefined}
+            data-prefix={typeof item.value === 'number' && 'prefix' in item && item.prefix ? item.prefix : undefined}
+            data-suffix={typeof item.value === 'number' ? item.suffix : undefined}
+          >
+            {item.display}
+          </p>
           <p class="proof-label">{item.label}</p>
           <p class="proof-hint">{item.hint}</p>
         </li>

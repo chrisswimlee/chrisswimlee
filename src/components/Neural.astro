@@ -1,0 +1,310 @@
+<canvas class="neural" data-neural aria-hidden="true"></canvas>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-neural]');
+  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const coarse = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+
+  if (!canvas || !motion || coarse) {
+    canvas?.remove();
+  } else {
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) {
+      canvas.remove();
+    } else {
+      const COBALT = '107, 159, 255';
+      const GOLD = '224, 177, 92';
+      const NEON = '61, 242, 255';
+      const PINK = '255, 79, 216';
+
+      let w = 0;
+      let h = 0;
+      let dpr = 1;
+      const resize = () => {
+        dpr = Math.min(1.5, window.devicePixelRatio || 1);
+        w = window.innerWidth;
+        h = window.innerHeight;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        canvas.style.width = `${w}px`;
+        canvas.style.height = `${h}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+      resize();
+      addEventListener('resize', resize, { passive: true });
+
+      /* Head node + spring trail */
+      type P = { x: number; y: number; vx: number; vy: number };
+      const N = 14;
+      const pts: P[] = Array.from({ length: N }, () => ({ x: w / 2, y: h / 2, vx: 0, vy: 0 }));
+      let tx = w / 2;
+      let ty = h / 2;
+      let seen = false;
+      let lastMove = 0;
+      let speed = 0;
+
+      /* KNN anchors */
+      type Anchor = { x: number; y: number; el: Element };
+      let anchors: Anchor[] = [];
+      const ANCHOR_SEL =
+        'a, button, .proof-value, .achieve-value, .thesis-line, .section-head h2, .work-piece h3, .spike h3, .case-title, .peak-dot';
+      let anchorsAt = 0;
+      const collectAnchors = () => {
+        anchorsAt = performance.now();
+        const out: Anchor[] = [];
+        const els = document.querySelectorAll(ANCHOR_SEL);
+        for (const el of els) {
+          const r = el.getBoundingClientRect();
+          if (r.bottom < -80 || r.top > h + 80 || r.width === 0) continue;
+          out.push({ x: r.left + r.width / 2, y: r.top + r.height / 2, el });
+        }
+        anchors = out;
+      };
+      addEventListener('scroll', () => (anchorsAt = 0), { passive: true });
+
+      /* Detection reticle */
+      const BLOCK_SEL = '.achieve-card, .work-piece, .spike, .thesis li, .case-brief, .lattice, .plane, .hero-photo, .skills-panel, .role-scan';
+      const labelFor = (el: Element) => {
+        const c = el.classList;
+        if (c.contains('achieve-card')) return 'achievement';
+        if (c.contains('work-piece')) return 'artifact';
+        if (c.contains('spike')) return 'range.spike';
+        if (c.contains('case-brief')) return 'case.brief';
+        if (c.contains('lattice')) return 'router.console';
+        if (c.contains('plane')) return 'graph.topology';
+        if (c.contains('hero-photo')) return 'human';
+        if (c.contains('skills-panel')) return 'skills';
+        if (c.contains('role-scan')) return 'role';
+        return 'thesis';
+      };
+      let target: Element | null = null;
+      let ret = { x: 0, y: 0, w: 0, h: 0, vx: 0, vy: 0, vw: 0, vh: 0, a: 0 };
+      let lockAt = 0;
+      let label = '';
+      let conf = 0;
+
+      document.addEventListener(
+        'pointerover',
+        (e) => {
+          const el = e.target;
+          if (!(el instanceof Element)) return;
+          const block = el.closest(BLOCK_SEL);
+          if (block === target) return;
+          target = block;
+          if (block) {
+            lockAt = performance.now();
+            label = labelFor(block);
+            conf = 0.86 + Math.random() * 0.13;
+            if (ret.a === 0) {
+              ret.x = tx - 20;
+              ret.y = ty - 20;
+              ret.w = 40;
+              ret.h = 40;
+            }
+          }
+        },
+        { passive: true },
+      );
+
+      addEventListener(
+        'pointermove',
+        (e) => {
+          const now = performance.now();
+          const dx = e.clientX - tx;
+          const dy = e.clientY - ty;
+          speed = Math.min(1, Math.hypot(dx, dy) / 40);
+          tx = e.clientX;
+          ty = e.clientY;
+          lastMove = now;
+          if (!seen) {
+            seen = true;
+            for (const p of pts) {
+              p.x = tx;
+              p.y = ty;
+            }
+            canvas.classList.add('is-on');
+          }
+        },
+        { passive: true },
+      );
+      document.addEventListener('mouseleave', () => canvas.classList.remove('is-on'));
+      document.addEventListener('mouseenter', () => seen && canvas.classList.add('is-on'));
+
+      const spring = (p: P, gx: number, gy: number, k: number, d: number) => {
+        p.vx += (gx - p.x) * k;
+        p.vy += (gy - p.y) * k;
+        p.vx *= d;
+        p.vy *= d;
+        p.x += p.vx;
+        p.y += p.vy;
+      };
+
+      const glyph = () => '01<>/\\|#$%&*+=-'[Math.floor(Math.random() * 15)];
+
+      let hidden = document.hidden;
+      document.addEventListener('visibilitychange', () => {
+        hidden = document.hidden;
+        if (!hidden) requestAnimationFrame(frame);
+      });
+
+      const frame = (now: number) => {
+        if (hidden) return;
+        ctx.clearRect(0, 0, w, h);
+        if (!seen) {
+          requestAnimationFrame(frame);
+          return;
+        }
+
+        /* Physics */
+        spring(pts[0], tx, ty, 0.42, 0.62);
+        for (let i = 1; i < N; i++) spring(pts[i], pts[i - 1].x, pts[i - 1].y, 0.26 - i * 0.008, 0.7);
+        speed *= 0.9;
+
+        const idle = now - lastMove > 1400;
+        const head = pts[0];
+
+        /* KNN webbing */
+        if (now - anchorsAt > 380) collectAnchors();
+        const R = 230;
+        const near = anchors
+          .map((a) => ({ a, d: Math.hypot(a.x - head.x, a.y - head.y) }))
+          .filter((n) => n.d < R && n.d > 6)
+          .sort((p, q) => p.d - q.d)
+          .slice(0, 6);
+        ctx.lineWidth = 0.6;
+        for (const { a, d } of near) {
+          const alpha = (1 - d / R) * (idle ? 0.35 : 0.7);
+          ctx.strokeStyle = `rgba(${COBALT}, ${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(head.x, head.y);
+          ctx.lineTo(a.x, a.y);
+          ctx.stroke();
+          ctx.fillStyle = `rgba(${NEON}, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        /* Connect neighbors to each other when close: a tiny graph */
+        for (let i = 0; i < near.length; i++) {
+          for (let j = i + 1; j < near.length; j++) {
+            const p = near[i].a;
+            const q = near[j].a;
+            const d = Math.hypot(p.x - q.x, p.y - q.y);
+            if (d > 160) continue;
+            ctx.strokeStyle = `rgba(${COBALT}, ${(1 - d / 160) * 0.18})`;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.stroke();
+          }
+        }
+
+        /* Trail */
+        for (let i = N - 1; i >= 1; i--) {
+          const p = pts[i];
+          const q = pts[i - 1];
+          const t = 1 - i / N;
+          ctx.strokeStyle = `rgba(${i % 3 === 0 ? GOLD : COBALT}, ${t * 0.35})`;
+          ctx.lineWidth = t * 1.2;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.stroke();
+          ctx.fillStyle = `rgba(${i % 4 === 0 ? PINK : COBALT}, ${t * 0.9})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 0.8 + t * 1.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        /* Head node */
+        const pulse = 0.5 + 0.5 * Math.sin(now * 0.004);
+        const grd = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, 22 + speed * 18);
+        grd.addColorStop(0, `rgba(${NEON}, ${0.55 + pulse * 0.2})`);
+        grd.addColorStop(0.35, `rgba(${COBALT}, 0.25)`);
+        grd.addColorStop(1, `rgba(${COBALT}, 0)`);
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, 22 + speed * 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#eaf6ff';
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = `rgba(${NEON}, ${0.5 + pulse * 0.3})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, 7 + pulse * 2, 0, Math.PI * 2);
+        ctx.stroke();
+
+        /* Reticle */
+        const goal = target ? target.getBoundingClientRect() : null;
+        const want = goal ? 1 : 0;
+        ret.a += (want - ret.a) * 0.18;
+        if (goal) {
+          const pad = 6;
+          const since = now - lockAt;
+          const jitter = since < 220 ? (1 - since / 220) * 6 : 0;
+          const gx = goal.left - pad + (Math.random() - 0.5) * jitter;
+          const gy = goal.top - pad + (Math.random() - 0.5) * jitter;
+          const gw = goal.width + pad * 2;
+          const gh = goal.height + pad * 2;
+          ret.vx = (ret.vx + (gx - ret.x) * 0.22) * 0.6;
+          ret.vy = (ret.vy + (gy - ret.y) * 0.22) * 0.6;
+          ret.vw = (ret.vw + (gw - ret.w) * 0.22) * 0.6;
+          ret.vh = (ret.vh + (gh - ret.h) * 0.22) * 0.6;
+          ret.x += ret.vx;
+          ret.y += ret.vy;
+          ret.w += ret.vw;
+          ret.h += ret.vh;
+        }
+        if (ret.a > 0.02) {
+          const a = ret.a;
+          const L = Math.min(22, ret.w * 0.18, ret.h * 0.3);
+          const since = now - lockAt;
+          const glitch = since < 260 && Math.random() < 0.35;
+          const off = glitch ? (Math.random() - 0.5) * 3 : 0;
+          ctx.save();
+          ctx.translate(off, -off);
+          ctx.strokeStyle = glitch ? `rgba(${PINK}, ${a})` : `rgba(${GOLD}, ${a * 0.95})`;
+          ctx.lineWidth = 1.2;
+          const { x, y } = ret;
+          const rw = ret.w;
+          const rh = ret.h;
+          ctx.beginPath();
+          ctx.moveTo(x, y + L); ctx.lineTo(x, y); ctx.lineTo(x + L, y);
+          ctx.moveTo(x + rw - L, y); ctx.lineTo(x + rw, y); ctx.lineTo(x + rw, y + L);
+          ctx.moveTo(x + rw, y + rh - L); ctx.lineTo(x + rw, y + rh); ctx.lineTo(x + rw - L, y + rh);
+          ctx.moveTo(x + L, y + rh); ctx.lineTo(x, y + rh); ctx.lineTo(x, y + rh - L);
+          ctx.stroke();
+          if (glitch) {
+            ctx.strokeStyle = `rgba(${NEON}, ${a * 0.8})`;
+            ctx.translate(-off * 2, off * 2);
+            ctx.stroke();
+          }
+          ctx.setLineDash([2, 6]);
+          ctx.strokeStyle = `rgba(${GOLD}, ${a * 0.25})`;
+          ctx.strokeRect(x, y, rw, rh);
+          ctx.setLineDash([]);
+
+          /* Boot-sequence label */
+          const full = `det ${label}  conf ${conf.toFixed(2)}  ${Math.round(rw)}x${Math.round(rh)}`;
+          const typed = Math.min(full.length, Math.floor(since / 14));
+          let text = full.slice(0, typed);
+          if (typed < full.length) text += glyph();
+          ctx.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
+          ctx.textBaseline = 'bottom';
+          const tw = ctx.measureText(text).width + 12;
+          const ly = y - 6 > 16 ? y - 4 : y + rh + 16;
+          ctx.fillStyle = `rgba(5, 6, 8, ${a * 0.85})`;
+          ctx.fillRect(x, ly - 14, tw, 14);
+          ctx.fillStyle = glitch ? `rgba(${PINK}, ${a})` : `rgba(${GOLD}, ${a})`;
+          ctx.fillText(text, x + 6, ly - 2);
+          ctx.restore();
+        }
+
+        requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    }
+  }
+</script>

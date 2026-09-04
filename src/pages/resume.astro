@@ -1,18 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import {
-  achievements,
+  competitive,
   education,
   range,
   roles,
   site,
   skills,
+  technicalAchievements,
 } from '../data/site';
 ---
 
 <Layout
   title={`Resume — ${site.name}`}
-  description={`Resume for ${site.legalName}: senior engineer in New York with six years in data pipelines, agents, and application systems.`}
+  description={`Resume for ${site.legalName}: problem solver in New York. Six years in data pipelines, agents, and modular systems.`}
 >
   <main id="main" class="resume-page wrap">
     <div class="resume-top">
@@ -42,11 +43,16 @@ import {
     <section class="resume-block">
       <h2>Profile</h2>
       <p class="resume-copy">
-        Senior engineer with six years in data pipelines, agents, and application
-        systems. Goldman infrastructure, then a founding seat on an agentic trading stack.
-        I learn the unfamiliar system on the fly, pick a direction, and ship.
+        Problem solver. I love coding, learning a business from the inside, and
+        shipping the system that comes out of both. Put the unfamiliar stack in
+        front of me — I learn it, break the work into modules, and leave something
+        you can upgrade. Six years: Goldman infrastructure, then founding CTO on
+        an agentic trading stack.
       </p>
       <ul class="resume-copy resume-list">
+        <li>I solve problems. I want as many as I can take — especially the ones that invest in AI.</li>
+        <li>I attack the constraint, cut the work into parts, and learn what I do not know yet.</li>
+        <li>I leave modular systems so the next version has a place to land.</li>
         {
           range.spikes.map((spike) => (
             <li>
@@ -90,7 +96,7 @@ import {
         capability gateway (Apache-2.0). Agents ask for a role, not a model string. Capability
         routing, admission queue, hybrid local + cloud swarm.
         {' '}
-        <a href="/#systems">Try the routing console</a>
+        <a href="/#systems">The method</a>
         {' · '}
         <a href="https://github.com/chrisswimlee/local-lattice" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-lattice</a>
       </p>
@@ -149,12 +155,40 @@ import {
     </section>
 
     <section class="resume-block">
+      <h2>Technical achievements</h2>
+      <ul class="resume-copy resume-list">
+        {
+          technicalAchievements.map((item) => (
+            <li>
+              <strong>{item.label} — {item.prefix ?? ''}{item.value.toLocaleString('en-US')}{item.suffix}.</strong>
+              {' '}
+              {item.claim} {item.proof}
+              {item.todo ? ` ${item.todo}` : ''}
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="resume-block">
       <h2>Competitive achievements</h2>
       {
-        achievements.map((item) => (
-          <p class="resume-copy">
-            <strong>{item.title}.</strong> {item.detail}
-          </p>
+        competitive.map((item) => (
+          <>
+            <p class="resume-copy">
+              <strong>{item.title}.</strong> {item.detail}
+            </p>
+            <p class="resume-copy resume-copy-gap">
+              {item.links.map((link, i) => (
+                <>
+                  {i > 0 && ' · '}
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    {link.label}
+                  </a>
+                </>
+              ))}
+            </p>
+          </>
         ))
       }
     </section>

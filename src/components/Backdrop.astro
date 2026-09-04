@@ -1,0 +1,328 @@
+<div class="backdrop" data-backdrop>
+  <canvas class="backdrop-canvas" aria-hidden="true"></canvas>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-backdrop]');
+  const canvas = root?.querySelector('canvas');
+  if (!root || !canvas) {
+    /* page has no backdrop mount */
+  } else {
+    const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const saveData = Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+    const resume = location.pathname.includes('/resume');
+
+    const fallback = () => {
+      document.documentElement.classList.add('backdrop-static');
+      canvas.remove();
+    };
+
+    if (!motion || saveData || resume) {
+      fallback();
+    } else {
+      const boot = () => {
+      const gl = canvas.getContext('webgl', {
+        alpha: false,
+        antialias: false,
+        depth: false,
+        stencil: false,
+        powerPreference: 'low-power',
+        preserveDrawingBuffer: false,
+      });
+
+      if (!gl) {
+        fallback();
+      } else {
+        const vert = `
+          attribute vec2 a_pos;
+          void main() {
+            gl_Position = vec4(a_pos, 0.0, 1.0);
+          }
+        `;
+
+        const frag = `
+          precision highp float;
+          uniform vec2 u_res;
+          uniform float u_time;
+          uniform vec2 u_mouse;
+          uniform float u_scroll;
+          uniform vec3 u_trail[16];
+          uniform float u_touch;
+
+          float hash(vec2 p) {
+            return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+          }
+
+          float noise(vec2 p) {
+            vec2 i = floor(p);
+            vec2 f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+            float a = hash(i);
+            float b = hash(i + vec2(1.0, 0.0));
+            float c = hash(i + vec2(0.0, 1.0));
+            float d = hash(i + vec2(1.0, 1.0));
+            return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+          }
+
+          float fbm(vec2 p) {
+            float v = 0.0;
+            float a = 0.5;
+            for (int i = 0; i < 3; i++) {
+              v += a * noise(p);
+              p = p * 2.03 + vec2(1.7, 9.2);
+              a *= 0.5;
+            }
+            return v;
+          }
+
+          void main() {
+            vec2 uv = gl_FragCoord.xy / u_res;
+            float aspect = u_res.x / max(u_res.y, 1.0);
+            vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
+
+            float t = u_time * 0.035;
+            vec2 m = (u_mouse - 0.5) * 0.42;
+            float s = clamp(u_scroll, 0.0, 1.0);
+
+            vec2 q = p * 1.55 + vec2(t * 0.18, t * 0.07) + m * 0.55;
+            float n1 = fbm(q + vec2(0.0, s * 0.9));
+            float n2 = fbm(q * 1.35 + vec2(n1 * 1.4, t * 0.22));
+            float n3 = fbm(q * 0.72 - vec2(t * 0.12, n2 + s));
+
+            float ribbon = smoothstep(0.32, 0.74, n2);
+            float gold = smoothstep(0.46, 0.8, n3) * (0.5 + 0.5 * n1);
+            float wash = smoothstep(0.2, 0.85, n1);
+
+            vec3 navy = vec3(0.02, 0.024, 0.034);
+            vec3 cobalt = vec3(0.420, 0.624, 1.0);
+            vec3 amber = vec3(0.878, 0.694, 0.361);
+
+            vec3 tint = mix(cobalt, amber, s * 0.5);
+            vec3 col = navy;
+            col += tint * ribbon * 0.1;
+            col += amber * gold * 0.05;
+            col += cobalt * wash * 0.03;
+            col += amber * s * 0.012;
+
+            /* Generative aura: iridescent wake left by the pointer or thumb */
+            float aura = 0.0;
+            float hue = 0.0;
+            for (int i = 0; i < 16; i++) {
+              vec3 tr = u_trail[i];
+              if (tr.z <= 0.0) continue;
+              vec2 d = (uv - tr.xy) * vec2(aspect, 1.0);
+              float warp = fbm(d * 6.0 + u_time * 0.6) - 0.5;
+              float r = length(d + warp * 0.05 * tr.z);
+              float rad = mix(0.05, 0.22, 1.0 - tr.z) * (1.0 + u_touch * 0.6);
+              float g = exp(-r * r / (rad * rad)) * tr.z;
+              aura += g;
+              hue += g * (float(i) * 0.11 + u_time * 0.25);
+            }
+            aura = min(aura, 1.0);
+            float h = hue / max(aura, 0.001);
+            vec3 iri = 0.5 + 0.5 * cos(6.2831 * (h + vec3(0.0, 0.33, 0.67)));
+            vec3 vapor = mix(vec3(1.0, 0.31, 0.85), vec3(0.24, 0.95, 1.0), 0.5 + 0.5 * sin(h * 6.2831));
+            vapor = mix(vapor, vec3(0.71, 1.0, 0.23), smoothstep(0.6, 1.0, fract(h)));
+            vec3 auraCol = mix(iri, vapor, u_touch);
+            col = mix(col, col + auraCol * 0.32, aura * 0.45);
+            col += auraCol * aura * aura * 0.08;
+
+            /* CRT scan-lines */
+            float scan = 0.5 + 0.5 * sin(gl_FragCoord.y * 3.14159 * 0.5);
+            col *= 1.0 - scan * 0.02;
+
+            float vig = 1.0 - dot(uv - 0.5, uv - 0.5) * 1.05;
+            col *= clamp(vig, 0.72, 1.0);
+
+            float grain = hash(gl_FragCoord.xy + vec2(fract(u_time * 13.0), 0.0)) * 0.012;
+            col += grain;
+
+            gl_FragColor = vec4(col, 1.0);
+          }
+        `;
+
+        const compile = (type: number, src: string) => {
+          const sh = gl.createShader(type);
+          if (!sh) return null;
+          gl.shaderSource(sh, src);
+          gl.compileShader(sh);
+          if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+            gl.deleteShader(sh);
+            return null;
+          }
+          return sh;
+        };
+
+        const vs = compile(gl.VERTEX_SHADER, vert);
+        const fs = compile(gl.FRAGMENT_SHADER, frag);
+        const prog = gl.createProgram();
+        if (!vs || !fs || !prog) {
+          fallback();
+        } else {
+          gl.attachShader(prog, vs);
+          gl.attachShader(prog, fs);
+          gl.linkProgram(prog);
+          if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+            fallback();
+          } else {
+            gl.useProgram(prog);
+            const buf = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+            const loc = gl.getAttribLocation(prog, 'a_pos');
+            gl.enableVertexAttribArray(loc);
+            gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+            const uRes = gl.getUniformLocation(prog, 'u_res');
+            const uTime = gl.getUniformLocation(prog, 'u_time');
+            const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+            const uScroll = gl.getUniformLocation(prog, 'u_scroll');
+            const uTrail = gl.getUniformLocation(prog, 'u_trail');
+            const uTouch = gl.getUniformLocation(prog, 'u_touch');
+
+            const TRAIL = 16;
+            const trail = new Float32Array(TRAIL * 3);
+            let trailHead = 0;
+            let lastTrailAt = 0;
+            const pushTrail = (cx: number, cy: number) => {
+              const now = performance.now();
+              if (now - lastTrailAt < 28) return;
+              lastTrailAt = now;
+              const i = trailHead * 3;
+              trail[i] = cx / Math.max(window.innerWidth, 1);
+              trail[i + 1] = 1 - cy / Math.max(window.innerHeight, 1);
+              trail[i + 2] = 1;
+              trailHead = (trailHead + 1) % TRAIL;
+            };
+            const decayTrail = (dt: number) => {
+              for (let i = 2; i < trail.length; i += 3) {
+                if (trail[i] > 0) trail[i] = Math.max(0, trail[i] - dt * 0.9);
+              }
+            };
+
+            const coarse = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+            const narrow = () => window.innerWidth < 640;
+            const dprCap = () => {
+              const dpr = window.devicePixelRatio || 1;
+              if (coarse) return 1;
+              return Math.min(dpr, 1.5);
+            };
+
+            let mouse = { x: 0.5, y: 0.5 };
+            let mouseTarget = { x: 0.5, y: 0.5 };
+            let lastScrollY = window.scrollY;
+            let lastInteract = performance.now();
+            let hidden = document.hidden;
+            let raf = 0;
+            let lastFrame = 0;
+
+            const resize = () => {
+              const scale = narrow() ? 0.5 : 1;
+              const dpr = dprCap() * scale;
+              const w = Math.max(1, Math.floor(window.innerWidth * dpr));
+              const h = Math.max(1, Math.floor(window.innerHeight * dpr));
+              if (canvas.width !== w || canvas.height !== h) {
+                canvas.width = w;
+                canvas.height = h;
+                gl.viewport(0, 0, w, h);
+              }
+            };
+
+            const mark = () => {
+              lastInteract = performance.now();
+            };
+
+            if (!coarse) {
+              addEventListener(
+                'pointermove',
+                (e) => {
+                  mouseTarget.x = e.clientX / Math.max(window.innerWidth, 1);
+                  mouseTarget.y = 1 - e.clientY / Math.max(window.innerHeight, 1);
+                  pushTrail(e.clientX, e.clientY);
+                  mark();
+                },
+                { passive: true },
+              );
+            } else {
+              addEventListener(
+                'touchmove',
+                (e) => {
+                  const t = e.touches[0];
+                  if (t) pushTrail(t.clientX, t.clientY);
+                  mark();
+                },
+                { passive: true },
+              );
+            }
+
+            addEventListener(
+              'scroll',
+              () => {
+                const y = window.scrollY;
+                if (coarse) {
+                  const vel = y - lastScrollY;
+                  mouseTarget.x = 0.5 + Math.max(-0.28, Math.min(0.28, vel * 0.004));
+                  mouseTarget.y = 0.5 + Math.max(-0.2, Math.min(0.2, vel * 0.002));
+                }
+                lastScrollY = y;
+                mark();
+              },
+              { passive: true },
+            );
+
+            addEventListener('pointerdown', mark, { passive: true });
+            addEventListener('keydown', mark);
+            addEventListener('resize', resize, { passive: true });
+            document.addEventListener('visibilitychange', () => {
+              hidden = document.hidden;
+              if (!hidden) {
+                lastFrame = 0;
+                loop(performance.now());
+              }
+            });
+
+            resize();
+
+            const fpsFor = (now: number) => {
+              const idle = now - lastInteract > 60000;
+              if (coarse) return idle ? 20 : 24;
+              return idle ? 30 : 60;
+            };
+
+            const loop = (now: number) => {
+              if (hidden) return;
+              const minDelta = 1000 / fpsFor(now);
+              if (now - lastFrame < minDelta - 1) {
+                raf = requestAnimationFrame(loop);
+                return;
+              }
+              const dt = lastFrame ? Math.min(0.1, (now - lastFrame) / 1000) : 0.016;
+              lastFrame = now;
+              decayTrail(dt);
+              mouse.x += (mouseTarget.x - mouse.x) * 0.06;
+              mouse.y += (mouseTarget.y - mouse.y) * 0.06;
+              const doc = document.documentElement;
+              const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+              const scroll = window.scrollY / max;
+              gl.uniform2f(uRes, canvas.width, canvas.height);
+              gl.uniform1f(uTime, now * 0.001);
+              gl.uniform2f(uMouse, mouse.x, mouse.y);
+              gl.uniform1f(uScroll, scroll);
+              gl.uniform3fv(uTrail, trail);
+              gl.uniform1f(uTouch, coarse ? 1 : 0);
+              gl.drawArrays(gl.TRIANGLES, 0, 3);
+              raf = requestAnimationFrame(loop);
+            };
+
+            raf = requestAnimationFrame(loop);
+            addEventListener('pagehide', () => cancelAnimationFrame(raf));
+          }
+        }
+      }
+      };
+      const ric = (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+      if (typeof ric === 'function') ric(boot, { timeout: 450 });
+      else setTimeout(boot, 180);
+    }
+  }
+</script>

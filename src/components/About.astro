@@ -1,14 +1,22 @@
 ---
-import { about, built } from '../data/site';
+import { about, built, record } from '../data/site';
 ---
 
 <section class="section" id="about">
   <div class="section-head">
     <h2>About</h2>
-    <p class="note">{about.lede}</p>
+    <p class="note" data-reveal>{about.lede}</p>
   </div>
   <div class="prose" data-reveal>
     {about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+    <div class="record-links">
+      <p class="kicker">The record</p>
+      {record.map((link) => (
+        <a href={link.href} target="_blank" rel="noopener noreferrer">
+          {link.label}
+        </a>
+      ))}
+    </div>
   </div>
   <div class="built" data-reveal>
     <p class="kicker">{built.lede}</p>

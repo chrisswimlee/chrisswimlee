@@ -1,166 +1,27 @@
 ---
-import { cases, projects, systems } from '../data/site';
-import LatticeConsole from './LatticeConsole.astro';
-import Pipeline from './Pipeline.astro';
-
-const lattice = projects.find((project) => project.id === 'lattice');
-
-const pieces = systems.map((system) => ({
-  id: system.id,
-  kind: system.kind,
-  year: system.year,
-  title: system.title,
-  kicker: system.kicker,
-  metric: system.metric,
-  metricLabel: system.metricLabel,
-  brief: cases[system.id],
-  command: system.command,
-  links: system.id === 'lattice' ? lattice?.links ?? [] : [],
-}));
+import { buildSystem, sectionMessages } from '../data/site';
 ---
 
 <section class="section systems-section" id="systems">
   <div class="section-head">
-    <h2>Systems</h2>
-    <p class="note">Lattice is public. Goldman shipped. The trading engine cannot be shown.</p>
+    <h2>Build</h2>
+    <p class="note" data-reveal>{sectionMessages.systems}</p>
   </div>
 
-  <div class="systems-tabs" role="tablist" aria-label="Systems">
+  <div class="prose build-prose" data-reveal>
+    {buildSystem.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+
+  <ul class="build-links">
     {
-      pieces.map((piece, i) => (
-        <button
-          type="button"
-          role="tab"
-          id={`sys-tab-${piece.id}`}
-          aria-selected={i === 0 ? 'true' : 'false'}
-          aria-controls={`sys-panel-${piece.id}`}
-          tabindex={i === 0 ? 0 : -1}
-          data-sys={piece.id}
-        >
-          {piece.id === 'lattice' ? 'Lattice' : piece.id === 'goldman' ? 'Goldman' : 'Trading engine'}
-        </button>
+      buildSystem.links.map((link) => (
+        <li>
+          <a href={link.href} target="_blank" rel="noopener noreferrer">
+            <span>{link.label}</span>
+            <span class="build-hint">{link.hint}</span>
+          </a>
+        </li>
       ))
     }
-  </div>
-
-  <div class="case-dock">
-    <div class="systems-instrument">
-      <div id="sys-panel-lattice" data-instrument="lattice" role="tabpanel" aria-labelledby="sys-tab-lattice">
-        <LatticeConsole />
-      </div>
-      <div id="sys-panel-sim" data-instrument="sim" role="tabpanel" hidden>
-        <Pipeline />
-      </div>
-    </div>
-    <div class="case-briefs">
-      {
-        pieces.map((piece, i) => (
-          <article class="case-brief" data-case={piece.id} hidden={i !== 0}>
-            <p class="kicker">{piece.kicker}</p>
-            <h3 class="case-title">{piece.title}</h3>
-            <p class="gal-metric">
-              {piece.metric} · {piece.metricLabel}
-            </p>
-            <dl class="case-steps">
-              <div>
-                <dt>Problem</dt>
-                <dd>{piece.brief.problem}</dd>
-              </div>
-              <div>
-                <dt>Constraint</dt>
-                <dd>{piece.brief.constraint}</dd>
-              </div>
-              <div>
-                <dt>Decision</dt>
-                <dd>{piece.brief.decision}</dd>
-              </div>
-              <div>
-                <dt>Outcome</dt>
-                <dd>{piece.brief.outcome}</dd>
-              </div>
-              {
-                piece.brief.interfaces && (
-                  <div>
-                    <dt>Interfaces</dt>
-                    <dd>{piece.brief.interfaces}</dd>
-                  </div>
-                )
-              }
-              {
-                piece.brief.again && (
-                  <div>
-                    <dt>Would not again</dt>
-                    <dd>{piece.brief.again}</dd>
-                  </div>
-                )
-              }
-            </dl>
-            {
-              piece.command && (
-                <p class="cmd">
-                  <code>{piece.command}</code>
-                  <button class="cmd-copy" type="button" data-copy={piece.command}>
-                    Copy
-                  </button>
-                </p>
-              )
-            }
-            {
-              piece.links.length > 0 && (
-                <div class="case-links">
-                  {piece.links.map((link, li) => (
-                    <a
-                      class:list={['btn', li === 0 && 'btn-solid']}
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {link.label}
-                    </a>
-                  ))}
-                </div>
-              )
-            }
-          </article>
-        ))
-      }
-    </div>
-  </div>
+  </ul>
 </section>
-
-<script>
-  import '../scripts/copy-buttons';
-
-  const briefs = [...document.querySelectorAll<HTMLElement>('[data-case]')];
-  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-sys]')];
-  const latticePane = document.querySelector<HTMLElement>('[data-instrument="lattice"]');
-  const simPane = document.querySelector<HTMLElement>('[data-instrument="sim"]');
-
-  function show(id: string) {
-    for (const brief of briefs) brief.hidden = brief.dataset.case !== id;
-    for (const tab of tabs) {
-      const on = tab.dataset.sys === id;
-      tab.setAttribute('aria-selected', on ? 'true' : 'false');
-      tab.tabIndex = on ? 0 : -1;
-    }
-    const lattice = id === 'lattice';
-    if (latticePane) latticePane.hidden = !lattice;
-    if (simPane) {
-      simPane.hidden = lattice;
-      simPane.setAttribute('aria-labelledby', `sys-tab-${id}`);
-    }
-    window.dispatchEvent(new CustomEvent('system-select', { detail: { id } }));
-  }
-
-  tabs.forEach((tab, i) => {
-    tab.addEventListener('click', () => show(tab.dataset.sys || 'lattice'));
-    tab.addEventListener('keydown', (e) => {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      e.preventDefault();
-      const next = e.key === 'ArrowRight' ? (i + 1) % tabs.length : (i - 1 + tabs.length) % tabs.length;
-      tabs[next].focus();
-      show(tabs[next].dataset.sys || 'lattice');
-    });
-  });
-
-</script>

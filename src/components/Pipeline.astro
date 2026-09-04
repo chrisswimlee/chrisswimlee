@@ -151,7 +151,8 @@
     let logAt = 0;
     let logIdx = 0;
     let hits: number[] = [];
-    type Node = NodeDef & { px: number; py: number; tw: number; pulse: number };
+    type Node = NodeDef & { px: number; py: number; bx: number; by: number; ox: number; oy: number; tw: number; pulse: number };
+    let mouse: { x: number; y: number } | null = null;
     type Particle = { e: number; t: number; speed: number; warm: boolean };
     let nodes: Node[] = [];
     let edges: EdgeDef[] = [];
@@ -174,6 +175,10 @@
         ...n,
         px: n.x * w,
         py: n.y * h,
+        bx: n.x * w,
+        by: n.y * h,
+        ox: 0,
+        oy: 0,
         tw: ctx.measureText(n.label).width,
         pulse: 0,
       }));
@@ -234,7 +239,28 @@
 
     function tick(dt: number) {
       spawn(dt);
-      for (const n of nodes) n.pulse = Math.max(0, n.pulse - dt * 2.4);
+      for (const n of nodes) {
+        n.pulse = Math.max(0, n.pulse - dt * 2.4);
+        /* Nodes lean toward the cursor like neurons snapping to attention */
+        let gx = 0;
+        let gy = 0;
+        if (mouse) {
+          const dx = mouse.x - n.bx;
+          const dy = mouse.y - n.by;
+          const d = Math.hypot(dx, dy);
+          const reach = 150;
+          if (d < reach) {
+            const pull = (1 - d / reach) * 0.32;
+            gx = dx * pull;
+            gy = dy * pull;
+            if (d < 26) n.pulse = Math.max(n.pulse, 0.6);
+          }
+        }
+        n.ox += (gx - n.ox) * Math.min(1, dt * 9);
+        n.oy += (gy - n.oy) * Math.min(1, dt * 9);
+        n.px = n.bx + n.ox;
+        n.py = n.by + n.oy;
+      }
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.t += p.speed * dt;
@@ -302,7 +328,7 @@
 
     function draw() {
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = '#070e1a';
+      ctx.fillStyle = '#050608';
       ctx.fillRect(0, 0, w, h);
 
       ctx.strokeStyle = 'rgba(232, 244, 245, 0.05)';
@@ -416,6 +442,18 @@
       { threshold: 0.05 },
     );
     io.observe(root);
+
+    canvas.addEventListener(
+      'pointermove',
+      (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      },
+      { passive: true },
+    );
+    canvas.addEventListener('pointerleave', () => {
+      mouse = null;
+    });
 
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();

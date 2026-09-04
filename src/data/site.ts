@@ -1,9 +1,9 @@
 export const site = {
   name: 'Chris Swim Lee',
-  legalName: 'Chris Su-Young Lee',
+  legalName: 'Chris SuYoung Lee',
   title: 'Chris Swim Lee, New York',
   description:
-    'Senior engineer in New York. Six years in data pipelines, agents, and application systems — Goldman infrastructure, a founding year on an agent stack, and Local Lattice on PyPI.',
+    'Problem solver in New York. I learn the unfamiliar stack, break the work into modules, and ship systems built to be upgraded — Goldman, a founding CTO seat, Local Lattice on PyPI.',
   url: 'https://chrisswimlee.com',
   location: 'New York, NY',
   email: 'suyoung.lee99@gmail.com',
@@ -12,11 +12,12 @@ export const site = {
   photo: '/images/chris.jpg',
   ogImage: '/images/chris-og.jpg',
   jobTitle: 'Senior Engineer',
-  built: 'Astro. No React. Custom canvas topologies. Printable CV.',
+  built: 'Astro. No React. A live aurora field. Custom canvas topologies. Printable CV.',
 };
 
 export const nav = [
-  { href: '/#systems', label: 'Systems' },
+  { href: '/#systems', label: 'Build' },
+  { href: '/#achievements', label: 'Achievements' },
   { href: '/#work', label: 'Work' },
   { href: '/#experience', label: 'Experience' },
   { href: '/#about', label: 'About' },
@@ -27,9 +28,24 @@ export const hireMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURICompo
 export const tutorMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Tutoring — software and math')}`;
 
 export const hero = {
-  kicker: 'Senior engineer · New York',
-  lede: 'Data pipelines, agents, and the systems under them. Six years — Goldman infrastructure, then a founding year on an agent stack.',
+  kicker: 'Problem solver · New York',
+  lede: 'Put the problem in front of me. I will find a way through it — even if I have to learn the stack first.',
   stack: ['Java', 'Python', 'Kafka', 'PyTorch', 'MLX', 'SQL'],
+};
+
+export const thesis = {
+  why: {
+    line: 'I am a problem solver.',
+    detail: 'I love coding, learning how a business actually works, and putting both to work. I want as many hard problems as I can take — especially the ones that build the future of AI.',
+  },
+  how: {
+    line: 'I attack it. I break it down.',
+    detail: 'I am not always the person who already knows. I am the person who learns it, cuts the work into modules, and does not stop until it ships.',
+  },
+  what: {
+    line: 'Modular systems you can upgrade.',
+    detail: 'The product is not a one-off. It is a system with clean seams — so the next version, the next model, the next constraint can land without a rewrite.',
+  },
 };
 
 export const tutor = {
@@ -43,7 +59,32 @@ export const tutor = {
   href: tutorMail,
 };
 
-export const experienceIntro = 'Goldman, a founding year on an agent stack, then the systems I can put a URL on.';
+export const experienceIntro = 'Goldman. A founding CTO seat. Then the systems you can open.';
+
+export const buildSystem = {
+  lede: 'I can build anything you put in front of me.',
+  paragraphs: [
+    'That is not a stack claim. It is a method. I do not wait until I already know the tools. I find the constraint, learn what the problem actually needs, cut the work into modules, and ship a system that can take the next upgrade.',
+    'The last six years are the proof of range, not of a specialty. Java and Kafka under Goldman compliance. Python agents and PyTorch on a founding clock. PHP, hosting, and security for a university that does not have a campus yet. A playable site. An OpenAI-compatible gateway on PyPI. Each one started as a problem I had not shipped before.',
+    'Give me the brief and enough time. I will learn the unfamiliar piece, make the seams clean, and leave something you can run — and change — without a rewrite.',
+  ],
+  links: [
+    { label: 'Local Lattice', hint: 'GitHub', href: 'https://github.com/chrisswimlee/local-lattice' },
+    { label: 'Local Lattice', hint: 'PyPI', href: 'https://pypi.org/project/local-lattice/' },
+    { label: 'HAIT', hint: 'haitedu.com', href: 'https://haitedu.com' },
+    { label: 'D22-soso', hint: 'd22soso.com', href: 'https://d22soso.com' },
+    { label: 'GitHub', hint: 'everything else', href: 'https://github.com/chrisswimlee' },
+  ],
+};
+
+export const sectionMessages = {
+  systems: 'I can build anything you put in front of me.',
+  achievements: 'Proof that the method holds.',
+  range: 'Deep in each.',
+  work: 'Open the work.',
+  experience: 'The years, in order.',
+  about: 'Chris SuYoung Lee. Suyoung means swim.',
+};
 
 type Spike = {
   id: 'theory' | 'build' | 'strategy';
@@ -54,10 +95,9 @@ type Spike = {
 };
 
 export const range = {
-  lede: 'Math, systems, and a competitive streak. Deep in each.',
-  thread:
-    'The degree, the ladder, and Goldman look unrelated until you watch how I work.',
-  meet: 'Read what you cannot see. Prove the constraint. Ship before the brief goes stale.',
+  lede: 'Math, systems, and a competitive streak.',
+  thread: 'The degree, the ladder, and Goldman look unrelated until you watch how I work.',
+  meet: 'I do not need to know it yet. I need the constraint, then a way to break it into parts.',
   spikes: [
     {
       id: 'theory',
@@ -77,7 +117,7 @@ export const range = {
       trains: 'Infrastructure on a deadline, with the pager on.',
       proof: [
         'Three years at Goldman Sachs — 10,000+ accounts, 50+ internal teams on the APIs.',
-        'Founding engineer on an agentic trading engine, zero to one.',
+        'Founding CTO on an agentic trading engine, zero to one.',
         'Local Lattice — an OpenAI-compatible gateway, published on PyPI.',
       ],
     },
@@ -89,7 +129,7 @@ export const range = {
       proof: [
         '#1 on the Hearthstone Americas Wild ladder — January 2019, again November 2025.',
         '#1 seed for the 2019 Wild Open. HCT Tavern Champion, 2017.',
-        'New stack, new constraint — I learn it and ship.',
+        'New stack, new constraint — I learn it, modularize it, and ship.',
       ],
     },
   ] as Spike[],
@@ -110,6 +150,75 @@ export const proof: Proof[] = [
   { value: 'PyPI', suffix: '', label: 'local-lattice', hint: 'OpenAI-compatible gateway' },
 ];
 
+export type TechnicalAchievement = {
+  id: string;
+  label: string;
+  value: number;
+  prefix?: string;
+  suffix: string;
+  claim: string;
+  proof: string;
+  todo?: string;
+};
+
+export const technicalAchievements: TechnicalAchievement[] = [
+  {
+    id: 'scale',
+    label: 'Scale',
+    value: 10000,
+    suffix: '+',
+    claim: 'Accounts on one beneficiary system.',
+    proof:
+      'Goldman. Processing time down 80%. Fifty-plus teams on the APIs. Latency down 15%. Test accuracy up 22%.',
+  },
+  {
+    id: 'speed',
+    label: 'Speed',
+    value: 100,
+    prefix: '<',
+    suffix: 'ms',
+    claim: 'Market-data in, end to end.',
+    proof: 'Kafka across exchanges. Millions of ticks. Sub-100ms from feed to the book the agents traded on.',
+    todo: 'TODO: peak ticks/sec, number of exchanges.',
+  },
+  {
+    id: 'agents',
+    label: 'Agents',
+    value: 4,
+    suffix: '',
+    claim: 'Swarm modes over HTTP.',
+    proof:
+      'An agent loop that audits live portfolios against legacy SQL. Local Lattice on PyPI — role:coder, role:reasoner, role:fast, then fanout, vote, pipeline, debate.',
+    todo: 'TODO: Lattice downloads / stars.',
+  },
+  {
+    id: 'models',
+    label: 'Models',
+    value: 90,
+    suffix: '%',
+    claim: 'Less manual analysis before the open.',
+    proof:
+      'PyTorch time-series signals. Unified-memory training on Apple silicon next to cloud. Daily pre-market briefings that cut the manual pass by 90%.',
+  },
+  {
+    id: 'zero',
+    label: 'Zero to one',
+    value: 3,
+    suffix: '',
+    claim: 'Systems that did not exist.',
+    proof:
+      'Founding CTO: market-data to live signals. HAIT’s public site, PHP, hosting, and security before there is a campus. D22-soso with a Random race roll and an in-site 2 Hand Hold’em table.',
+  },
+  {
+    id: 'earlier',
+    label: 'Earlier',
+    value: 70,
+    suffix: '%',
+    claim: 'Faster on the email path.',
+    proof: 'One Dave. Full-stack for national defense and nuclear energy. A system-wide upgrade that cut email-server response time by 70%.',
+  },
+];
+
 type CaseBrief = {
   problem: string;
   constraint: string;
@@ -124,7 +233,8 @@ export const cases: Record<'lattice' | 'goldman' | 'trading', CaseBrief> = {
     problem: 'Agents were bound to model strings. Switching a backend meant rewriting the call site.',
     constraint: 'Local-first — MLX and LM Studio — without locking out cloud when a role needs it.',
     decision: 'An OpenAI-compatible gateway. Assign role:coder, role:reasoner, role:fast. Swarm primitives over HTTP.',
-    outcome: 'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back. The console on this page runs the same router.',
+    outcome:
+      'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back. The console on this page runs the same router.',
   },
   goldman: {
     problem: 'Beneficiary data for 10,000+ client accounts was too slow to operate.',
@@ -188,7 +298,7 @@ export const systems: System[] = [
     id: 'trading',
     kind: 'System',
     year: '2025–26',
-    kicker: 'Stealth fintech · founding',
+    kicker: 'Stealth fintech · founding CTO',
     title: 'Agentic trading engine',
     metric: '0 → 1',
     metricLabel: 'market-data to live signals',
@@ -199,7 +309,7 @@ export const systems: System[] = [
 ];
 
 export const work = {
-  lede: 'Two sites you can open.',
+  lede: 'Three things you can open.',
 };
 
 type Project = {
@@ -221,7 +331,7 @@ type Project = {
 export const projects: Project[] = [
   {
     id: 'lattice',
-    featured: false,
+    featured: true,
     tone: 'accent',
     kind: 'Open source',
     title: 'Local Lattice',
@@ -296,15 +406,15 @@ export const roles = [
   },
   {
     company: 'Stealth fintech',
-    title: 'Lead Founding AI Engineer',
+    title: 'Founding CTO',
     dates: 'Sep 2025 — Aug 2026',
     location: 'New York',
     note: 'Agentic stock trading engine, zero to one',
     scan: 'Zero to one: market-data to live signals on a founding clock.',
     bullets: [
-      'Built the Python and Kafka market-data pipeline the agents traded on, across multiple exchanges.',
+      'Built the Python and Kafka market-data pipeline the agents traded on, across multiple exchanges — millions of ticks, sub-100ms end to end.',
       'Built the agent loop that audits portfolios against legacy SQL with modern LLMs.',
-      'Owned MLOps: PyTorch time-series models, live signals, backtesting, and daily pre-market briefings.',
+      'Owned MLOps: PyTorch time-series models, unified-memory local training alongside cloud, live signals, backtesting, and daily pre-market briefings that cut manual analysis 90%.',
     ],
   },
   {
@@ -349,34 +459,53 @@ export const education = [
   },
 ];
 
-export const achievements = [
+export const record = [
+  {
+    label: 'Jan 2019 · Liquipedia ladder',
+    href: 'https://liquipedia.net/hearthstone/Ladder_Ranking/2019/Americas/Wild/January',
+  },
+  {
+    label: 'Jan 2019 · #1 deck',
+    href: 'https://www.hearthpwn.com/decks/661171-1-wild-aggro-beast-druid',
+  },
+  {
+    label: 'Nov 2025 · Rank 1 again',
+    href: 'https://x.com/chrisswimlee/status/1994461923346452901',
+  },
+];
+
+export const competitive = [
   {
     title: 'Professional Hearthstone, Americas',
     detail:
       '#1 on the Americas Wild ladder twice — January 2019 and again November 2025. #1 seed for the 2019 Wild Open. 2016 HCT Americas Spring Preliminary. Official HCT tavern champion, Rancho Cucamonga, July 2017. Seven years apart at the top of the same ladder, against two completely different metagames.',
+    links: record,
   },
 ];
 
 export const skills = {
-  Languages: ['Java', 'Python', 'SQL', 'JavaScript'],
-  'AI & ML': ['PyTorch', 'LangChain', 'NumPy', 'Quantitative modeling'],
-  Platforms: ['Spring Boot', 'Apache Kafka', 'Docker', 'GitLab CI/CD'],
+  Languages: ['Java', 'Python', 'SQL', 'JavaScript', 'C++', 'C#'],
+  'AI & ML': ['PyTorch', 'TensorFlow', 'Scikit-Learn', 'LangChain', 'NumPy', 'Quantitative modeling'],
+  Platforms: ['Spring Boot', 'ASP.NET', 'Apache Kafka', 'Docker', 'GitLab CI/CD'],
+  'Agent tooling': ['Claude', 'Cursor', 'n8n', 'Openclaw'],
   Tools: ['Git', 'Selenium', 'TestNG', 'JUnit'],
 };
 
 export const about = {
-  lede: 'Chris Su-Young Lee.',
+  lede: 'Chris SuYoung Lee. Suyoung means swim.',
   paragraphs: [
-    'Chris Swim Lee is 수영 — swim — said in English.',
-    'Mathematics at Trinity on a full-ride. The ladder and Goldman taught the same lesson: find the constraint, then ship.',
+    'I double-majored in Mathematics and Computer Science at Trinity College in Connecticut — a little Ivy, on a full-ride scholarship. Six years of engineering since: data pipelines, AI agents, and the systems under them. Three of those years on Goldman Sachs infrastructure, then founding CTO at a funded startup.',
+    'At the core I am a problem solver. I love coding. I love learning a business from the inside. I love applying what I just learned to the thing in front of me. I may not be the person who already knows — I am the person who will find out, break the work into modules, and keep going until it ships.',
+    'Math taught me to find the constraint. Goldman taught me what happens when it is wrong at scale. The new stack I learn on the fly. The systems I leave behind are modular on purpose — built so the next upgrade has a place to land.',
+    'I played Hearthstone to #1 on the Americas Wild ladder twice — January 2019 and again November 2025. The record is public.',
+    'I shipped the public sites for HAIT and d22soso.com. Now I consult in New York, and I want as many hard problems as I can take — especially the ones that invest in the future of AI.',
   ],
 };
 
 export const engage = {
   heading: 'Engage',
   lede: 'Technical lead work for funded teams with a stuck system — data, automation, or agents.',
-  promise:
-    'Most engagements start with a diagnostic. You get everything in writing before I start.',
+  promise: 'Most engagements start with a diagnostic. You get everything in writing before I start.',
   rates: [
     { name: 'Diagnostic', price: '$1,000', unit: '90 minutes' },
     { name: 'Build', price: 'From $20,000', unit: 'scoped project' },
@@ -394,7 +523,7 @@ export const engage = {
 
 export const contact = {
   heading: 'Email',
-  lede: 'Roles, systems, or a question. I’ll tell you if I’m the person.',
+  lede: 'Put the problem in front of me. I’ll tell you if I’m the person to break it down.',
   projectCta: 'Email about a role',
   href: hireMail,
 };
@@ -402,6 +531,6 @@ export const contact = {
 export const built = {
   lede: 'This site.',
   detail:
-    'Astro. No React. A custom canvas DAG and a Lattice router that runs in the page. Printable CV. The source is the proof.',
+    'Astro. No React. A live WebGL aurora, a custom canvas DAG, and a Lattice router that runs in the page. Printable CV. The source is the proof.',
   href: 'https://github.com/chrisswimlee/chrisswimlee',
 };

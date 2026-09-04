@@ -1,8 +1,13 @@
 ---
 import '../styles/global.css';
+import Backdrop from '../components/Backdrop.astro';
+import Effects from '../components/Effects.astro';
+import Neural from '../components/Neural.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { education, site } from '../data/site';
+
+const isResume = Astro.url.pathname.startsWith('/resume');
 
 interface Props {
   title?: string;
@@ -47,7 +52,7 @@ const og = new URL(site.ogImage, site.url).href;
       rel="stylesheet"
     />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#070e1a" />
+    <meta name="theme-color" content="#050608" />
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Person',
@@ -63,6 +68,7 @@ const og = new URL(site.ogImage, site.url).href;
         'Python',
         'Machine learning',
         'Agents',
+        'Problem solving',
         'Local Lattice',
       ],
       knowsLanguage: ['en', 'ko'],
@@ -82,6 +88,9 @@ const og = new URL(site.ogImage, site.url).href;
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    {!isResume && <Backdrop />}
+    {!isResume && <Effects />}
+    {!isResume && <Neural />}
     <Nav />
     <slot />
     <Footer />
@@ -100,6 +109,19 @@ const og = new URL(site.ogImage, site.url).href;
         if (nav && 'ResizeObserver' in window) new ResizeObserver(setNavOffset).observe(nav);
         addEventListener('resize', setNavOffset, { passive: true });
 
+        const coarse = matchMedia('(pointer: coarse)').matches;
+        if (motion && !coarse) {
+          const spot = (e) => {
+            const node = e.target;
+            if (!(node instanceof Element)) return;
+            const card = node.closest('.work-piece, .achieve-card, .spike, .case-brief, .role-scan');
+            if (!card) return;
+            const r = card.getBoundingClientRect();
+            card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+            card.style.setProperty('--my', `${e.clientY - r.top}px`);
+          };
+          document.addEventListener('pointermove', spot, { passive: true });
+        }
         if (motion && !view) {
           const io = new IntersectionObserver((entries, obs) => {
             for (const e of entries) {

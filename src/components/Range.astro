@@ -1,5 +1,5 @@
 ---
-import { range } from '../data/site';
+import { range, record } from '../data/site';
 
 const peaks = [
   { id: 'theory', x: 155, y: 56 },
@@ -13,7 +13,7 @@ const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? ''
 <section class="section range" id="range" data-range>
   <div class="section-head">
     <h2>Range</h2>
-    <p class="note">{range.lede}</p>
+    <p class="note" data-reveal>{range.lede}</p>
   </div>
 
   <p class="range-thread" data-reveal>{range.thread}</p>
@@ -27,7 +27,8 @@ const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? ''
 
       {
         peaks.map((peak) => (
-          <g class="peak" data-peak={peak.id}>
+          <g class="peak" data-peak={peak.id} tabindex="0" role="button" aria-label={label(peak.id)}>
+            <circle class="peak-hit" cx={peak.x} cy={peak.y} r="56" />
             <path class="peak-drop" d={`M${peak.x} ${peak.y}V214`} />
             <circle class="peak-dot" cx={peak.x} cy={peak.y} r="7" />
             <text class="peak-label" x={peak.x} y="238">
@@ -61,6 +62,18 @@ const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? ''
               <li>{line}</li>
             ))}
           </ul>
+          {
+            spike.id === 'strategy' && (
+              <div class="record-links">
+                <p class="kicker">The record is public</p>
+                {record.map((link) => (
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            )
+          }
         </article>
       ))
     }
@@ -90,12 +103,18 @@ const label = (id: string) => range.spikes.find((s) => s.id === id)?.label ?? ''
       const id = group.dataset.peak!;
       group.addEventListener('pointerenter', () => setActive(id));
       group.addEventListener('pointerleave', () => setActive(null));
-      group.addEventListener('click', () => {
+      const activate = () => {
         const card = cards.find((c) => c.dataset.spike === id);
         if (!card) return;
         setActive(id);
         card.focus({ preventScroll: true });
         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      };
+      group.addEventListener('click', activate);
+      group.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate();
       });
     }
   }

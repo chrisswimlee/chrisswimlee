@@ -1,0 +1,349 @@
+<div class="fx-progress" aria-hidden="true"><i></i></div>
+<div class="fx-grain" aria-hidden="true"></div>
+<div class="fx-scan" aria-hidden="true"></div>
+
+<script>
+  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const coarse = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+
+  /* Scroll progress bar */
+  const bar = document.querySelector<HTMLElement>('.fx-progress i');
+  if (bar) {
+    let queued = false;
+    const paint = () => {
+      queued = false;
+      const doc = document.documentElement;
+      const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+      bar.style.transform = `scaleX(${Math.min(1, window.scrollY / max)})`;
+    };
+    addEventListener(
+      'scroll',
+      () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(paint);
+      },
+      { passive: true },
+    );
+    paint();
+  }
+
+  if (motion) {
+    /* Text decode on headings and the hero kicker */
+    const glyphs = '01<>/\\|{}[]#$%&*+=-_~^:;.';
+    const decode = (el: HTMLElement, duration = 900) => {
+      if (el.dataset.decoded) return;
+      el.dataset.decoded = '1';
+      const text = el.textContent ?? '';
+      const chars = [...text];
+      const start = performance.now();
+      const width = el.getBoundingClientRect().width;
+      el.style.minWidth = `${width}px`;
+      el.setAttribute('aria-label', text);
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / duration);
+        const settled = Math.floor(t * chars.length);
+        let out = '';
+        for (let i = 0; i < chars.length; i++) {
+          const c = chars[i];
+          if (c === ' ' || i < settled) out += c;
+          else out += glyphs[Math.floor(Math.random() * glyphs.length)];
+        }
+        el.textContent = out;
+        if (t < 1) requestAnimationFrame(tick);
+        else {
+          el.textContent = text;
+          el.style.minWidth = '';
+          el.removeAttribute('aria-label');
+        }
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const kicker = document.querySelector<HTMLElement>('.hero-kicker');
+    if (kicker) setTimeout(() => decode(kicker, 700), 120);
+
+    /* Analog typewriter: uneven keystrokes, breaths on punctuation, blinking caret */
+    const typewrite = (el: HTMLElement, delay = 0) =>
+      new Promise<void>((resolve) => {
+        if (el.dataset.typed) return resolve();
+        el.dataset.typed = '1';
+        const text = el.textContent ?? '';
+        const height = el.getBoundingClientRect().height;
+        el.style.minHeight = `${height}px`;
+        el.textContent = '';
+
+        const sr = document.createElement('span');
+        sr.className = 'visually-hidden';
+        sr.textContent = text;
+        const out = document.createElement('span');
+        out.className = 'fx-type';
+        out.setAttribute('aria-hidden', 'true');
+        el.append(sr, out);
+
+        const chars = [...text];
+        let i = 0;
+        const pace = (c: string, prev: string) => {
+          let ms = 34 + Math.random() * 46;
+          if (Math.random() < 0.08) ms += 90 + Math.random() * 120;
+          if (c === ' ') ms += 18;
+          if (/[,;:—–]/.test(prev)) ms += 140;
+          if (/[.!?]/.test(prev)) ms += 300;
+          return ms;
+        };
+        const step = () => {
+          if (i >= chars.length) {
+            setTimeout(() => {
+              out.classList.add('is-done');
+              el.style.minHeight = '';
+              resolve();
+            }, 1400);
+            return;
+          }
+          const c = chars[i++];
+          out.textContent += c;
+          setTimeout(step, pace(c, chars[i - 2] ?? ''));
+        };
+        setTimeout(step, delay);
+      });
+
+    const lede = document.querySelector<HTMLElement>('.hero .lede');
+    const thesisLines = [...document.querySelectorAll<HTMLElement>('.thesis-line')];
+    if (lede) {
+      typewrite(lede, 520).then(async () => {
+        for (const line of thesisLines) await typewrite(line, 80);
+      });
+    } else {
+      thesisLines.forEach((line, n) => typewrite(line, 300 + n * 900));
+    }
+
+    const typeOnView = [
+      ...document.querySelectorAll<HTMLElement>(
+        '.section-head .note, .range-plot figcaption, .range-thread, .contact-box p[data-reveal]',
+      ),
+    ];
+    if (typeOnView.length) {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            typewrite(entry.target as HTMLElement, 120);
+            obs.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.6 },
+      );
+      typeOnView.forEach((el) => io.observe(el));
+    }
+
+    const heads = [...document.querySelectorAll<HTMLElement>('.section-head h2, .contact-box h2')];
+    if (heads.length) {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            decode(entry.target as HTMLElement, 760);
+            obs.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.5 },
+      );
+      heads.forEach((h) => io.observe(h));
+    }
+
+    /* Count up the hero proof stats */
+    const counters = [...document.querySelectorAll<HTMLElement>('.proof-value[data-count-to]')];
+    if (counters.length) {
+      const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            const el = entry.target as HTMLElement;
+            obs.unobserve(el);
+            const target = Number(el.dataset.countTo);
+            const prefix = el.dataset.prefix ?? '';
+            const suffix = el.dataset.suffix ?? '';
+            const start = performance.now();
+            const tick = (now: number) => {
+              const t = Math.min(1, (now - start) / 1200);
+              el.textContent = `${prefix}${Math.round(target * ease(t)).toLocaleString('en-US')}${suffix}`;
+              if (t < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+          }
+        },
+        { threshold: 0.4 },
+      );
+      counters.forEach((c) => io.observe(c));
+    }
+
+    /* Button ripple */
+    document.addEventListener('pointerdown', (e) => {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+      const btn = target.closest<HTMLElement>('.btn, .systems-tabs button, .lattice-chip');
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'fx-ripple';
+      const size = Math.max(r.width, r.height) * 2;
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${e.clientX - r.left - size / 2}px`;
+      ripple.style.top = `${e.clientY - r.top - size / 2}px`;
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+    });
+  }
+
+  if (motion) {
+    /* Glitch-reveal on the digital artifacts */
+    const artifacts = [...document.querySelectorAll<HTMLElement>('.work-piece, .achieve-card')];
+    if (artifacts.length) {
+      const io = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            const el = entry.target as HTMLElement;
+            el.classList.add('is-glitch');
+            el.addEventListener('animationend', () => el.classList.remove('is-glitch'), { once: true });
+            obs.unobserve(el);
+          }
+        },
+        { threshold: 0.3 },
+      );
+      artifacts.forEach((a) => io.observe(a));
+    }
+  }
+
+  if (motion && coarse) {
+    /* Glitch haptic pull: rubber-banding tears the interface */
+    const root = document.documentElement;
+    let startY = 0;
+    let pulling: 'top' | 'bottom' | null = null;
+    const atBottom = () => window.innerHeight + window.scrollY >= root.scrollHeight - 2;
+    addEventListener(
+      'touchstart',
+      (e) => {
+        startY = e.touches[0]?.clientY ?? 0;
+        pulling = null;
+      },
+      { passive: true },
+    );
+    addEventListener(
+      'touchmove',
+      (e) => {
+        const y = e.touches[0]?.clientY ?? 0;
+        const dy = y - startY;
+        if (window.scrollY <= 0 && dy > 0) pulling = 'top';
+        else if (atBottom() && dy < 0) pulling = 'bottom';
+        else pulling = null;
+        if (!pulling) {
+          root.style.setProperty('--pull', '0');
+          root.classList.remove('is-pulling');
+          return;
+        }
+        const amt = Math.min(1, Math.abs(dy) / 180);
+        root.style.setProperty('--pull', amt.toFixed(3));
+        root.classList.add('is-pulling');
+        root.dataset.pull = pulling;
+      },
+      { passive: true },
+    );
+    const release = () => {
+      root.style.setProperty('--pull', '0');
+      root.classList.remove('is-pulling');
+      pulling = null;
+    };
+    addEventListener('touchend', release, { passive: true });
+    addEventListener('touchcancel', release, { passive: true });
+
+    /* Bento liquid parallax via gyroscope, falling back to scroll velocity */
+    let gyro = false;
+    const onTilt = (e: DeviceOrientationEvent) => {
+      if (e.gamma == null || e.beta == null) return;
+      gyro = true;
+      const gx = Math.max(-1, Math.min(1, e.gamma / 30));
+      const gy = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+      root.style.setProperty('--tilt-x', gx.toFixed(3));
+      root.style.setProperty('--tilt-y', gy.toFixed(3));
+    };
+    const arm = async () => {
+      const DOE = (window as Window & {
+        DeviceOrientationEvent?: { requestPermission?: () => Promise<'granted' | 'denied'> };
+      }).DeviceOrientationEvent;
+      try {
+        if (DOE?.requestPermission) {
+          const state = await DOE.requestPermission();
+          if (state !== 'granted') return;
+        }
+        addEventListener('deviceorientation', onTilt, { passive: true });
+      } catch {
+        /* permission declined; scroll fallback below */
+      }
+    };
+    addEventListener('touchend', () => void arm(), { once: true, passive: true });
+    if (!('requestPermission' in (window.DeviceOrientationEvent ?? {}))) void arm();
+
+    let lastY = window.scrollY;
+    let vel = 0;
+    let raf = 0;
+    const settle = () => {
+      vel *= 0.86;
+      if (!gyro) root.style.setProperty('--tilt-y', Math.max(-1, Math.min(1, vel / 40)).toFixed(3));
+      if (Math.abs(vel) > 0.2) raf = requestAnimationFrame(settle);
+      else raf = 0;
+    };
+    addEventListener(
+      'scroll',
+      () => {
+        const y = window.scrollY;
+        vel = y - lastY;
+        lastY = y;
+        if (!raf) raf = requestAnimationFrame(settle);
+      },
+      { passive: true },
+    );
+  }
+
+  if (motion && !coarse) {
+    /* Magnetic buttons */
+    const magnets = [...document.querySelectorAll<HTMLElement>('.btn, .nav-resume')];
+    for (const m of magnets) {
+      m.classList.add('fx-magnet');
+      m.addEventListener(
+        'pointermove',
+        (e) => {
+          const r = m.getBoundingClientRect();
+          const dx = e.clientX - (r.left + r.width / 2);
+          const dy = e.clientY - (r.top + r.height / 2);
+          m.style.transform = `translate(${dx * 0.22}px, ${dy * 0.28}px)`;
+        },
+        { passive: true },
+      );
+      m.addEventListener('pointerleave', () => {
+        m.style.transform = '';
+      });
+    }
+
+    /* 3D tilt on cards */
+    const tilts = [...document.querySelectorAll<HTMLElement>('.work-piece, .achieve-card, .spike')];
+    for (const card of tilts) {
+      card.classList.add('fx-tilt');
+      card.addEventListener(
+        'pointermove',
+        (e) => {
+          const r = card.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - 0.5;
+          const py = (e.clientY - r.top) / r.height - 0.5;
+          const max = 5;
+          card.style.transform = `perspective(900px) rotateX(${-py * max}deg) rotateY(${px * max}deg) translateZ(0)`;
+        },
+        { passive: true },
+      );
+      card.addEventListener('pointerleave', () => {
+        card.style.transform = '';
+      });
+    }
+  }
+</script>
