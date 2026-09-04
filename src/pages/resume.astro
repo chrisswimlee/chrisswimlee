@@ -3,7 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import {
   competitive,
   education,
-  range,
   roles,
   site,
   skills,
@@ -43,24 +42,12 @@ import {
     <section class="resume-block">
       <h2>Profile</h2>
       <p class="resume-copy">
-        Problem solver. I love coding, learning a business from the inside, and
-        shipping the system that comes out of both. Put the unfamiliar stack in
-        front of me — I learn it, break the work into modules, and leave something
-        you can upgrade. Six years: Goldman infrastructure, then founding CTO on
-        an agentic trading stack.
+        Problem solver in New York. Six years in data pipelines, agents, and
+        modular systems — Goldman infrastructure, then founding CTO on an
+        agentic trading stack, now technical lead at HAIT. I learn the
+        unfamiliar piece, cut the work into modules, and leave something you
+        can run and upgrade.
       </p>
-      <ul class="resume-copy resume-list">
-        <li>I solve problems. I want as many as I can take — especially the ones that invest in AI.</li>
-        <li>I attack the constraint, cut the work into parts, and learn what I do not know yet.</li>
-        <li>I leave modular systems so the next version has a place to land.</li>
-        {
-          range.spikes.map((spike) => (
-            <li>
-              <strong>{spike.label}.</strong> {spike.domain} — {spike.trains}
-            </li>
-          ))
-        }
-      </ul>
     </section>
 
     <section class="resume-block">
@@ -106,7 +93,7 @@ import {
       <h2>Public work</h2>
       <p class="resume-copy">
         <strong>HAIT</strong> — public site for Hebron Asia
-        International Institute of Technology, an AI university in Chiang Rai.
+        International Institute of Technology, an AI institute in Chiang Rai.
         Redesigned the front-end, upgraded the PHP, and fixed performance so recruiting works before
         there is a campus.
         {' '}
@@ -163,7 +150,6 @@ import {
               <strong>{item.label} — {item.prefix ?? ''}{item.value.toLocaleString('en-US')}{item.suffix}.</strong>
               {' '}
               {item.claim} {item.proof}
-              {item.todo ? ` ${item.todo}` : ''}
             </li>
           ))
         }

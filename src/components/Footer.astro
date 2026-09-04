@@ -3,12 +3,15 @@ import { site } from '../data/site';
 ---
 
 <footer class="footer wrap">
-  <span class="footer-brand">Chris <em>Swim</em> Lee</span>
-  <span class="footer-built">{site.built}</span>
-  <span>{site.location}</span>
-  <a href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
-  <a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-  <a href={`mailto:${site.email}`}>Email</a>
-  <a href="/engage/">Consulting</a>
-  <a href="/tutor/">Tutoring</a>
+  <div class="footer-id">
+    <span class="footer-brand">Chris <em>Swim</em> Lee</span>
+    <span class="footer-built">{site.built}</span>
+  </div>
+  <nav class="footer-links" aria-label="Footer">
+    <span>{site.location}</span>
+    <a href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+    <a href={`mailto:${site.email}`}>Email</a>
+    <a href="/engage/">Engage</a>
+  </nav>
 </footer>

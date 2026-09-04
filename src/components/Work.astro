@@ -1,7 +1,9 @@
 ---
-import { projects, work } from '../data/site';
+import { cases, projects, systems, work } from '../data/site';
 
 const featured = projects.filter((project) => project.featured);
+const trading = systems.find((system) => system.id === 'trading');
+const tradingBrief = cases.trading;
 ---
 
 <section class="section" id="work">
@@ -11,10 +13,10 @@ const featured = projects.filter((project) => project.featured);
   </div>
   <div class="work-board">
     {
-      featured.map((project, index) => {
+      featured.map((project) => {
         const live = project.links[0];
         return (
-          <article class={`work-piece chrome piece-${index}`} data-reveal>
+          <article class="work-piece chrome" data-reveal>
             {
               project.image && live ? (
                 <a class="polaroid" href={live.href} target="_blank" rel="noopener noreferrer">
@@ -84,6 +86,35 @@ const featured = projects.filter((project) => project.featured);
       })
     }
   </div>
+  {
+    trading && (
+      <article class="case-brief work-case" data-reveal>
+        <p class="kicker">{trading.kicker}</p>
+        <h3 class="case-title">{trading.title}</h3>
+        <p class="gal-metric">
+          {trading.metric} · {trading.metricLabel}
+        </p>
+        <dl class="case-steps">
+          <div>
+            <dt>Problem</dt>
+            <dd>{tradingBrief.problem}</dd>
+          </div>
+          <div>
+            <dt>Constraint</dt>
+            <dd>{tradingBrief.constraint}</dd>
+          </div>
+          <div>
+            <dt>Decision</dt>
+            <dd>{tradingBrief.decision}</dd>
+          </div>
+          <div>
+            <dt>Outcome</dt>
+            <dd>{tradingBrief.outcome}</dd>
+          </div>
+        </dl>
+      </article>
+    )
+  }
 </section>
 
 <script>

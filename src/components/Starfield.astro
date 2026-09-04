@@ -1,0 +1,732 @@
+<div class="starfield" data-starfield aria-hidden="true">
+  <canvas class="starfield-canvas"></canvas>
+</div>
+<button class="starfield-skip" type="button" hidden>Skip</button>
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    if (!root.classList.contains('is-booting')) return;
+    setTimeout(() => {
+      if (!root.classList.contains('is-booting')) return;
+      root.classList.add('is-named', 'is-landed');
+      root.classList.remove('is-booting', 'is-landing');
+      root.dispatchEvent(new CustomEvent('hero:in'));
+    }, 6000);
+  })();
+</script>
+
+<script>
+  const root = document.documentElement;
+  const wrap = document.querySelector<HTMLElement>('[data-starfield]');
+  const canvas = wrap?.querySelector('canvas');
+  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const saveData = Boolean(navigator.connection?.saveData);
+  const home = location.pathname === '/';
+  const SESSION = 'astra-booted';
+
+  const settle = () => {
+    root.classList.add('is-named', 'is-landed');
+    root.classList.remove('is-booting', 'is-landing');
+  };
+  const cueHero = () => root.dispatchEvent(new CustomEvent('hero:in'));
+  const skipBoot = () => {
+    settle();
+    cueHero();
+  };
+
+  const shouldPlay = () => {
+    if (!home || !root.classList.contains('is-booting')) return false;
+    if (new URLSearchParams(location.search).get('boot') === '1') return true;
+    if (location.hash) return false;
+    try {
+      return sessionStorage.getItem(SESSION) !== '1';
+    } catch {
+      return true;
+    }
+  };
+
+  if (!wrap || !canvas || !motion || saveData) {
+    wrap?.classList.add('is-static');
+    if (root.classList.contains('is-booting')) skipBoot();
+  } else {
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) {
+      wrap.classList.add('is-static');
+      if (root.classList.contains('is-booting')) skipBoot();
+    } else {
+      const coarse = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+      const lite = coarse || window.innerWidth < 640;
+      const play = shouldPlay();
+
+      type Star = {
+        id: number;
+        x: number;
+        y: number;
+        sx: number;
+        sy: number;
+        hx: number;
+        hy: number;
+        gx?: number;
+        gy?: number;
+        z: number;
+        size: number;
+        tw: number;
+        vx: number;
+        vy: number;
+        spin: number;
+        gold: boolean;
+        cyan: boolean;
+        glyph: boolean;
+      };
+      type Bond = { a: Star; b: Star; life: number };
+
+      let w = 0;
+      let h = 0;
+      let raf = 0;
+      let lastFrame = 0;
+      let hidden = document.hidden;
+      let stars: Star[] = [];
+      let idSeq = 0;
+      let nameEdges: Bond[] = [];
+      const userLines: Bond[] = [];
+      const ripples: { x: number; y: number; r: number; life: number }[] = [];
+      let cursor = { x: -999, y: -999, on: false };
+      let lastPtr = { x: 0, y: 0 };
+      let ptrV = { x: 0, y: 0 };
+      let cam = { x: 0, y: 0, vx: 0, vy: 0 };
+      let sky = { x: '0', y: '0' };
+      let pressing = false;
+      let pressAge = 0;
+      let holdTimer = 0;
+      let downAt = { x: 0, y: 0, scroll: 0 };
+      let scrollY = window.scrollY;
+      let leave = 0;
+      let lastBox = { w: 0, h: 0 };
+      let named = !play;
+      let landed = !play;
+      let forced = false;
+      let armed = false;
+      const skipBtn = document.querySelector<HTMLButtonElement>('.starfield-skip');
+      const t0 = performance.now();
+      const COMPRESS = lite ? 1500 : 2000;
+      const NAME_HOLD = lite ? 360 : 560;
+      const PRINT_AT = COMPRESS + NAME_HOLD + 160;
+      const GLYPHS = lite ? 200 : 400;
+      const FIELD = lite ? 80 : 220;
+
+      const blocked = (t: EventTarget | null) =>
+        t instanceof Element &&
+        Boolean(t.closest('a, button, input, textarea, select, label, .nav, .cmd-copy, .fx-play'));
+
+      const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      const pageLeave = () => Math.min(1, Math.max(0, (scrollY - h * 0.06) / Math.max(1, h * 0.7)));
+
+      const snapHome = () => {
+        for (const s of stars) {
+          s.x = s.glyph && s.gx != null ? s.gx : s.hx;
+          s.y = s.glyph && s.gy != null ? s.gy : s.hy;
+          s.vx = 0;
+          s.vy = 0;
+        }
+      };
+
+      const skipPlay = () => {
+        if (!play || landed) return;
+        forced = true;
+        named = true;
+        landed = true;
+        snapHome();
+        try {
+          sessionStorage.setItem(SESSION, '1');
+        } catch {
+          /* private mode */
+        }
+        if (skipBtn) skipBtn.hidden = true;
+        root.classList.add('is-named', 'is-landing', 'is-landed');
+        root.classList.remove('is-booting');
+        cueHero();
+      };
+
+      const sampleName = () => {
+        const pts: { x: number; y: number; gold: boolean }[] = [];
+        if (!w || !h) return pts;
+        const words = [
+          { text: 'Chris', gold: false },
+          { text: 'Swim', gold: true },
+          { text: 'Lee', gold: false },
+        ];
+        const phrase = words.map((word) => word.text).join(' ');
+        let size = Math.min(w * 0.145, h * 0.112, 88);
+        const off = document.createElement('canvas');
+        const g = off.getContext('2d');
+        if (!g) return pts;
+        const setFont = () => {
+          g.font = `italic 600 ${size}px Fraunces, Georgia, serif`;
+        };
+        setFont();
+        while (size > 22 && g.measureText(phrase).width > w * 0.9) {
+          size -= 2;
+          setFont();
+        }
+        const pad = Math.ceil(size * 0.45);
+        const tw = g.measureText(phrase).width;
+        off.width = Math.max(1, Math.ceil(tw + pad * 2));
+        off.height = Math.max(1, Math.ceil(size * 1.6));
+        setFont();
+        g.textBaseline = 'middle';
+        g.fillStyle = '#fff';
+        const mid = off.height * 0.52;
+        const originX = (w - tw) / 2;
+        const originY = h * 0.48 - mid;
+        let cursorX = pad;
+        const space = g.measureText(' ').width;
+        for (const word of words) {
+          const ww = g.measureText(word.text).width;
+          g.clearRect(0, 0, off.width, off.height);
+          g.fillText(word.text, cursorX, mid);
+          const x0 = Math.max(0, Math.floor(cursorX - 4));
+          const y0 = Math.max(0, Math.floor(mid - size * 0.8));
+          const x1 = Math.min(off.width, Math.ceil(cursorX + ww + 4));
+          const y1 = Math.min(off.height, Math.ceil(mid + size * 0.55));
+          const img = g.getImageData(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
+          const step = lite ? 3 : 2;
+          for (let y = 0; y < img.height; y += step) {
+            for (let x = 0; x < img.width; x += step) {
+              if (img.data[(y * img.width + x) * 4 + 3] > 88) {
+                pts.push({ x: (originX + x0 + x) / w, y: (originY + y0 + y) / h, gold: word.gold });
+              }
+            }
+          }
+          cursorX += ww + space;
+        }
+        if (pts.length <= GLYPHS) return pts;
+        const picked: typeof pts = [];
+        const stride = pts.length / GLYPHS;
+        for (let i = 0; i < GLYPHS; i++) picked.push(pts[Math.floor(i * stride)]);
+        return picked;
+      };
+
+      const weaveName = (glyphs: Star[]) => {
+        nameEdges = [];
+        if (lite || glyphs.length < 8) return;
+        const seen = new Set<string>();
+        const step = Math.max(1, Math.floor(glyphs.length / 80));
+        const maxD = 22 / Math.max(w, 1);
+        for (let i = 0; i < glyphs.length && nameEdges.length < 80; i += step) {
+          const a = glyphs[i];
+          let best: Star | null = null;
+          let bestD = maxD;
+          for (let j = 0; j < glyphs.length; j++) {
+            if (i === j) continue;
+            const b = glyphs[j];
+            const d = Math.hypot(a.hx - b.hx, a.hy - b.hy);
+            if (d < bestD) {
+              bestD = d;
+              best = b;
+            }
+          }
+          if (!best) continue;
+          const key = a.id < best.id ? `${a.id}:${best.id}` : `${best.id}:${a.id}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          nameEdges.push({ a, b: best, life: 1 });
+        }
+      };
+
+      const rebuild = () => {
+        stars = [];
+        idSeq = 0;
+        const glyphs = sampleName();
+        const total = glyphs.length + FIELD;
+        const aspect = h / Math.max(w, 1);
+        for (let i = 0; i < total; i++) {
+          const glyph = i < glyphs.length;
+          const g = glyph ? glyphs[i] : null;
+          const tw = Math.random() * Math.PI * 2;
+          const ring = 0.1 + Math.random() * 0.26;
+          const ang = Math.random() * Math.PI * 2;
+          const around = !glyph && Math.random() < 0.22;
+          const hx = glyph && g ? g.x : around ? 0.5 + Math.cos(ang) * ring * aspect : Math.random();
+          const hy = glyph && g ? g.y : around ? 0.48 + Math.sin(ang) * ring : Math.random();
+          const arm = (i / Math.max(1, total - 1)) * Math.PI * 7.4 + tw;
+          const rad = 0.1 + (i % 11) * 0.038 + Math.random() * 0.07;
+          const x = play ? 0.5 + Math.cos(arm) * rad * aspect : hx;
+          const y = play ? 0.48 + Math.sin(arm) * rad * 0.94 : hy;
+          stars.push({
+            id: idSeq++,
+            x,
+            y,
+            sx: x,
+            sy: y,
+            hx,
+            hy,
+            gx: g?.x,
+            gy: g?.y,
+            z: glyph ? 0.1 : 0.18 + Math.random() * 0.82,
+            size: glyph ? 1.2 + Math.random() * 0.7 : 0.3 + Math.random() * 1.25,
+            tw,
+            vx: 0,
+            vy: 0,
+            spin: 4.8 + (tw % 1) * 1.6,
+            gold: g?.gold ?? Math.random() < 0.08,
+            cyan: !g?.gold && Math.random() < 0.2,
+            glyph,
+          });
+        }
+        weaveName(stars.filter((s) => s.glyph));
+      };
+
+      const screen = (s: Star) => {
+        const depth = s.glyph ? 0.18 : 0.4 + (1 - s.z) * 0.95;
+        const keep = 1 - leave * 0.65;
+        const drift = s.glyph ? scrollY : scrollY * (0.05 + (1 - s.z) * 0.07);
+        return {
+          x: s.x * w + cam.x * depth * keep,
+          y: s.y * h + cam.y * depth * keep - drift,
+          r: Math.max(0.35, s.size * (1.35 - s.z * 0.4)),
+        };
+      };
+
+      const nearest = (x: number, y: number, max: number, except?: number) => {
+        let best: Star | null = null;
+        let bestD = max;
+        for (const s of stars) {
+          if (s.id === except) continue;
+          const p = screen(s);
+          const d = Math.hypot(p.x - x, p.y - y);
+          if (d < bestD) {
+            bestD = d;
+            best = s;
+          }
+        }
+        return best;
+      };
+
+      const resize = () => {
+        const dpr = lite ? Math.min(1.25, window.devicePixelRatio || 1) : Math.min(1.5, window.devicePixelRatio || 1);
+        const nextW = window.innerWidth;
+        const nextH = window.innerHeight;
+        const widthJump = Math.abs(nextW - lastBox.w) > 24;
+        const heightJump = Math.abs(nextH - lastBox.h) > 160;
+        w = nextW;
+        h = nextH;
+        const bw = Math.max(1, Math.floor(w * dpr));
+        const bh = Math.max(1, Math.floor(h * dpr));
+        if (canvas.width !== bw || canvas.height !== bh) {
+          canvas.width = bw;
+          canvas.height = bh;
+          canvas.style.width = `${w}px`;
+          canvas.style.height = `${h}px`;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        if (!stars.length || widthJump || heightJump) {
+          lastBox = { w, h };
+          rebuild();
+          userLines.length = 0;
+        }
+      };
+
+      const line = (a: Star, b: Star, alpha: number, gold = false, width = 0.8) => {
+        const pa = screen(a);
+        const pb = screen(b);
+        ctx.strokeStyle = gold ? `rgba(224, 177, 92, ${alpha})` : `rgba(160, 210, 255, ${alpha})`;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        ctx.moveTo(pa.x, pa.y);
+        ctx.lineTo(pb.x, pb.y);
+        ctx.stroke();
+      };
+
+      const syncSky = () => {
+        const keep = 1 - leave;
+        const nx = Math.max(-1, Math.min(1, (cam.x / Math.max(80, w * 0.22)) * keep)).toFixed(3);
+        const ny = Math.max(-1, Math.min(1, (cam.y / Math.max(80, h * 0.22)) * keep)).toFixed(3);
+        if (nx === sky.x && ny === sky.y) return;
+        sky = { x: nx, y: ny };
+        root.style.setProperty('--sky-x', nx);
+        root.style.setProperty('--sky-y', ny);
+      };
+
+      const paintNebula = (t: number, wallpaper: boolean) => {
+        ctx.fillStyle = '#010208';
+        ctx.fillRect(0, 0, w, h);
+        if (wallpaper) return;
+        const shiftX = cam.x / Math.max(w, 1);
+        const shiftY = cam.y / Math.max(h, 1);
+        const blobs = lite
+          ? [{ x: 0.42 + shiftX * 0.2, y: 0.4 + shiftY * 0.2, r: 0.5, c: '36, 64, 148' }]
+          : [
+              { x: 0.3 + Math.sin(t * 0.07) * 0.06 + shiftX * 0.36, y: 0.36 + Math.cos(t * 0.05) * 0.04 + shiftY * 0.36, r: 0.44, c: '36, 64, 148' },
+              { x: 0.68 + Math.cos(t * 0.06) * 0.04 + shiftX * 0.24, y: 0.28 + Math.sin(t * 0.08) * 0.03 + shiftY * 0.24, r: 0.38, c: '224, 177, 92' },
+            ];
+        const nebula = 0.16 * (1 - leave * 0.45);
+        for (const b of blobs) {
+          const g = ctx.createRadialGradient(b.x * w, b.y * h, 0, b.x * w, b.y * h, b.r * Math.max(w, h));
+          g.addColorStop(0, `rgba(${b.c}, ${nebula})`);
+          g.addColorStop(0.45, `rgba(${b.c}, ${0.05 * (1 - leave * 0.4)})`);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, w, h);
+        }
+        if (leave < 0.9) {
+          const coreX = w * 0.5 + cam.x * 0.2;
+          const coreY = h * 0.48 + cam.y * 0.2 - scrollY;
+          const core = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, Math.min(w, h) * 0.26);
+          const glow = 1 - leave;
+          core.addColorStop(0, `rgba(255, 248, 230, ${0.14 * glow})`);
+          core.addColorStop(0.3, `rgba(107, 159, 255, ${0.07 * glow})`);
+          core.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = core;
+          ctx.fillRect(0, 0, w, h);
+        }
+        if (pressing && cursor.on) {
+          const touch = ctx.createRadialGradient(cursor.x, cursor.y, 6, cursor.x, cursor.y, 220 + pressAge * 50);
+          touch.addColorStop(0, 'rgba(220, 236, 255, 0.18)');
+          touch.addColorStop(0.35, 'rgba(107, 159, 255, 0.08)');
+          touch.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = touch;
+          ctx.fillRect(0, 0, w, h);
+        }
+        for (const ripple of ripples) {
+          const g = ctx.createRadialGradient(ripple.x, ripple.y, Math.max(0, ripple.r - 16), ripple.x, ripple.y, ripple.r + 6);
+          g.addColorStop(0, 'rgba(0,0,0,0)');
+          g.addColorStop(0.7, `rgba(200, 230, 255, ${0.14 * ripple.life})`);
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, w, h);
+        }
+      };
+
+      const growConstellation = () => {
+        if (!pressing || !cursor.on) return;
+        const reach = (lite ? 78 : 96) + Math.min(160, pressAge * 60);
+        const near: { s: Star; d: number }[] = [];
+        for (const s of stars) {
+          if (s.glyph && !named) continue;
+          const p = screen(s);
+          const d = Math.hypot(p.x - cursor.x, p.y - cursor.y);
+          if (d < reach) near.push({ s, d });
+        }
+        near.sort((a, b) => a.d - b.d);
+        const keep = near.slice(0, lite ? 10 : 14);
+        for (let i = 0; i < keep.length; i++) {
+          for (let j = i + 1; j < keep.length; j++) {
+            const pa = screen(keep[i].s);
+            const pb = screen(keep[j].s);
+            if (Math.hypot(pa.x - pb.x, pa.y - pb.y) > 150) continue;
+            const exists = userLines.some(
+              (u) =>
+                (u.a.id === keep[i].s.id && u.b.id === keep[j].s.id) ||
+                (u.a.id === keep[j].s.id && u.b.id === keep[i].s.id),
+            );
+            if (!exists) userLines.push({ a: keep[i].s, b: keep[j].s, life: 7 });
+          }
+        }
+        if (userLines.length > 40) userLines.splice(0, userLines.length - 40);
+      };
+
+      const spiralTo = (s: Star, toX: number, toY: number, u: number) => {
+        const mx = s.sx + (toX - s.sx) * u;
+        const my = s.sy + (toY - s.sy) * u;
+        const a = (1 - u) * s.spin;
+        const dx = mx - 0.5;
+        const dy = my - 0.48;
+        const c = Math.cos(a);
+        const sn = Math.sin(a);
+        s.x = 0.5 + dx * c - dy * sn;
+        s.y = 0.48 + dx * sn + dy * c;
+      };
+
+      const paint = (now: number) => {
+        if (hidden) return;
+        leave = pageLeave();
+        const wallpaper = leave > 0.7 && !pressing;
+        const minDelta = wallpaper ? 80 : lite ? 33 : 16;
+        if (lastFrame && now - lastFrame < minDelta - 1) {
+          raf = requestAnimationFrame(paint);
+          return;
+        }
+        const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
+        lastFrame = now;
+        const t = now * 0.001;
+        const elapsed = now - t0;
+        const compress = forced || !play ? 1 : easeInOut(Math.min(1, elapsed / COMPRESS));
+        const formed = compress >= 1;
+
+        if (play && !named && elapsed >= COMPRESS + NAME_HOLD) {
+          named = true;
+          root.classList.add('is-named');
+          try {
+            sessionStorage.setItem(SESSION, '1');
+          } catch {
+            /* private mode */
+          }
+        }
+        if (play && !landed && elapsed >= PRINT_AT) {
+          landed = true;
+          if (skipBtn) skipBtn.hidden = true;
+          root.classList.add('is-landing');
+          cueHero();
+        }
+
+        if (pressing) {
+          pressAge += dt;
+          growConstellation();
+        } else {
+          pressAge = Math.max(0, pressAge - dt * 1.6);
+        }
+
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          ripples[i].r += (lite ? 360 : 480) * dt;
+          ripples[i].life -= dt * 0.9;
+          if (ripples[i].life <= 0) ripples.splice(i, 1);
+        }
+
+        cam.x += cam.vx;
+        cam.y += cam.vy;
+        cam.vx *= pressing ? 0.9 : 0.985;
+        cam.vy *= pressing ? 0.9 : 0.985;
+        if (!pressing) {
+          const pull = leave > 0.35 ? 0.045 : 0.01;
+          cam.x += -cam.x * pull;
+          cam.y += -cam.y * pull;
+        }
+        const camMax = Math.min(w, h) * 0.42;
+        cam.x = Math.max(-camMax, Math.min(camMax, cam.x));
+        cam.y = Math.max(-camMax, Math.min(camMax, cam.y));
+        ptrV.x *= 0.88;
+        ptrV.y *= 0.88;
+        syncSky();
+
+        paintNebula(t, wallpaper);
+        ctx.lineCap = 'round';
+
+        if (formed && named && !wallpaper && leave < 0.9) {
+          const edgeA = 1 - leave;
+          for (const edge of nameEdges) line(edge.a, edge.b, (edge.a.gold || edge.b.gold ? 0.15 : 0.08) * edgeA, edge.a.gold || edge.b.gold);
+        }
+
+        for (let i = userLines.length - 1; i >= 0; i--) {
+          const u = userLines[i];
+          u.life -= dt;
+          if (u.life <= 0) {
+            userLines.splice(i, 1);
+            continue;
+          }
+          line(u.a, u.b, 0.22 + 0.5 * Math.min(1, u.life / 4), true, 1.05);
+        }
+
+        if (pressing && cursor.on && leave < 0.55) {
+          const reach = (lite ? 80 : 110) + Math.min(140, pressAge * 50);
+          const near: Star[] = [];
+          for (const s of stars) {
+            const p = screen(s);
+            if (Math.hypot(p.x - cursor.x, p.y - cursor.y) < reach) near.push(s);
+          }
+          for (let i = 0; i < near.length; i++) {
+            for (let j = i + 1; j < Math.min(near.length, i + 4); j++) {
+              const pa = screen(near[i]);
+              const pb = screen(near[j]);
+              if (Math.hypot(pa.x - pb.x, pa.y - pb.y) < 130) line(near[i], near[j], 0.28);
+            }
+          }
+        }
+
+        for (const s of stars) {
+          if (!formed) {
+            if (s.glyph && s.gx != null && s.gy != null) spiralTo(s, s.gx, s.gy, compress);
+            else if (play) spiralTo(s, s.hx, s.hy, compress);
+          } else if (!wallpaper) {
+            const homeX = s.glyph && s.gx != null ? s.gx : s.hx;
+            const homeY = s.glyph && s.gy != null ? s.gy : s.hy;
+            const p = screen(s);
+            if (cursor.on && pressing && !(s.glyph && leave > 0.45)) {
+              const dx = cursor.x - p.x;
+              const dy = cursor.y - p.y;
+              const d = Math.hypot(dx, dy) || 1;
+              const reach = 300;
+              if (d < reach) {
+                const falloff = (reach - d) / reach;
+                s.vx += (dx / d) * falloff * 0.014 * (s.glyph ? 0.7 : 1.7);
+                s.vy += (dy / d) * falloff * 0.014 * (s.glyph ? 0.7 : 1.7);
+                s.vx += -((dy / d) * falloff * 0.008);
+                s.vy += (dx / d) * falloff * 0.008;
+                s.vx += (ptrV.x / Math.max(w, 1)) * falloff * 0.03;
+                s.vy += (ptrV.y / Math.max(h, 1)) * falloff * 0.03;
+              }
+            }
+            for (const ripple of ripples) {
+              const d = Math.hypot(p.x - ripple.x, p.y - ripple.y);
+              const band = Math.abs(d - ripple.r);
+              if (band < 26) {
+                const kick = (1 - band / 26) * ripple.life * 0.01 * (s.glyph ? 0.4 : 1.1);
+                s.vx += ((p.x - ripple.x) / (d || 1)) * kick;
+                s.vy += ((p.y - ripple.y) / (d || 1)) * kick;
+              }
+            }
+            const ox = homeX - s.x;
+            const oy = homeY - s.y;
+            const stretch = Math.hypot(ox, oy);
+            const spring = s.glyph ? 0.014 / (1 + stretch * 10) : 0.0024;
+            s.vx += ox * spring;
+            s.vy += oy * spring;
+            s.vx *= s.glyph ? 0.9 : 0.978;
+            s.vy *= s.glyph ? 0.9 : 0.978;
+            s.x += s.vx;
+            s.y += s.vy;
+          }
+
+          if (s.glyph && leave > 0.96) continue;
+          const p = screen(s);
+          if (p.x < -16 || p.y < -16 || p.x > w + 16 || p.y > h + 16) continue;
+          const twinkle = wallpaper ? 0.7 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * (1.2 + s.z) + s.tw));
+          const glyphLit = s.glyph && compress > 0.28 ? 1 : twinkle;
+          const fieldA = (0.14 + 0.4 * (1 - s.z)) * (0.72 + 0.28 * (1 - leave));
+          const alpha = (s.glyph ? 0.94 * (1 - leave) : fieldA) * glyphLit;
+          const col = s.gold ? '224, 177, 92' : s.cyan ? '120, 190, 255' : '230, 238, 255';
+          if (!lite && !wallpaper && s.glyph) {
+            ctx.fillStyle = `rgba(${col}, ${alpha * 0.14})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.fillStyle = `rgba(${col}, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, s.glyph ? p.r * 1.06 : p.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (play && landed && elapsed >= PRINT_AT + 600 && root.classList.contains('is-booting')) {
+          root.classList.add('is-landed');
+          root.classList.remove('is-booting');
+        }
+
+        raf = requestAnimationFrame(paint);
+      };
+
+      const cancelHold = () => {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = 0;
+        }
+      };
+
+      const beginPlay = (x: number, y: number) => {
+        if (pressing) return;
+        pressing = true;
+        pressAge = 0;
+        ripples.push({ x, y, r: 8, life: 1 });
+        if (userLines.length > 36) return;
+        const hit = nearest(x, y, lite ? 52 : 40);
+        if (!hit) return;
+        const other = nearest(x, y, lite ? 90 : 72, hit.id);
+        if (other) userLines.push({ a: hit, b: other, life: 8 });
+      };
+
+      const onMove = (e: PointerEvent) => {
+        const dx = e.clientX - lastPtr.x;
+        const dy = e.clientY - lastPtr.y;
+        if (lastPtr.x || lastPtr.y) {
+          ptrV = { x: dx, y: dy };
+          if (pressing) {
+            cam.vx += dx * 0.5;
+            cam.vy += dy * 0.5;
+          }
+        }
+        lastPtr = { x: e.clientX, y: e.clientY };
+        cursor = { x: e.clientX, y: e.clientY, on: true };
+        if (coarse && !pressing && holdTimer) {
+          const adx = Math.abs(e.clientX - downAt.x);
+          const ady = Math.abs(e.clientY - downAt.y);
+          if (ady > 12 && ady > adx) cancelHold();
+          else if (adx > 16) {
+            cancelHold();
+            beginPlay(e.clientX, e.clientY);
+          }
+        }
+      };
+
+      const onDown = (e: PointerEvent) => {
+        if (blocked(e.target)) return;
+        lastPtr = { x: e.clientX, y: e.clientY };
+        cursor = { x: e.clientX, y: e.clientY, on: true };
+        downAt = { x: e.clientX, y: e.clientY, scroll: scrollY };
+        cancelHold();
+        if (!coarse) {
+          beginPlay(e.clientX, e.clientY);
+          return;
+        }
+        holdTimer = window.setTimeout(() => {
+          holdTimer = 0;
+          if (Math.abs(window.scrollY - downAt.scroll) < 10) beginPlay(downAt.x, downAt.y);
+        }, 160);
+      };
+
+      const onUp = () => {
+        cancelHold();
+        if (pressing) {
+          cam.vx += ptrV.x * 1.1;
+          cam.vy += ptrV.y * 1.1;
+        }
+        pressing = false;
+      };
+
+      const onLeave = () => {
+        cancelHold();
+        cursor.on = false;
+        pressing = false;
+      };
+
+      const onVis = () => {
+        hidden = document.hidden;
+        if (hidden) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+          return;
+        }
+        lastFrame = 0;
+        raf = requestAnimationFrame(paint);
+      };
+
+      const arm = () => {
+        if (armed) return;
+        armed = true;
+        resize();
+        raf = requestAnimationFrame(paint);
+      };
+
+      if (home && document.fonts?.ready) {
+        const wait = window.setTimeout(arm, 450);
+        void document.fonts.ready.then(() => {
+          clearTimeout(wait);
+          arm();
+        }).catch(arm);
+      } else {
+        arm();
+      }
+
+      addEventListener('pointermove', onMove, { passive: true });
+      addEventListener('pointerdown', onDown, { passive: true });
+      addEventListener('pointerup', onUp, { passive: true });
+      addEventListener('pointercancel', onUp, { passive: true });
+      addEventListener('resize', resize, { passive: true });
+      addEventListener(
+        'scroll',
+        () => {
+          scrollY = window.scrollY;
+        },
+        { passive: true },
+      );
+      document.addEventListener('visibilitychange', onVis);
+      addEventListener('pointerleave', onLeave, { passive: true });
+      addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Enter') skipPlay();
+      });
+      skipBtn?.addEventListener('click', skipPlay);
+      if (play && skipBtn) skipBtn.hidden = false;
+
+      if (!play && root.classList.contains('is-booting')) skipBoot();
+    }
+  }
+</script>

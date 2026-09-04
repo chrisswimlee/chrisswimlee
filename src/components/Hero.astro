@@ -14,52 +14,52 @@ const pillars = [thesis.why, thesis.how, thesis.what];
 ---
 
 <header class="hero" id="top">
-  <div class="hero-identity">
-    <div class="hero-copy">
-      <p class="hero-kicker">{hero.kicker}</p>
-      <h1 class="hero-name">
-        <span class="hero-word">Chris</span>
-        <em class="hero-word hero-word-swim">Swim</em>
-        <span class="hero-word">Lee</span>
-      </h1>
-      <p class="lede">{hero.lede}</p>
-      <p class="hero-stack">{hero.stack.join(' · ')}</p>
-      <div class="hero-actions">
-        <a class="btn btn-solid" href="/#systems">See the work</a>
-        <a class="btn" href="/resume/">Resume</a>
-        <a class="btn" href={`mailto:${site.email}`}>Email</a>
-      </div>
-    </div>
-    <figure class="hero-photo">
-      <img src={site.photo} alt={site.name} width="320" height="320" fetchpriority="high" decoding="async" />
-    </figure>
+  <div class="hero-stage">
+    <h1 class="hero-name visually-hidden">{site.name}</h1>
+    <p class="hero-kicker" data-island style="--i: 0">{hero.kicker}</p>
   </div>
-  <ol class="thesis bento">
-    {
-      pillars.map((pillar) => (
-        <li class="glass" data-depth="1">
-          <p class="thesis-line">{pillar.line}</p>
-          <p class="thesis-detail">{pillar.detail}</p>
-        </li>
-      ))
-    }
-  </ol>
-  <ul class="hero-stats bento">
-    {
-      stats.map((item) => (
-        <li class="glass" data-depth="2">
-          <p
-            class="proof-value"
-            data-count-to={typeof item.value === 'number' ? item.value : undefined}
-            data-prefix={typeof item.value === 'number' && 'prefix' in item && item.prefix ? item.prefix : undefined}
-            data-suffix={typeof item.value === 'number' ? item.suffix : undefined}
-          >
-            {item.display}
-          </p>
-          <p class="proof-label">{item.label}</p>
-          <p class="proof-hint">{item.hint}</p>
-        </li>
-      ))
-    }
-  </ul>
+  <div class="hero-body">
+    <div class="hero-identity">
+      <div class="hero-copy">
+        <p class="lede" data-island style="--i: 1">{hero.lede}</p>
+        <p class="hero-stack" data-island style="--i: 2">{hero.stack.join(' · ')}</p>
+        <div class="hero-actions" data-island style="--i: 3">
+          <a class="btn btn-solid" href="/#work">See the work</a>
+          <a class="btn" href="/resume/">Resume</a>
+          <a class="btn" href="/engage/">Engage</a>
+        </div>
+      </div>
+      <figure class="hero-photo" data-island data-play data-island-kind="photo" style="--i: 2; --from-x: 48px; --from-y: -12px">
+        <img src={site.photo} alt={site.name} width="320" height="320" fetchpriority="high" decoding="async" />
+      </figure>
+    </div>
+    <ol class="thesis bento">
+      {
+        pillars.map((pillar, i) => (
+          <li class="glass" data-island data-play data-depth={i === 0 ? '1' : '2'} style={`--i: ${4 + i}; --from-y: 36px`}>
+            <p class="thesis-line">{pillar.line}</p>
+            <p class="thesis-detail">{pillar.detail}</p>
+          </li>
+        ))
+      }
+    </ol>
+    <ul class="hero-stats bento">
+      {
+        stats.map((item, i) => (
+          <li class="glass" data-island data-depth="2" style={`--i: ${7 + i}; --from-y: 42px`}>
+            <p
+              class="proof-value"
+              data-count-to={typeof item.value === 'number' ? item.value : undefined}
+              data-prefix={typeof item.value === 'number' && 'prefix' in item && item.prefix ? item.prefix : undefined}
+              data-suffix={typeof item.value === 'number' ? item.suffix : undefined}
+            >
+              {item.display}
+            </p>
+            <p class="proof-label">{item.label}</p>
+            <p class="proof-hint">{item.hint}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </header>

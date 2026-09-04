@@ -11,21 +11,20 @@ export const site = {
   linkedin: 'https://www.linkedin.com/in/chris-suyoung-lee',
   photo: '/images/chris.jpg',
   ogImage: '/images/chris-og.jpg',
-  jobTitle: 'Senior Engineer',
-  built: 'Astro. No React. A live aurora field. Custom canvas topologies. Printable CV.',
+  jobTitle: 'Technical Lead',
+  built: 'Astro. No React. A live constellation field. Printable CV.',
 };
 
 export const nav = [
   { href: '/#systems', label: 'Build' },
   { href: '/#achievements', label: 'Achievements' },
+  { href: '/#range', label: 'Range' },
   { href: '/#work', label: 'Work' },
   { href: '/#experience', label: 'Experience' },
   { href: '/#about', label: 'About' },
 ];
 
-export const briefMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Consulting — Chris Swim Lee')}&body=${encodeURIComponent('What the company does:\n\nWhat’s stuck (data / automation / agents):\n\nWhere you are (city / remote):\n')}`;
-export const hireMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Role — Chris Swim Lee')}&body=${encodeURIComponent('Role / company:\n\nWhat you need:\n\nWhere (city / remote):\n')}`;
-export const tutorMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Tutoring — software and math')}`;
+export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Chris Swim Lee')}&body=${encodeURIComponent('What you need (role / project / tutoring):\n\nWhat’s stuck, or what you’re hiring for:\n\nWhere (city / remote):\n')}`;
 
 export const hero = {
   kicker: 'Problem solver · New York',
@@ -48,24 +47,11 @@ export const thesis = {
   },
 };
 
-export const tutor = {
-  title: 'Software and math',
-  lede: 'One-to-one. Separate from the consulting.',
-  paragraphs: [
-    'I tutor software development and math — I studied both at Trinity. Students, career-switchers, interview prep. 60-minute sessions, remote or in New York.',
-    'Email me what you’re working on and I’ll reply with times.',
-  ],
-  cta: 'Email about tutoring',
-  href: tutorMail,
-};
-
 export const experienceIntro = 'Goldman. A founding CTO seat. Then the systems you can open.';
 
 export const buildSystem = {
-  lede: 'I can build anything you put in front of me.',
   paragraphs: [
-    'That is not a stack claim. It is a method. I do not wait until I already know the tools. I find the constraint, learn what the problem actually needs, cut the work into modules, and ship a system that can take the next upgrade.',
-    'The last six years are the proof of range, not of a specialty. Java and Kafka under Goldman compliance. Python agents and PyTorch on a founding clock. PHP, hosting, and security for a university that does not have a campus yet. A playable site. An OpenAI-compatible gateway on PyPI. Each one started as a problem I had not shipped before.',
+    'The last six years are the proof of range, not of a specialty. Java and Kafka under Goldman compliance. Python agents and PyTorch on a founding clock. PHP, hosting, and security for an institute that does not have a campus yet. A playable site. An OpenAI-compatible gateway on PyPI. Each one started as a problem I had not shipped before.',
     'Give me the brief and enough time. I will learn the unfamiliar piece, make the seams clean, and leave something you can run — and change — without a rewrite.',
   ],
   links: [
@@ -78,12 +64,8 @@ export const buildSystem = {
 };
 
 export const sectionMessages = {
-  systems: 'I can build anything you put in front of me.',
+  systems: 'I find the constraint, learn the stack, and ship a system you can upgrade.',
   achievements: 'Proof that the method holds.',
-  range: 'Deep in each.',
-  work: 'Open the work.',
-  experience: 'The years, in order.',
-  about: 'Chris SuYoung Lee. Suyoung means swim.',
 };
 
 type Spike = {
@@ -107,7 +89,6 @@ export const range = {
       proof: [
         'B.S. in Computer Science and Mathematics, Trinity College.',
         '1823 Scholar — full-ride scholarship.',
-        'M.S. Information Studies, 2026.',
       ],
     },
     {
@@ -127,9 +108,9 @@ export const range = {
       domain: 'Competitive meta and rapid learning',
       trains: 'A clock, a hidden hand, then a system I have not seen yet.',
       proof: [
-        '#1 on the Hearthstone Americas Wild ladder — January 2019, again November 2025.',
-        '#1 seed for the 2019 Wild Open. HCT Tavern Champion, 2017.',
-        'New stack, new constraint — I learn it, modularize it, and ship.',
+        '#1 on the Hearthstone Americas Wild ladder — October 2016, January 2019, and November 2025.',
+        '#1 seed for the 2019 Wild Open.',
+        'Two-time Americas Continental Qualifier — 2016 and 2017, top ~75 across the Americas.',
       ],
     },
   ] as Spike[],
@@ -158,7 +139,6 @@ export type TechnicalAchievement = {
   suffix: string;
   claim: string;
   proof: string;
-  todo?: string;
 };
 
 export const technicalAchievements: TechnicalAchievement[] = [
@@ -179,7 +159,6 @@ export const technicalAchievements: TechnicalAchievement[] = [
     suffix: 'ms',
     claim: 'Market-data in, end to end.',
     proof: 'Kafka across exchanges. Millions of ticks. Sub-100ms from feed to the book the agents traded on.',
-    todo: 'TODO: peak ticks/sec, number of exchanges.',
   },
   {
     id: 'agents',
@@ -188,8 +167,7 @@ export const technicalAchievements: TechnicalAchievement[] = [
     suffix: '',
     claim: 'Swarm modes over HTTP.',
     proof:
-      'An agent loop that audits live portfolios against legacy SQL. Local Lattice on PyPI — role:coder, role:reasoner, role:fast, then fanout, vote, pipeline, debate.',
-    todo: 'TODO: Lattice downloads / stars.',
+      'Local Lattice on PyPI — role:coder, role:reasoner, role:fast, then fanout, vote, pipeline, debate.',
   },
   {
     id: 'models',
@@ -234,7 +212,7 @@ export const cases: Record<'lattice' | 'goldman' | 'trading', CaseBrief> = {
     constraint: 'Local-first — MLX and LM Studio — without locking out cloud when a role needs it.',
     decision: 'An OpenAI-compatible gateway. Assign role:coder, role:reasoner, role:fast. Swarm primitives over HTTP.',
     outcome:
-      'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back. The console on this page runs the same router.',
+      'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back.',
   },
   goldman: {
     problem: 'Beneficiary data for 10,000+ client accounts was too slow to operate.',
@@ -309,7 +287,7 @@ export const systems: System[] = [
 ];
 
 export const work = {
-  lede: 'Three things you can open.',
+  lede: 'Three things you can open. The trading engine cannot be shown.',
 };
 
 type Project = {
@@ -360,14 +338,14 @@ export const projects: Project[] = [
     url: 'haitedu.com',
     year: '2026',
     summary:
-      'The public site for HAIT, an AI university in Chiang Rai still recruiting before there is a campus. I built the site and the systems behind it.',
+      'The public site for Hebron Asia International Institute of Technology (HAIT), an AI institute in Chiang Rai still recruiting before there is a campus. I built the site and the systems behind it.',
     image: '/images/work/haitedu.jpg',
     points: [
       'Redesigned the front-end and upgraded the PHP underneath it.',
       'The sites were slow. I reconfigured them so they run.',
       'Now designing their IT systems — hosting, security, and the stack the school will run on.',
     ],
-    tags: ['Chiang Rai', 'Pre-opening', 'AI engineering'],
+    tags: ['PHP', 'Hosting', 'Chiang Rai'],
     links: [{ label: 'Live site', href: 'https://haitedu.com' }],
   },
   {
@@ -434,7 +412,7 @@ export const roles = [
     company: 'One Dave Software',
     title: 'Full Stack Software Engineer',
     dates: 'Oct 2020 — May 2022',
-    location: '',
+    location: 'La Brea, CA',
     note: '',
     scan: 'Full-stack for defense and nuclear. Email path 70% faster.',
     bullets: [
@@ -461,12 +439,32 @@ export const education = [
 
 export const record = [
   {
+    label: '2016 · HCT Spring Preliminary',
+    href: 'https://liquipedia.net/hearthstone/2016_Hearthstone_Championship_Tour/Spring/Americas/Preliminary',
+  },
+  {
+    label: '2016 · Lower bracket',
+    href: 'https://liquipedia.net/hearthstone/2016_Hearthstone_Championship_Tour/Spring/Americas/Preliminary/LB3',
+  },
+  {
+    label: 'Oct 2016 · #1 deck',
+    href: 'https://www.hearthpwn.com/decks/661171-1-wild-aggro-beast-druid',
+  },
+  {
+    label: '2017 · HCT Summer Preliminary',
+    href: 'https://liquipedia.net/hearthstone/2017_Hearthstone_Championship_Tour/Summer/Preliminary/Americas',
+  },
+  {
+    label: '2017 · Tavern Hero path',
+    href: 'https://news.blizzard.com/en-us/article/20942617/join-us-for-the-2017-hct-summer-season',
+  },
+  {
     label: 'Jan 2019 · Liquipedia ladder',
     href: 'https://liquipedia.net/hearthstone/Ladder_Ranking/2019/Americas/Wild/January',
   },
   {
-    label: 'Jan 2019 · #1 deck',
-    href: 'https://www.hearthpwn.com/decks/661171-1-wild-aggro-beast-druid',
+    label: '2019 · Wild Open',
+    href: 'https://hearthstone.blizzard.com/en-us/news/22887052',
   },
   {
     label: 'Nov 2025 · Rank 1 again',
@@ -478,7 +476,7 @@ export const competitive = [
   {
     title: 'Professional Hearthstone, Americas',
     detail:
-      '#1 on the Americas Wild ladder twice — January 2019 and again November 2025. #1 seed for the 2019 Wild Open. 2016 HCT Americas Spring Preliminary. Official HCT tavern champion, Rancho Cucamonga, July 2017. Seven years apart at the top of the same ladder, against two completely different metagames.',
+      '#1 on the Americas Wild ladder three times — October 2016, January 2019, and November 2025. #1 seed for the 2019 Wild Open. Two-time Americas Continental Qualifier in 2016 and 2017, including a 2016 HCT Spring Preliminary lower-bracket run and a 3–2 over Flamekilla, and the 2017 HCT Summer Preliminary as tavern champion at Rancho Cucamonga. Nine years apart at the top of the same ladder, against three different metagames.',
     links: record,
   },
 ];
@@ -487,25 +485,29 @@ export const skills = {
   Languages: ['Java', 'Python', 'SQL', 'JavaScript', 'C++', 'C#'],
   'AI & ML': ['PyTorch', 'TensorFlow', 'Scikit-Learn', 'LangChain', 'NumPy', 'Quantitative modeling'],
   Platforms: ['Spring Boot', 'ASP.NET', 'Apache Kafka', 'Docker', 'GitLab CI/CD'],
-  'Agent tooling': ['Claude', 'Cursor', 'n8n', 'Openclaw'],
+  'Agent tooling': ['Claude', 'Cursor', 'n8n', 'OpenClaw'],
   Tools: ['Git', 'Selenium', 'TestNG', 'JUnit'],
 };
 
 export const about = {
   lede: 'Chris SuYoung Lee. Suyoung means swim.',
   paragraphs: [
-    'I double-majored in Mathematics and Computer Science at Trinity College in Connecticut — a little Ivy, on a full-ride scholarship. Six years of engineering since: data pipelines, AI agents, and the systems under them. Three of those years on Goldman Sachs infrastructure, then founding CTO at a funded startup.',
-    'At the core I am a problem solver. I love coding. I love learning a business from the inside. I love applying what I just learned to the thing in front of me. I may not be the person who already knows — I am the person who will find out, break the work into modules, and keep going until it ships.',
-    'Math taught me to find the constraint. Goldman taught me what happens when it is wrong at scale. The new stack I learn on the fly. The systems I leave behind are modular on purpose — built so the next upgrade has a place to land.',
-    'I played Hearthstone to #1 on the Americas Wild ladder twice — January 2019 and again November 2025. The record is public.',
-    'I shipped the public sites for HAIT and d22soso.com. Now I consult in New York, and I want as many hard problems as I can take — especially the ones that invest in the future of AI.',
+    'I double-majored in Mathematics and Computer Science at Trinity College in Connecticut, on a full-ride 1823 scholarship. Six years since: Goldman infrastructure, founding CTO at a stealth fintech, now technical lead at HAIT.',
+    'Math taught me to find the constraint. Goldman taught me what happens when it is wrong at scale. I leave systems modular on purpose — so the next upgrade has a place to land.',
+    'Hearthstone: #1 Americas Wild in October 2016, January 2019, and November 2025. The record is public.',
+    'I shipped haitedu.com and d22soso.com. I want as many hard problems as I can take — especially the ones that invest in the future of AI.',
   ],
 };
 
 export const engage = {
   heading: 'Engage',
-  lede: 'Technical lead work for funded teams with a stuck system — data, automation, or agents.',
-  promise: 'Most engagements start with a diagnostic. You get everything in writing before I start.',
+  lede: 'A role, a stuck system, or tutoring. One inbox.',
+  promise: 'Tell me which it is. You get a clear yes or no — and for builds, everything in writing before I start.',
+  paths: [
+    { name: 'Role', detail: 'A seat where the work is hard and the stack may be new.' },
+    { name: 'Build', detail: 'Technical lead work for funded teams — data, automation, or agents.' },
+    { name: 'Tutoring', detail: 'Software and math. One-to-one, 60 minutes, remote or in New York. I studied both at Trinity.' },
+  ],
   rates: [
     { name: 'Diagnostic', price: '$1,000', unit: '90 minutes' },
     { name: 'Build', price: 'From $20,000', unit: 'scoped project' },
@@ -513,24 +515,23 @@ export const engage = {
     { name: 'Day', price: '$3,000', unit: 'day' },
   ],
   notes: [
-    'For companies that already pay for software. Not for brochure sites, students, or equity-only work.',
+    'Builds are for companies that already pay for software — not brochure sites or equity-only.',
     'New York or remote. Builds start with a diagnostic unless the scope is already clear.',
-    'Diagnostic, retainer, and day rate are listed. Builds start at $20,000.',
   ],
-  cta: 'Email about a project',
-  href: briefMail,
+  cta: 'Email me',
+  href: mail,
 };
 
 export const contact = {
   heading: 'Email',
-  lede: 'Put the problem in front of me. I’ll tell you if I’m the person to break it down.',
-  projectCta: 'Email about a role',
-  href: hireMail,
+  lede: 'One inbox. A role, a stuck system, or tutoring.',
+  projectCta: 'Email me',
+  href: mail,
 };
 
 export const built = {
   lede: 'This site.',
   detail:
-    'Astro. No React. A live WebGL aurora, a custom canvas DAG, and a Lattice router that runs in the page. Printable CV. The source is the proof.',
+    'Astro. No React. A live constellation field you can draw in. Printable CV. The source is the proof.',
   href: 'https://github.com/chrisswimlee/chrisswimlee',
 };

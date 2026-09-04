@@ -1,13 +1,13 @@
 ---
 import '../styles/global.css';
-import Backdrop from '../components/Backdrop.astro';
 import Effects from '../components/Effects.astro';
-import Neural from '../components/Neural.astro';
+import Starfield from '../components/Starfield.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { education, site } from '../data/site';
 
 const isResume = Astro.url.pathname.startsWith('/resume');
+const isHome = Astro.url.pathname === '/';
 
 interface Props {
   title?: string;
@@ -23,7 +23,7 @@ const og = new URL(site.ogImage, site.url).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class:list={[{ 'is-booting': isHome }]}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -52,7 +52,7 @@ const og = new URL(site.ogImage, site.url).href;
       rel="stylesheet"
     />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#050608" />
+    <meta name="theme-color" content="#000000" />
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Person',
@@ -88,9 +88,8 @@ const og = new URL(site.ogImage, site.url).href;
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    {!isResume && <Backdrop />}
+    {isHome && <Starfield />}
     {!isResume && <Effects />}
-    {!isResume && <Neural />}
     <Nav />
     <slot />
     <Footer />

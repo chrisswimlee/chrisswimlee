@@ -14,53 +14,15 @@ import { sectionMessages, technicalAchievements } from '../data/site';
           <p class="kicker">{item.label}</p>
           <p class="achieve-value">
             {item.prefix && <span class="achieve-affix">{item.prefix}</span>}
-            <span data-count-to={item.value} data-count-suffix={item.suffix}>
+            <span data-count-to={item.value}>
               {item.value.toLocaleString('en-US')}
             </span>
             {item.suffix && <span class="achieve-affix">{item.suffix}</span>}
           </p>
           <h3>{item.claim}</h3>
           <p>{item.proof}</p>
-          {item.todo && <p class="achieve-todo">{item.todo}</p>}
         </li>
       ))
     }
   </ul>
 </section>
-
-<script>
-  const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const nodes = [...document.querySelectorAll<HTMLElement>('[data-count-to]')];
-  if (!nodes.length) {
-    /* no counters on this page */
-  } else if (!motion) {
-    /* static numerals already rendered */
-  } else {
-    const ease = (t: number) => 1 - Math.pow(1 - t, 3);
-    const run = (el: HTMLElement) => {
-      const target = Number(el.dataset.countTo);
-      if (!Number.isFinite(target)) return;
-      const start = performance.now();
-      const duration = 1100;
-      const tick = (now: number) => {
-        const t = Math.min(1, (now - start) / duration);
-        const value = Math.round(target * ease(t));
-        el.textContent = value.toLocaleString('en-US');
-        if (t < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    };
-
-    const io = new IntersectionObserver(
-      (entries, obs) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          run(entry.target as HTMLElement);
-          obs.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.35 },
-    );
-    for (const node of nodes) io.observe(node);
-  }
-</script>

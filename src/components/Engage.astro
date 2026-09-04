@@ -4,6 +4,16 @@ import { engage, site } from '../data/site';
 
 <div class="engage-block">
   <p>{engage.promise}</p>
+  <ul class="engage-paths">
+    {
+      engage.paths.map((item) => (
+        <li>
+          <strong>{item.name}</strong>
+          <p>{item.detail}</p>
+        </li>
+      ))
+    }
+  </ul>
   <ul class="engage-rates">
     {
       engage.rates.map((item) => (
