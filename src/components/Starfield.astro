@@ -147,13 +147,47 @@
         };
       };
       syncPalette();
-      const t0 = performance.now();
-      const COMPRESS = lite ? 900 : 2000;
-      const NAME_HOLD = lite ? 140 : 560;
-      const PRINT_AT = COMPRESS + NAME_HOLD + (lite ? 80 : 160);
-      const GLYPHS = lite ? 240 : 400;
-      const FIELD = lite ? 180 : 220;
+      let t0 = performance.now();
+      const COMPRESS = lite ? 700 : 2000;
+      const NAME_HOLD = lite ? 80 : 560;
+      const PRINT_AT = COMPRESS + NAME_HOLD + (lite ? 60 : 160);
+      const GLYPHS = lite ? 170 : 400;
+      const FIELD = lite ? 40 : 220;
       let nameBox = { x0: 0.18, y0: 0.16, x1: 0.82, y1: 0.4 };
+      let nebulaLayer: HTMLCanvasElement | null = null;
+
+      const bakeNebula = () => {
+        if (!lite || tones.light || !w || !h) {
+          nebulaLayer = null;
+          return;
+        }
+        const layer = nebulaLayer ?? document.createElement('canvas');
+        const lw = Math.max(1, Math.floor(w));
+        const lh = Math.max(1, Math.floor(h));
+        if (layer.width !== lw || layer.height !== lh) {
+          layer.width = lw;
+          layer.height = lh;
+        }
+        const g = layer.getContext('2d');
+        if (!g) {
+          nebulaLayer = null;
+          return;
+        }
+        g.clearRect(0, 0, lw, lh);
+        const blobs = [
+          { x: 0.32, y: 0.3, r: 0.5, c: '107, 159, 255', a: 0.14 },
+          { x: 0.7, y: 0.24, r: 0.36, c: '224, 177, 92', a: 0.12 },
+        ];
+        for (const b of blobs) {
+          const grd = g.createRadialGradient(b.x * lw, b.y * lh, 0, b.x * lw, b.y * lh, b.r * Math.max(lw, lh));
+          grd.addColorStop(0, `rgba(${b.c}, ${b.a})`);
+          grd.addColorStop(0.5, `rgba(${b.c}, 0.04)`);
+          grd.addColorStop(1, 'rgba(0,0,0,0)');
+          g.fillStyle = grd;
+          g.fillRect(0, 0, lw, lh);
+        }
+        nebulaLayer = layer;
+      };
 
       const blocked = (t: EventTarget | null) =>
         t instanceof Element &&
@@ -296,7 +330,7 @@
 
       const weaveName = (glyphs: Star[]) => {
         nameEdges = [];
-        if (glyphs.length < 8) return;
+        if (lite || glyphs.length < 8) return;
         const seen = new Set<string>();
         const cap = lite ? 56 : 80;
         const step = Math.max(1, Math.floor(glyphs.length / cap));
@@ -417,10 +451,11 @@
       };
 
       const resize = () => {
-        const dpr = lite ? Math.min(2, window.devicePixelRatio || 1) : Math.min(1.5, window.devicePixelRatio || 1);
         const nextW = Math.max(1, wrap.clientWidth || window.innerWidth);
         const nextH = Math.max(1, wrap.clientHeight || window.innerHeight);
         const widthJump = Math.abs(nextW - lastBox.w) > 24;
+        if (lite && landed && !widthJump && stars.length) return;
+        const dpr = lite ? 1 : Math.min(1.5, window.devicePixelRatio || 1);
         const heightJump = Math.abs(nextH - lastBox.h) > 80;
         w = nextW;
         h = nextH;
@@ -430,15 +465,19 @@
           canvas.width = bw;
           canvas.height = bh;
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          if (lite) ctx.imageSmoothingEnabled = false;
         }
         canvas.style.width = '100%';
         canvas.style.height = '100%';
-        if (!stars.length || widthJump || heightJump) {
+        if (!stars.length || widthJump || (!lite && heightJump)) {
           lastBox = { w, h };
           rebuild();
           userLines.length = 0;
-          wake();
+        } else {
+          lastBox = { w, h };
         }
+        if (lite) bakeNebula();
+        wake();
       };
 
       const line = (a: Star, b: Star, alpha: number, gold = false, width = 0.8) => {
@@ -555,6 +594,26 @@
         s.y = 0.48 + dx * sn + dy * c;
       };
 
+      const paintLite = (compress: number, formed: boolean) => {
+        ctx.fillStyle = tones.sky;
+        ctx.fillRect(0, 0, w, h);
+        if (nebulaLayer && !tones.light) ctx.drawImage(nebulaLayer, 0, 0);
+        const u = formed ? 1 : compress;
+        const glyphA = compress > 0.2 ? 0.95 : 0.35 + compress;
+        const fieldA = tones.light ? 0.38 : 0.24;
+        for (const s of stars) {
+          const tx = s.glyph && s.gx != null ? s.gx : s.hx;
+          const ty = s.glyph && s.gy != null ? s.gy : s.hy;
+          const x = (formed ? tx : s.sx + (tx - s.sx) * u) * w;
+          const y = (formed ? ty : s.sy + (ty - s.sy) * u) * h;
+          if (x < -4 || y < -4 || x > w + 4 || y > h + 4) continue;
+          const col = tones.light ? tones.star : s.gold ? tones.gold : s.cyan ? tones.cyan : tones.star;
+          ctx.fillStyle = `rgba(${col}, ${s.glyph ? glyphA : fieldA})`;
+          const d = s.glyph ? 2.8 : 1.15;
+          ctx.fillRect(x - d * 0.5, y - d * 0.5, d, d);
+        }
+      };
+
       const paint = (now: number) => {
         if (hidden) return;
         leave = pageLeave();
@@ -585,6 +644,16 @@
           else if (!root.classList.contains('is-landing')) root.classList.add('is-landing');
           rememberSky();
           cueHero();
+        }
+
+        if (lite) {
+          paintLite(compress, formed);
+          if (canSleep()) {
+            sleep();
+            return;
+          }
+          raf = requestAnimationFrame(paint);
+          return;
         }
 
         const frozen = lite && landed && !pressing;
@@ -830,12 +899,15 @@
           sleep();
           return;
         }
+        if (lite && landed) return;
         wake();
       };
 
       const arm = () => {
         if (armed) return;
         armed = true;
+        t0 = performance.now();
+        lastFrame = 0;
         resize();
         raf = requestAnimationFrame(paint);
       };
@@ -850,20 +922,30 @@
         arm();
       }
 
-      addEventListener('pointermove', onMove, { passive: true });
-      addEventListener('pointerdown', onDown);
-      document.addEventListener('selectstart', (e) => {
-        if (pressing) e.preventDefault();
-      });
-      addEventListener('pointerup', onUp, { passive: true });
-      addEventListener('pointercancel', onUp, { passive: true });
-      addEventListener('pointerleave', onLeave, { passive: true });
+      if (!lite) {
+        addEventListener('pointermove', onMove, { passive: true });
+        addEventListener('pointerdown', onDown);
+        document.addEventListener('selectstart', (e) => {
+          if (pressing) e.preventDefault();
+        });
+        addEventListener('pointerup', onUp, { passive: true });
+        addEventListener('pointercancel', onUp, { passive: true });
+        addEventListener('pointerleave', onLeave, { passive: true });
+      }
       addEventListener('resize', resize, { passive: true });
       visualViewport?.addEventListener('resize', resize, { passive: true });
       addEventListener(
         'scroll',
         () => {
           scrollY = window.scrollY;
+          if (lite) {
+            const nextAway = scrollY > Math.max(h, window.innerHeight) * 0.9;
+            if (nextAway === away) return;
+            away = nextAway;
+            wrap.classList.toggle('is-away', away);
+            if (away) sleep();
+            return;
+          }
           wake();
         },
         { passive: true },
@@ -876,6 +958,7 @@
       if (play && skipBtn) skipBtn.hidden = false;
       root.addEventListener('themechange', () => {
         syncPalette();
+        if (lite) bakeNebula();
         wake();
       });
 
