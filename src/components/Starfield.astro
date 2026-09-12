@@ -148,11 +148,11 @@
       };
       syncPalette();
       const t0 = performance.now();
-      const COMPRESS = lite ? 720 : 2000;
-      const NAME_HOLD = lite ? 80 : 560;
-      const PRINT_AT = COMPRESS + NAME_HOLD + (lite ? 60 : 160);
-      const GLYPHS = lite ? 180 : 400;
-      const FIELD = lite ? 14 : 220;
+      const COMPRESS = lite ? 900 : 2000;
+      const NAME_HOLD = lite ? 140 : 560;
+      const PRINT_AT = COMPRESS + NAME_HOLD + (lite ? 80 : 160);
+      const GLYPHS = lite ? 240 : 400;
+      const FIELD = lite ? 180 : 220;
       let nameBox = { x0: 0.18, y0: 0.16, x1: 0.82, y1: 0.4 };
 
       const blocked = (t: EventTarget | null) =>
@@ -182,10 +182,11 @@
         landed = true;
         snapHome();
         if (skipBtn) skipBtn.hidden = true;
-        root.classList.add('is-named', 'is-landing', 'is-landed');
+        root.classList.add('is-named', 'is-landed');
         root.classList.remove('is-booting');
+        if (lite) root.classList.remove('is-landing');
+        else root.classList.add('is-landing');
         rememberSky();
-        dock();
         cueHero();
       };
 
@@ -199,7 +200,6 @@
 
       const canSleep = () => {
         if (root.classList.contains('is-booting')) return false;
-        if (lite && landed) return true;
         return idle();
       };
 
@@ -214,20 +214,7 @@
         raf = requestAnimationFrame(paint);
       };
 
-      const dock = () => {
-        if (!lite) return;
-        wrap.classList.add('is-docked');
-        cam.x = 0;
-        cam.y = 0;
-        cam.vx = 0;
-        cam.vy = 0;
-        lastBox = { w: 0, h: 0 };
-        requestAnimationFrame(() => {
-          resize();
-          snapHome();
-          wake();
-        });
-      };
+      const dock = () => {};
 
       const sampleName = () => {
         const pts: { x: number; y: number; gold: boolean }[] = [];
@@ -243,9 +230,7 @@
         const canvasBox = wrap.getBoundingClientRect();
         const skyTop = sky ? sky.top - canvasBox.top : h * 0.12;
         const skyH = sky && sky.height > 32 ? sky.height : h * (lite ? 0.24 : 0.42);
-        let size = lite
-          ? Math.min(w * 0.22, Math.max(44, skyH * 0.48), 58)
-          : Math.min(w * 0.145, h * 0.112, 88);
+        let size = Math.min(w * 0.145, h * 0.112, lite ? 64 : 88);
         const off = document.createElement('canvas');
         const g = off.getContext('2d');
         if (!g) return pts;
@@ -311,11 +296,12 @@
 
       const weaveName = (glyphs: Star[]) => {
         nameEdges = [];
-        if (lite || glyphs.length < 8) return;
+        if (glyphs.length < 8) return;
         const seen = new Set<string>();
-        const step = Math.max(1, Math.floor(glyphs.length / 80));
+        const cap = lite ? 56 : 80;
+        const step = Math.max(1, Math.floor(glyphs.length / cap));
         const maxD = 22 / Math.max(w, 1);
-        for (let i = 0; i < glyphs.length && nameEdges.length < 80; i += step) {
+        for (let i = 0; i < glyphs.length && nameEdges.length < cap; i += step) {
           const a = glyphs[i];
           let best: Star | null = null;
           let bestD = maxD;
@@ -435,8 +421,7 @@
         const nextW = Math.max(1, wrap.clientWidth || window.innerWidth);
         const nextH = Math.max(1, wrap.clientHeight || window.innerHeight);
         const widthJump = Math.abs(nextW - lastBox.w) > 24;
-        const heightJump = Math.abs(nextH - lastBox.h) > 160;
-        if (lite && stars.length && !widthJump && !heightJump) return;
+        const heightJump = Math.abs(nextH - lastBox.h) > 80;
         w = nextW;
         h = nextH;
         const bw = Math.max(1, Math.floor(w * dpr));
@@ -452,7 +437,7 @@
           lastBox = { w, h };
           rebuild();
           userLines.length = 0;
-          if (lite && landed) wake();
+          wake();
         }
       };
 
@@ -483,12 +468,16 @@
         if (wallpaper || tones.light) return;
         const shiftX = cam.x / Math.max(w, 1);
         const shiftY = cam.y / Math.max(h, 1);
-        if (lite) return;
-        const blobs = [
-          { x: 0.3 + Math.sin(t * 0.07) * 0.06 + shiftX * 0.36, y: 0.36 + Math.cos(t * 0.05) * 0.04 + shiftY * 0.36, r: 0.44, c: '107, 159, 255' },
-          { x: 0.68 + Math.cos(t * 0.06) * 0.04 + shiftX * 0.24, y: 0.28 + Math.sin(t * 0.08) * 0.03 + shiftY * 0.24, r: 0.38, c: '224, 177, 92' },
-        ];
-        const nebula = 0.16 * (1 - leave * 0.45);
+        const blobs = lite
+          ? [
+              { x: 0.32 + Math.sin(t * 0.07) * 0.04 + shiftX * 0.2, y: 0.3 + Math.cos(t * 0.05) * 0.03 + shiftY * 0.2, r: 0.5, c: '107, 159, 255' },
+              { x: 0.7 + Math.cos(t * 0.06) * 0.03 + shiftX * 0.14, y: 0.24 + Math.sin(t * 0.08) * 0.02 + shiftY * 0.14, r: 0.36, c: '224, 177, 92' },
+            ]
+          : [
+              { x: 0.3 + Math.sin(t * 0.07) * 0.06 + shiftX * 0.36, y: 0.36 + Math.cos(t * 0.05) * 0.04 + shiftY * 0.36, r: 0.44, c: '107, 159, 255' },
+              { x: 0.68 + Math.cos(t * 0.06) * 0.04 + shiftX * 0.24, y: 0.28 + Math.sin(t * 0.08) * 0.03 + shiftY * 0.24, r: 0.38, c: '224, 177, 92' },
+            ];
+        const nebula = (lite ? 0.14 : 0.16) * (1 - leave * 0.45);
         for (const b of blobs) {
           const g = ctx.createRadialGradient(b.x * w, b.y * h, 0, b.x * w, b.y * h, b.r * Math.max(w, h));
           g.addColorStop(0, `rgba(${b.c}, ${nebula})`);
@@ -590,47 +579,45 @@
         if (play && !landed && elapsed >= PRINT_AT) {
           landed = true;
           snapHome();
-          if (!root.classList.contains('is-landed')) root.classList.add('is-landing');
           root.classList.add('is-landed');
           root.classList.remove('is-booting');
+          if (lite) root.classList.remove('is-landing');
+          else if (!root.classList.contains('is-landing')) root.classList.add('is-landing');
           rememberSky();
-          dock();
           cueHero();
         }
 
-        const frozen = lite && landed;
+        const frozen = lite && landed && !pressing;
 
-        if (!lite) {
-          if (pressing) {
-            pressAge += dt;
-            growConstellation();
-          } else {
-            pressAge = Math.max(0, pressAge - dt * 1.6);
-          }
-
-          for (let i = ripples.length - 1; i >= 0; i--) {
-            ripples[i].r += 480 * dt;
-            ripples[i].life -= dt * 0.9;
-            if (ripples[i].life <= 0) ripples.splice(i, 1);
-          }
-
-          cam.x += cam.vx;
-          cam.y += cam.vy;
-          cam.vx *= pressing ? 0.9 : 0.985;
-          cam.vy *= pressing ? 0.9 : 0.985;
-          if (!pressing) {
-            const pull = leave > 0.35 ? 0.045 : 0.01;
-            cam.x += -cam.x * pull;
-            cam.y += -cam.y * pull;
-          }
-          const camMax = Math.min(w, h) * 0.42;
-          cam.x = Math.max(-camMax, Math.min(camMax, cam.x));
-          cam.y = Math.max(-camMax, Math.min(camMax, cam.y));
-          ptrV.x *= 0.88;
-          ptrV.y *= 0.88;
-          aimView();
-          syncSky();
+        if (pressing) {
+          pressAge += dt;
+          growConstellation();
+        } else {
+          pressAge = Math.max(0, pressAge - dt * 1.6);
         }
+
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          ripples[i].r += 480 * dt;
+          ripples[i].life -= dt * 0.9;
+          if (ripples[i].life <= 0) ripples.splice(i, 1);
+        }
+
+        cam.x += cam.vx;
+        cam.y += cam.vy;
+        cam.vx *= pressing ? 0.9 : 0.985;
+        cam.vy *= pressing ? 0.9 : 0.985;
+        if (!pressing) {
+          const pull = leave > 0.35 ? 0.045 : 0.01;
+          cam.x += -cam.x * pull;
+          cam.y += -cam.y * pull;
+        }
+        const camMax = Math.min(w, h) * 0.42;
+        cam.x = Math.max(-camMax, Math.min(camMax, cam.x));
+        cam.y = Math.max(-camMax, Math.min(camMax, cam.y));
+        ptrV.x *= 0.88;
+        ptrV.y *= 0.88;
+        aimView();
+        syncSky();
 
         paintNebula(t, wallpaper);
         ctx.lineCap = 'round';
@@ -732,28 +719,17 @@
           const alpha = (s.glyph ? (tones.light ? 1 : 0.94) * (1 - leave) : fieldA) * glyphLit;
           const col = tones.light ? tones.star : s.gold ? tones.gold : s.cyan ? tones.cyan : tones.star;
           if (!wallpaper && s.glyph) {
-            const halo = tones.light ? (lite ? 0.18 : 0.1) : lite ? 0.22 : 0.14;
-            const haloR = tones.light ? (lite ? 2.6 : p.r * 2.4) : lite ? 3.4 : p.r * 4;
+            const halo = tones.light ? 0.1 : lite ? 0.1 : 0.14;
+            const haloR = tones.light ? p.r * 2.4 : lite ? p.r * 2.6 : p.r * 4;
             ctx.fillStyle = `rgba(${col}, ${alpha * halo})`;
             ctx.beginPath();
             ctx.arc(p.x, p.y, haloR, 0, Math.PI * 2);
             ctx.fill();
           }
           ctx.fillStyle = `rgba(${col}, ${alpha})`;
-          if (lite) {
-            if (s.glyph) {
-              ctx.beginPath();
-              ctx.arc(p.x, p.y, tones.light ? 1.7 : 1.35, 0, Math.PI * 2);
-              ctx.fill();
-            } else {
-              const dot = Math.max(1, p.r);
-              ctx.fillRect(p.x - dot / 2, p.y - dot / 2, dot, dot);
-            }
-          } else {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, s.glyph ? p.r * 1.06 : p.r, 0, Math.PI * 2);
-            ctx.fill();
-          }
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, s.glyph ? (lite ? Math.max(1.2, p.r * 1.08) : p.r * 1.06) : p.r, 0, Math.PI * 2);
+          ctx.fill();
         }
 
         if (canSleep()) {
@@ -776,7 +752,7 @@
       };
 
       const beginPlay = (x: number, y: number) => {
-        if (pressing || away || (lite && landed)) return;
+        if (pressing || away) return;
         wake();
         pressing = true;
         setSkyDrag(true);
@@ -814,7 +790,8 @@
       };
 
       const onDown = (e: PointerEvent) => {
-        if (blocked(e.target) || away || (lite && landed)) return;
+        if (blocked(e.target) || away) return;
+        if (lite && landed && !(e.target instanceof Element && e.target.closest('.hero-stage'))) return;
         lastPtr = { x: e.clientX, y: e.clientY };
         cursor = { x: e.clientX, y: e.clientY, on: true };
         downAt = { x: e.clientX, y: e.clientY, scroll: scrollY };
@@ -853,14 +830,12 @@
           sleep();
           return;
         }
-        if (lite && landed) return;
         wake();
       };
 
       const arm = () => {
         if (armed) return;
         armed = true;
-        if (lite) dock();
         resize();
         raf = requestAnimationFrame(paint);
       };
@@ -875,32 +850,21 @@
         arm();
       }
 
-      if (!lite) {
-        addEventListener('pointermove', onMove, { passive: true });
-        addEventListener('pointerdown', onDown);
-        document.addEventListener('selectstart', (e) => {
-          if (pressing) e.preventDefault();
-        });
-        addEventListener('pointerup', onUp, { passive: true });
-        addEventListener('pointercancel', onUp, { passive: true });
-        addEventListener('pointerleave', onLeave, { passive: true });
-      }
+      addEventListener('pointermove', onMove, { passive: true });
+      addEventListener('pointerdown', onDown);
+      document.addEventListener('selectstart', (e) => {
+        if (pressing) e.preventDefault();
+      });
+      addEventListener('pointerup', onUp, { passive: true });
+      addEventListener('pointercancel', onUp, { passive: true });
+      addEventListener('pointerleave', onLeave, { passive: true });
       addEventListener('resize', resize, { passive: true });
       visualViewport?.addEventListener('resize', resize, { passive: true });
       addEventListener(
         'scroll',
         () => {
           scrollY = window.scrollY;
-          if (!lite) {
-            wake();
-            return;
-          }
-          const nextAway = scrollY > Math.max(h, window.innerHeight) * 1.15;
-          if (nextAway === away) return;
-          away = nextAway;
-          wrap.classList.toggle('is-away', away);
-          if (away) sleep();
-          else wake();
+          wake();
         },
         { passive: true },
       );

@@ -2079,21 +2079,33 @@ html.is-landed:not(.is-landing) [data-island] {
     transform: none !important;
   }
 
-  .starfield.is-docked {
-    height: calc(var(--nav-offset, var(--nav-h)) + 9.5rem);
-  }
-
   .hero-stage {
-    transition: none;
-    min-height: 9.25rem;
-    padding: 1.1rem 0 0.3rem;
+    display: flex;
+    min-height: 40dvh;
+    padding: calc(var(--nav-offset, var(--nav-h)) + 0.2rem) 0 0.7rem;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.45rem;
+    transition: min-height 700ms var(--ease-buoy);
+    touch-action: pan-y;
   }
 
   html.is-booting:not(.is-landing) .hero-stage {
-    min-height: 42dvh;
+    min-height: 62dvh;
+    transition: none;
+  }
+
+  html.is-booting [data-island] {
+    opacity: 0;
+    transform: none;
+    filter: none;
+    animation: none;
+  }
+
+  html.is-landed [data-island] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    animation: none;
   }
 
   .fx-grain,
@@ -2211,8 +2223,8 @@ html.is-landed:not(.is-landing) [data-island] {
   }
 
   .hero-body {
-    background: var(--bg);
-    padding-top: 0.2rem;
+    background: linear-gradient(180deg, var(--hero-veil), var(--bg) 28%);
+    padding-top: 0.55rem;
   }
 
   .hero-identity {
