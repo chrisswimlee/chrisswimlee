@@ -27,6 +27,41 @@ const og = new URL(site.ogImage, site.url).href;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#000000" />
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        let theme = 'dark';
+        try {
+          const stored = localStorage.getItem('csl-theme');
+          if (stored === 'light' || stored === 'dark') theme = stored;
+          else if (matchMedia('(prefers-color-scheme: light)').matches) theme = 'light';
+        } catch (_) {}
+        root.dataset.theme = theme;
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', theme === 'light' ? '#eceae4' : '#000000');
+      })();
+    </script>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        if (!root.classList.contains('is-booting')) return;
+        const hash = location.hash.replace(/^#/, '');
+        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let seen = false;
+        let replay = false;
+        try {
+          replay = sessionStorage.getItem('sky-replay') === '1';
+          seen = sessionStorage.getItem('sky-seen') === '1';
+        } catch (_) {}
+        const skip = reduced || (Boolean(hash) && hash !== 'top') || (seen && !replay);
+        if (!skip) return;
+        root.classList.remove('is-booting');
+        root.classList.add('is-named', 'is-landed');
+        if (hash && hash !== 'top') root.classList.add('is-sky-away');
+      })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
@@ -51,8 +86,6 @@ const og = new URL(site.ogImage, site.url).href;
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap"
       rel="stylesheet"
     />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#000000" />
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Person',
@@ -93,6 +126,21 @@ const og = new URL(site.ogImage, site.url).href;
     <Nav />
     <slot />
     <Footer />
+    <script is:inline>
+      (() => {
+        const landHash = (raw) => {
+          const id = String(raw || '').replace(/^#/, '');
+          if (!id || id === 'top') return;
+          const root = document.documentElement;
+          root.classList.remove('is-booting');
+          root.classList.add('is-named', 'is-landed', 'is-sky-away');
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' });
+        };
+        landHash(location.hash);
+        addEventListener('hashchange', () => landHash(location.hash));
+      })();
+    </script>
     <script is:inline type="module">
       (() => {
         const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -108,19 +156,6 @@ const og = new URL(site.ogImage, site.url).href;
         if (nav && 'ResizeObserver' in window) new ResizeObserver(setNavOffset).observe(nav);
         addEventListener('resize', setNavOffset, { passive: true });
 
-        const coarse = matchMedia('(pointer: coarse)').matches;
-        if (motion && !coarse) {
-          const spot = (e) => {
-            const node = e.target;
-            if (!(node instanceof Element)) return;
-            const card = node.closest('.work-piece, .achieve-card, .spike, .case-brief, .role-scan');
-            if (!card) return;
-            const r = card.getBoundingClientRect();
-            card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-            card.style.setProperty('--my', `${e.clientY - r.top}px`);
-          };
-          document.addEventListener('pointermove', spot, { passive: true });
-        }
         if (motion && !view) {
           const io = new IntersectionObserver((entries, obs) => {
             for (const e of entries) {

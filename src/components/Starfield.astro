@@ -11,8 +11,12 @@
       if (!root.classList.contains('is-booting')) return;
       root.classList.add('is-named', 'is-landed');
       root.classList.remove('is-booting', 'is-landing');
+      try {
+        sessionStorage.setItem('sky-seen', '1');
+        sessionStorage.removeItem('sky-replay');
+      } catch (_) {}
       root.dispatchEvent(new CustomEvent('hero:in'));
-    }, 6000);
+    }, 4500);
   })();
 </script>
 
@@ -23,11 +27,17 @@
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const saveData = Boolean(navigator.connection?.saveData);
   const home = location.pathname === '/';
-  const SESSION = 'astra-booted';
 
+  const rememberSky = () => {
+    try {
+      sessionStorage.setItem('sky-seen', '1');
+      sessionStorage.removeItem('sky-replay');
+    } catch (_) {}
+  };
   const settle = () => {
     root.classList.add('is-named', 'is-landed');
     root.classList.remove('is-booting', 'is-landing');
+    rememberSky();
   };
   const cueHero = () => root.dispatchEvent(new CustomEvent('hero:in'));
   const skipBoot = () => {
@@ -36,27 +46,35 @@
   };
 
   const shouldPlay = () => {
-    if (!home || !root.classList.contains('is-booting')) return false;
-    if (new URLSearchParams(location.search).get('boot') === '1') return true;
-    if (location.hash) return false;
+    if (!home) return false;
+    const hash = location.hash.replace(/^#/, '');
+    if (hash && hash !== 'top') return false;
+    if (!root.classList.contains('is-booting')) return false;
     try {
-      return sessionStorage.getItem(SESSION) !== '1';
-    } catch {
-      return true;
-    }
+      if (sessionStorage.getItem('sky-replay') === '1') return true;
+      if (sessionStorage.getItem('sky-seen') === '1') return false;
+    } catch (_) {}
+    return true;
   };
+
+  const hashName = location.hash.replace(/^#/, '');
+  if (hashName && hashName !== 'top') {
+    wrap?.classList.add('is-away');
+    root.classList.add('is-sky-away');
+  }
 
   if (!wrap || !canvas || !motion || saveData) {
     wrap?.classList.add('is-static');
     if (root.classList.contains('is-booting')) skipBoot();
   } else {
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx =
+      canvas.getContext('2d', { alpha: false, desynchronized: true }) || canvas.getContext('2d', { alpha: false });
     if (!ctx) {
       wrap.classList.add('is-static');
       if (root.classList.contains('is-booting')) skipBoot();
     } else {
-      const coarse = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
-      const lite = coarse || window.innerWidth < 640;
+      const coarse = matchMedia('(pointer: coarse)').matches;
+      const lite = coarse || window.innerWidth < 720;
       const play = shouldPlay();
 
       type Star = {
@@ -95,6 +113,7 @@
       let lastPtr = { x: 0, y: 0 };
       let ptrV = { x: 0, y: 0 };
       let cam = { x: 0, y: 0, vx: 0, vy: 0 };
+      let view = { cy: 1, sy: 0, cx: 1, sx: 0 };
       let sky = { x: '0', y: '0' };
       let pressing = false;
       let pressAge = 0;
@@ -107,20 +126,45 @@
       let landed = !play;
       let forced = false;
       let armed = false;
+      let away = false;
       const skipBtn = document.querySelector<HTMLButtonElement>('.starfield-skip');
+      let tones = {
+        sky: '#000000',
+        star: '232, 240, 248',
+        gold: '224, 177, 92',
+        cyan: '107, 159, 255',
+        light: false,
+      };
+
+      const syncPalette = () => {
+        const styles = getComputedStyle(root);
+        tones = {
+          sky: styles.getPropertyValue('--sky').trim() || '#000000',
+          star: styles.getPropertyValue('--star-rgb').trim() || '232, 240, 248',
+          gold: styles.getPropertyValue('--star-gold').trim() || '224, 177, 92',
+          cyan: styles.getPropertyValue('--star-cyan').trim() || '107, 159, 255',
+          light: root.getAttribute('data-theme') === 'light',
+        };
+      };
+      syncPalette();
       const t0 = performance.now();
-      const COMPRESS = lite ? 1500 : 2000;
-      const NAME_HOLD = lite ? 360 : 560;
-      const PRINT_AT = COMPRESS + NAME_HOLD + 160;
-      const GLYPHS = lite ? 200 : 400;
-      const FIELD = lite ? 80 : 220;
+      const COMPRESS = lite ? 720 : 2000;
+      const NAME_HOLD = lite ? 80 : 560;
+      const PRINT_AT = COMPRESS + NAME_HOLD + (lite ? 60 : 160);
+      const GLYPHS = lite ? 180 : 400;
+      const FIELD = lite ? 14 : 220;
+      let nameBox = { x0: 0.18, y0: 0.16, x1: 0.82, y1: 0.4 };
 
       const blocked = (t: EventTarget | null) =>
         t instanceof Element &&
         Boolean(t.closest('a, button, input, textarea, select, label, .nav, .cmd-copy, .fx-play'));
 
       const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-      const pageLeave = () => Math.min(1, Math.max(0, (scrollY - h * 0.06) / Math.max(1, h * 0.7)));
+      const docked = () => wrap.classList.contains('is-docked');
+      const pageLeave = () => {
+        if (docked()) return 0;
+        return Math.min(1, Math.max(0, (scrollY - h * 0.06) / Math.max(1, h * 0.7)));
+      };
 
       const snapHome = () => {
         for (const s of stars) {
@@ -137,15 +181,52 @@
         named = true;
         landed = true;
         snapHome();
-        try {
-          sessionStorage.setItem(SESSION, '1');
-        } catch {
-          /* private mode */
-        }
         if (skipBtn) skipBtn.hidden = true;
         root.classList.add('is-named', 'is-landing', 'is-landed');
         root.classList.remove('is-booting');
+        rememberSky();
+        dock();
         cueHero();
+      };
+
+      const idle = () =>
+        landed &&
+        !pressing &&
+        ripples.length === 0 &&
+        userLines.length === 0 &&
+        Math.hypot(cam.x, cam.y) < 0.5 &&
+        Math.hypot(cam.vx, cam.vy) < 0.08;
+
+      const canSleep = () => {
+        if (root.classList.contains('is-booting')) return false;
+        if (lite && landed) return true;
+        return idle();
+      };
+
+      const sleep = () => {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      };
+
+      const wake = () => {
+        if (away || hidden || raf) return;
+        lastFrame = 0;
+        raf = requestAnimationFrame(paint);
+      };
+
+      const dock = () => {
+        if (!lite) return;
+        wrap.classList.add('is-docked');
+        cam.x = 0;
+        cam.y = 0;
+        cam.vx = 0;
+        cam.vy = 0;
+        lastBox = { w: 0, h: 0 };
+        requestAnimationFrame(() => {
+          resize();
+          snapHome();
+          wake();
+        });
       };
 
       const sampleName = () => {
@@ -157,7 +238,14 @@
           { text: 'Lee', gold: false },
         ];
         const phrase = words.map((word) => word.text).join(' ');
-        let size = Math.min(w * 0.145, h * 0.112, 88);
+        const skyEl = document.querySelector('.hero-stage');
+        const sky = skyEl?.getBoundingClientRect();
+        const canvasBox = wrap.getBoundingClientRect();
+        const skyTop = sky ? sky.top - canvasBox.top : h * 0.12;
+        const skyH = sky && sky.height > 32 ? sky.height : h * (lite ? 0.24 : 0.42);
+        let size = lite
+          ? Math.min(w * 0.22, Math.max(44, skyH * 0.48), 58)
+          : Math.min(w * 0.145, h * 0.112, 88);
         const off = document.createElement('canvas');
         const g = off.getContext('2d');
         if (!g) return pts;
@@ -165,7 +253,7 @@
           g.font = `italic 600 ${size}px Fraunces, Georgia, serif`;
         };
         setFont();
-        while (size > 22 && g.measureText(phrase).width > w * 0.9) {
+        while (size > 22 && g.measureText(phrase).width > w * (lite ? 0.86 : 0.88)) {
           size -= 2;
           setFont();
         }
@@ -177,8 +265,9 @@
         g.textBaseline = 'middle';
         g.fillStyle = '#fff';
         const mid = off.height * 0.52;
+        const nameCenterY = skyTop + Math.max(size * 0.62, (skyH - (lite ? 26 : 44)) * 0.5);
         const originX = (w - tw) / 2;
-        const originY = h * 0.48 - mid;
+        const originY = nameCenterY - mid;
         let cursorX = pad;
         const space = g.measureText(' ').width;
         for (const word of words) {
@@ -190,7 +279,7 @@
           const x1 = Math.min(off.width, Math.ceil(cursorX + ww + 4));
           const y1 = Math.min(off.height, Math.ceil(mid + size * 0.55));
           const img = g.getImageData(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
-          const step = lite ? 3 : 2;
+          const step = lite ? 2 : 2;
           for (let y = 0; y < img.height; y += step) {
             for (let x = 0; x < img.width; x += step) {
               if (img.data[(y * img.width + x) * 4 + 3] > 88) {
@@ -199,6 +288,19 @@
             }
           }
           cursorX += ww + space;
+        }
+        if (pts.length) {
+          let x0 = 1;
+          let y0 = 1;
+          let x1 = 0;
+          let y1 = 0;
+          for (const p of pts) {
+            if (p.x < x0) x0 = p.x;
+            if (p.y < y0) y0 = p.y;
+            if (p.x > x1) x1 = p.x;
+            if (p.y > y1) y1 = p.y;
+          }
+          nameBox = { x0: x0 - 0.05, y0: y0 - 0.045, x1: x1 + 0.05, y1: y1 + 0.06 };
         }
         if (pts.length <= GLYPHS) return pts;
         const picked: typeof pts = [];
@@ -247,8 +349,11 @@
           const ring = 0.1 + Math.random() * 0.26;
           const ang = Math.random() * Math.PI * 2;
           const around = !glyph && Math.random() < 0.22;
-          const hx = glyph && g ? g.x : around ? 0.5 + Math.cos(ang) * ring * aspect : Math.random();
-          const hy = glyph && g ? g.y : around ? 0.48 + Math.sin(ang) * ring : Math.random();
+          let hx = glyph && g ? g.x : around ? 0.5 + Math.cos(ang) * ring * aspect : Math.random();
+          let hy = glyph && g ? g.y : around ? 0.48 + Math.sin(ang) * ring : Math.random();
+          if (!glyph && hx > nameBox.x0 && hx < nameBox.x1 && hy > nameBox.y0 && hy < nameBox.y1) {
+            hy = nameBox.y1 + 0.06 + Math.random() * 0.35;
+          }
           const arm = (i / Math.max(1, total - 1)) * Math.PI * 7.4 + tw;
           const rad = 0.1 + (i % 11) * 0.038 + Math.random() * 0.07;
           const x = play ? 0.5 + Math.cos(arm) * rad * aspect : hx;
@@ -275,15 +380,37 @@
           });
         }
         weaveName(stars.filter((s) => s.glyph));
+        if (landed || forced || !play) {
+          for (const s of stars) {
+            s.x = s.glyph && s.gx != null ? s.gx : s.hx;
+            s.y = s.glyph && s.gy != null ? s.gy : s.hy;
+            s.sx = s.x;
+            s.sy = s.y;
+          }
+        }
+      };
+
+      const aimView = () => {
+        const keep = 1 - leave * 0.65;
+        const yaw = (cam.x / Math.max(w, 1)) * 0.95 * keep;
+        const pitch = (cam.y / Math.max(h, 1)) * 0.72 * keep;
+        view.cy = Math.cos(yaw);
+        view.sy = Math.sin(yaw);
+        view.cx = Math.cos(pitch);
+        view.sx = Math.sin(pitch);
       };
 
       const screen = (s: Star) => {
-        const depth = s.glyph ? 0.18 : 0.4 + (1 - s.z) * 0.95;
-        const keep = 1 - leave * 0.65;
-        const drift = s.glyph ? scrollY : scrollY * (0.05 + (1 - s.z) * 0.07);
+        const x0 = s.x - 0.5;
+        const y0 = s.y - 0.48;
+        const z = (s.glyph ? 0.12 : s.z) - 0.35;
+        const x1 = x0 * view.cy + z * view.sy;
+        const z1 = z * view.cy - x0 * view.sy;
+        const y1 = y0 * view.cx - z1 * view.sx;
+        const drift = docked() ? 0 : s.glyph ? scrollY : scrollY * (0.05 + (1 - s.z) * 0.07);
         return {
-          x: s.x * w + cam.x * depth * keep,
-          y: s.y * h + cam.y * depth * keep - drift,
+          x: (0.5 + x1) * w,
+          y: (0.48 + y1) * h - drift,
           r: Math.max(0.35, s.size * (1.35 - s.z * 0.4)),
         };
       };
@@ -304,11 +431,12 @@
       };
 
       const resize = () => {
-        const dpr = lite ? Math.min(1.25, window.devicePixelRatio || 1) : Math.min(1.5, window.devicePixelRatio || 1);
-        const nextW = window.innerWidth;
-        const nextH = window.innerHeight;
+        const dpr = lite ? Math.min(2, window.devicePixelRatio || 1) : Math.min(1.5, window.devicePixelRatio || 1);
+        const nextW = Math.max(1, wrap.clientWidth || window.innerWidth);
+        const nextH = Math.max(1, wrap.clientHeight || window.innerHeight);
         const widthJump = Math.abs(nextW - lastBox.w) > 24;
         const heightJump = Math.abs(nextH - lastBox.h) > 160;
+        if (lite && stars.length && !widthJump && !heightJump) return;
         w = nextW;
         h = nextH;
         const bw = Math.max(1, Math.floor(w * dpr));
@@ -316,21 +444,22 @@
         if (canvas.width !== bw || canvas.height !== bh) {
           canvas.width = bw;
           canvas.height = bh;
-          canvas.style.width = `${w}px`;
-          canvas.style.height = `${h}px`;
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
         if (!stars.length || widthJump || heightJump) {
           lastBox = { w, h };
           rebuild();
           userLines.length = 0;
+          if (lite && landed) wake();
         }
       };
 
       const line = (a: Star, b: Star, alpha: number, gold = false, width = 0.8) => {
         const pa = screen(a);
         const pb = screen(b);
-        ctx.strokeStyle = gold ? `rgba(224, 177, 92, ${alpha})` : `rgba(160, 210, 255, ${alpha})`;
+        ctx.strokeStyle = gold ? `rgba(${tones.gold}, ${alpha})` : `rgba(${tones.cyan}, ${alpha})`;
         ctx.lineWidth = width;
         ctx.beginPath();
         ctx.moveTo(pa.x, pa.y);
@@ -349,17 +478,16 @@
       };
 
       const paintNebula = (t: number, wallpaper: boolean) => {
-        ctx.fillStyle = '#010208';
+        ctx.fillStyle = tones.sky;
         ctx.fillRect(0, 0, w, h);
-        if (wallpaper) return;
+        if (wallpaper || tones.light) return;
         const shiftX = cam.x / Math.max(w, 1);
         const shiftY = cam.y / Math.max(h, 1);
-        const blobs = lite
-          ? [{ x: 0.42 + shiftX * 0.2, y: 0.4 + shiftY * 0.2, r: 0.5, c: '36, 64, 148' }]
-          : [
-              { x: 0.3 + Math.sin(t * 0.07) * 0.06 + shiftX * 0.36, y: 0.36 + Math.cos(t * 0.05) * 0.04 + shiftY * 0.36, r: 0.44, c: '36, 64, 148' },
-              { x: 0.68 + Math.cos(t * 0.06) * 0.04 + shiftX * 0.24, y: 0.28 + Math.sin(t * 0.08) * 0.03 + shiftY * 0.24, r: 0.38, c: '224, 177, 92' },
-            ];
+        if (lite) return;
+        const blobs = [
+          { x: 0.3 + Math.sin(t * 0.07) * 0.06 + shiftX * 0.36, y: 0.36 + Math.cos(t * 0.05) * 0.04 + shiftY * 0.36, r: 0.44, c: '107, 159, 255' },
+          { x: 0.68 + Math.cos(t * 0.06) * 0.04 + shiftX * 0.24, y: 0.28 + Math.sin(t * 0.08) * 0.03 + shiftY * 0.24, r: 0.38, c: '224, 177, 92' },
+        ];
         const nebula = 0.16 * (1 - leave * 0.45);
         for (const b of blobs) {
           const g = ctx.createRadialGradient(b.x * w, b.y * h, 0, b.x * w, b.y * h, b.r * Math.max(w, h));
@@ -382,7 +510,7 @@
         }
         if (pressing && cursor.on) {
           const touch = ctx.createRadialGradient(cursor.x, cursor.y, 6, cursor.x, cursor.y, 220 + pressAge * 50);
-          touch.addColorStop(0, 'rgba(220, 236, 255, 0.18)');
+          touch.addColorStop(0, 'rgba(232, 240, 248, 0.18)');
           touch.addColorStop(0.35, 'rgba(107, 159, 255, 0.08)');
           touch.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = touch;
@@ -391,7 +519,7 @@
         for (const ripple of ripples) {
           const g = ctx.createRadialGradient(ripple.x, ripple.y, Math.max(0, ripple.r - 16), ripple.x, ripple.y, ripple.r + 6);
           g.addColorStop(0, 'rgba(0,0,0,0)');
-          g.addColorStop(0.7, `rgba(200, 230, 255, ${0.14 * ripple.life})`);
+          g.addColorStop(0.7, `rgba(107, 159, 255, ${0.14 * ripple.life})`);
           g.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = g;
           ctx.fillRect(0, 0, w, h);
@@ -442,9 +570,10 @@
         if (hidden) return;
         leave = pageLeave();
         const wallpaper = leave > 0.7 && !pressing;
-        const minDelta = wallpaper ? 80 : lite ? 33 : 16;
+        const minDelta = wallpaper || (lite && landed) ? 80 : lite ? 50 : 16;
         if (lastFrame && now - lastFrame < minDelta - 1) {
-          raf = requestAnimationFrame(paint);
+          if (canSleep()) sleep();
+          else raf = requestAnimationFrame(paint);
           return;
         }
         const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0.016;
@@ -457,53 +586,57 @@
         if (play && !named && elapsed >= COMPRESS + NAME_HOLD) {
           named = true;
           root.classList.add('is-named');
-          try {
-            sessionStorage.setItem(SESSION, '1');
-          } catch {
-            /* private mode */
-          }
         }
         if (play && !landed && elapsed >= PRINT_AT) {
           landed = true;
-          if (skipBtn) skipBtn.hidden = true;
-          root.classList.add('is-landing');
+          snapHome();
+          if (!root.classList.contains('is-landed')) root.classList.add('is-landing');
+          root.classList.add('is-landed');
+          root.classList.remove('is-booting');
+          rememberSky();
+          dock();
           cueHero();
         }
 
-        if (pressing) {
-          pressAge += dt;
-          growConstellation();
-        } else {
-          pressAge = Math.max(0, pressAge - dt * 1.6);
-        }
+        const frozen = lite && landed;
 
-        for (let i = ripples.length - 1; i >= 0; i--) {
-          ripples[i].r += (lite ? 360 : 480) * dt;
-          ripples[i].life -= dt * 0.9;
-          if (ripples[i].life <= 0) ripples.splice(i, 1);
-        }
+        if (!lite) {
+          if (pressing) {
+            pressAge += dt;
+            growConstellation();
+          } else {
+            pressAge = Math.max(0, pressAge - dt * 1.6);
+          }
 
-        cam.x += cam.vx;
-        cam.y += cam.vy;
-        cam.vx *= pressing ? 0.9 : 0.985;
-        cam.vy *= pressing ? 0.9 : 0.985;
-        if (!pressing) {
-          const pull = leave > 0.35 ? 0.045 : 0.01;
-          cam.x += -cam.x * pull;
-          cam.y += -cam.y * pull;
+          for (let i = ripples.length - 1; i >= 0; i--) {
+            ripples[i].r += 480 * dt;
+            ripples[i].life -= dt * 0.9;
+            if (ripples[i].life <= 0) ripples.splice(i, 1);
+          }
+
+          cam.x += cam.vx;
+          cam.y += cam.vy;
+          cam.vx *= pressing ? 0.9 : 0.985;
+          cam.vy *= pressing ? 0.9 : 0.985;
+          if (!pressing) {
+            const pull = leave > 0.35 ? 0.045 : 0.01;
+            cam.x += -cam.x * pull;
+            cam.y += -cam.y * pull;
+          }
+          const camMax = Math.min(w, h) * 0.42;
+          cam.x = Math.max(-camMax, Math.min(camMax, cam.x));
+          cam.y = Math.max(-camMax, Math.min(camMax, cam.y));
+          ptrV.x *= 0.88;
+          ptrV.y *= 0.88;
+          aimView();
+          syncSky();
         }
-        const camMax = Math.min(w, h) * 0.42;
-        cam.x = Math.max(-camMax, Math.min(camMax, cam.x));
-        cam.y = Math.max(-camMax, Math.min(camMax, cam.y));
-        ptrV.x *= 0.88;
-        ptrV.y *= 0.88;
-        syncSky();
 
         paintNebula(t, wallpaper);
         ctx.lineCap = 'round';
 
         if (formed && named && !wallpaper && leave < 0.9) {
-          const edgeA = 1 - leave;
+          const edgeA = (1 - leave) * (tones.light ? 1.35 : 1);
           for (const edge of nameEdges) line(edge.a, edge.b, (edge.a.gold || edge.b.gold ? 0.15 : 0.08) * edgeA, edge.a.gold || edge.b.gold);
         }
 
@@ -537,7 +670,7 @@
           if (!formed) {
             if (s.glyph && s.gx != null && s.gy != null) spiralTo(s, s.gx, s.gy, compress);
             else if (play) spiralTo(s, s.hx, s.hy, compress);
-          } else if (!wallpaper) {
+          } else if (!wallpaper && !frozen) {
             const homeX = s.glyph && s.gx != null ? s.gx : s.hx;
             const homeY = s.glyph && s.gy != null ? s.gy : s.hy;
             const p = screen(s);
@@ -548,12 +681,12 @@
               const reach = 300;
               if (d < reach) {
                 const falloff = (reach - d) / reach;
-                s.vx += (dx / d) * falloff * 0.014 * (s.glyph ? 0.7 : 1.7);
-                s.vy += (dy / d) * falloff * 0.014 * (s.glyph ? 0.7 : 1.7);
-                s.vx += -((dy / d) * falloff * 0.008);
-                s.vy += (dx / d) * falloff * 0.008;
-                s.vx += (ptrV.x / Math.max(w, 1)) * falloff * 0.03;
-                s.vy += (ptrV.y / Math.max(h, 1)) * falloff * 0.03;
+                s.vx += (dx / d) * falloff * 0.003 * (s.glyph ? 0.35 : 1);
+                s.vy += (dy / d) * falloff * 0.003 * (s.glyph ? 0.35 : 1);
+                s.vx += -((dy / d) * falloff * 0.01);
+                s.vy += (dx / d) * falloff * 0.01;
+                s.vx += (ptrV.x / Math.max(w, 1)) * falloff * 0.008;
+                s.vy += (ptrV.y / Math.max(h, 1)) * falloff * 0.008;
               }
             }
             for (const ripple of ripples) {
@@ -578,30 +711,55 @@
           }
 
           if (s.glyph && leave > 0.96) continue;
+          if (
+            !s.glyph &&
+            leave < 0.88 &&
+            s.hx > nameBox.x0 &&
+            s.hx < nameBox.x1 &&
+            s.hy > nameBox.y0 &&
+            s.hy < nameBox.y1
+          ) {
+            continue;
+          }
           const p = screen(s);
           if (p.x < -16 || p.y < -16 || p.x > w + 16 || p.y > h + 16) continue;
-          const twinkle = wallpaper ? 0.7 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * (1.2 + s.z) + s.tw));
+          const twinkle =
+            lite || wallpaper ? 0.82 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * (1.2 + s.z) + s.tw));
           const glyphLit = s.glyph && compress > 0.28 ? 1 : twinkle;
-          const fieldA = (0.14 + 0.4 * (1 - s.z)) * (0.72 + 0.28 * (1 - leave));
-          const alpha = (s.glyph ? 0.94 * (1 - leave) : fieldA) * glyphLit;
-          const col = s.gold ? '224, 177, 92' : s.cyan ? '120, 190, 255' : '230, 238, 255';
-          if (!lite && !wallpaper && s.glyph) {
-            ctx.fillStyle = `rgba(${col}, ${alpha * 0.14})`;
+          const fieldA =
+            (tones.light ? 0.35 + 0.55 * (1 - s.z) : 0.14 + 0.4 * (1 - s.z)) *
+            (0.72 + 0.28 * (1 - leave));
+          const alpha = (s.glyph ? (tones.light ? 1 : 0.94) * (1 - leave) : fieldA) * glyphLit;
+          const col = tones.light ? tones.star : s.gold ? tones.gold : s.cyan ? tones.cyan : tones.star;
+          if (!wallpaper && s.glyph) {
+            const halo = tones.light ? (lite ? 0.18 : 0.1) : lite ? 0.22 : 0.14;
+            const haloR = tones.light ? (lite ? 2.6 : p.r * 2.4) : lite ? 3.4 : p.r * 4;
+            ctx.fillStyle = `rgba(${col}, ${alpha * halo})`;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, haloR, 0, Math.PI * 2);
             ctx.fill();
           }
           ctx.fillStyle = `rgba(${col}, ${alpha})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, s.glyph ? p.r * 1.06 : p.r, 0, Math.PI * 2);
-          ctx.fill();
+          if (lite) {
+            if (s.glyph) {
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, tones.light ? 1.7 : 1.35, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              const dot = Math.max(1, p.r);
+              ctx.fillRect(p.x - dot / 2, p.y - dot / 2, dot, dot);
+            }
+          } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, s.glyph ? p.r * 1.06 : p.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
 
-        if (play && landed && elapsed >= PRINT_AT + 600 && root.classList.contains('is-booting')) {
-          root.classList.add('is-landed');
-          root.classList.remove('is-booting');
+        if (canSleep()) {
+          sleep();
+          return;
         }
-
         raf = requestAnimationFrame(paint);
       };
 
@@ -612,9 +770,16 @@
         }
       };
 
+      const setSkyDrag = (on: boolean) => {
+        root.classList.toggle('is-sky-drag', on);
+        if (on) window.getSelection()?.removeAllRanges();
+      };
+
       const beginPlay = (x: number, y: number) => {
-        if (pressing) return;
+        if (pressing || away || (lite && landed)) return;
+        wake();
         pressing = true;
+        setSkyDrag(true);
         pressAge = 0;
         ripples.push({ x, y, r: 8, life: 1 });
         if (userLines.length > 36) return;
@@ -625,6 +790,7 @@
       };
 
       const onMove = (e: PointerEvent) => {
+        if (pressing) wake();
         const dx = e.clientX - lastPtr.x;
         const dy = e.clientY - lastPtr.y;
         if (lastPtr.x || lastPtr.y) {
@@ -648,12 +814,13 @@
       };
 
       const onDown = (e: PointerEvent) => {
-        if (blocked(e.target)) return;
+        if (blocked(e.target) || away || (lite && landed)) return;
         lastPtr = { x: e.clientX, y: e.clientY };
         cursor = { x: e.clientX, y: e.clientY, on: true };
         downAt = { x: e.clientX, y: e.clientY, scroll: scrollY };
         cancelHold();
         if (!coarse) {
+          e.preventDefault();
           beginPlay(e.clientX, e.clientY);
           return;
         }
@@ -670,28 +837,30 @@
           cam.vy += ptrV.y * 1.1;
         }
         pressing = false;
+        setSkyDrag(false);
       };
 
       const onLeave = () => {
         cancelHold();
         cursor.on = false;
         pressing = false;
+        setSkyDrag(false);
       };
 
       const onVis = () => {
         hidden = document.hidden;
         if (hidden) {
-          cancelAnimationFrame(raf);
-          raf = 0;
+          sleep();
           return;
         }
-        lastFrame = 0;
-        raf = requestAnimationFrame(paint);
+        if (lite && landed) return;
+        wake();
       };
 
       const arm = () => {
         if (armed) return;
         armed = true;
+        if (lite) dock();
         resize();
         raf = requestAnimationFrame(paint);
       };
@@ -706,25 +875,56 @@
         arm();
       }
 
-      addEventListener('pointermove', onMove, { passive: true });
-      addEventListener('pointerdown', onDown, { passive: true });
-      addEventListener('pointerup', onUp, { passive: true });
-      addEventListener('pointercancel', onUp, { passive: true });
+      if (!lite) {
+        addEventListener('pointermove', onMove, { passive: true });
+        addEventListener('pointerdown', onDown);
+        document.addEventListener('selectstart', (e) => {
+          if (pressing) e.preventDefault();
+        });
+        addEventListener('pointerup', onUp, { passive: true });
+        addEventListener('pointercancel', onUp, { passive: true });
+        addEventListener('pointerleave', onLeave, { passive: true });
+      }
       addEventListener('resize', resize, { passive: true });
+      visualViewport?.addEventListener('resize', resize, { passive: true });
       addEventListener(
         'scroll',
         () => {
           scrollY = window.scrollY;
+          if (!lite) {
+            wake();
+            return;
+          }
+          const nextAway = scrollY > Math.max(h, window.innerHeight) * 1.15;
+          if (nextAway === away) return;
+          away = nextAway;
+          wrap.classList.toggle('is-away', away);
+          if (away) sleep();
+          else wake();
         },
         { passive: true },
       );
       document.addEventListener('visibilitychange', onVis);
-      addEventListener('pointerleave', onLeave, { passive: true });
       addEventListener('keydown', (e) => {
         if (e.key === 'Escape' || e.key === 'Enter') skipPlay();
       });
       skipBtn?.addEventListener('click', skipPlay);
       if (play && skipBtn) skipBtn.hidden = false;
+      root.addEventListener('themechange', () => {
+        syncPalette();
+        wake();
+      });
+
+      addEventListener('hashchange', () => {
+        const next = location.hash.replace(/^#/, '');
+        if (!next || next === 'top') return;
+        wrap.classList.add('is-away');
+        root.classList.add('is-sky-away');
+        away = true;
+        sleep();
+        if (play && !landed) skipPlay();
+        else if (root.classList.contains('is-booting')) skipBoot();
+      });
 
       if (!play && root.classList.contains('is-booting')) skipBoot();
     }

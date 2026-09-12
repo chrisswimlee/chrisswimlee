@@ -10,23 +10,50 @@ import { education, experienceIntro, roles, skills } from '../data/site';
   <div class="timeline">
     {
       roles.map((role) => (
-        <article class="role role-scan" data-reveal>
-          <div class="when-col">
-            <p class="when">{role.dates}</p>
-            {role.location && <p class="when">{role.location}</p>}
-          </div>
-          <div>
-            <h3>{role.title}</h3>
-            <p class="company">{role.company}</p>
-            <p class="role-note">{role.scan}</p>
-          </div>
+        <article class="role role-scan role-explore" data-reveal>
+          <details class="role-fold" id={role.id}>
+            <summary class="role-summary">
+              <div class="when-col">
+                <p class="when">{role.dates}</p>
+                {role.location && <p class="when">{role.location}</p>}
+              </div>
+              <div>
+                <h3>{role.title}</h3>
+                <p class="company">{role.company}</p>
+                <p class="role-note">{role.scan}</p>
+              </div>
+            </summary>
+            <div class="role-projects">
+              {role.projects.map((project) => (
+                <details class="project-fold">
+                  <summary class="project-summary">
+                    <span class="project-title">{project.title}</span>
+                    <span class="project-line">{project.oneLiner}</span>
+                  </summary>
+                  <div class="project-body">
+                    {project.points.length > 0 && (
+                      <ul>
+                        {project.points.map((point) => (
+                          <li>{point}</li>
+                        ))}
+                      </ul>
+                    )}
+                    <p class="project-jump">
+                      <a href={`/experience/#${project.id}`}>Open in archive</a>
+                    </p>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </details>
         </article>
       ))
     }
   </div>
 
   <p class="resume-jump" data-reveal>
-    <a class="btn" href="/resume/">Full resume</a>
+    <a class="btn btn-solid" href="/experience/">Full archive</a>
+    <a class="btn" href="/resume/">Resume</a>
   </p>
 
   <div class="resume-extras" data-reveal>
@@ -62,3 +89,7 @@ import { education, experienceIntro, roles, skills } from '../data/site';
     </div>
   </div>
 </section>
+
+<script>
+  import '../scripts/open-hash-details';
+</script>

@@ -1,16 +1,16 @@
 ---
-import { sectionMessages, technicalAchievements } from '../data/site';
+import { achievementsNote, technicalAchievements } from '../data/site';
 ---
 
 <section class="section" id="achievements">
   <div class="section-head">
     <h2>Achievements</h2>
-    <p class="note" data-reveal>{sectionMessages.achievements}</p>
+    <p class="note" data-reveal>{achievementsNote}</p>
   </div>
-  <ul class="achieve-grid bento">
+  <ul class="achieve-grid">
     {
       technicalAchievements.map((item) => (
-        <li class="achieve-card glass chrome" data-reveal data-depth="1">
+        <li class="achieve-card glass" data-reveal>
           <p class="kicker">{item.label}</p>
           <p class="achieve-value">
             {item.prefix && <span class="achieve-affix">{item.prefix}</span>}

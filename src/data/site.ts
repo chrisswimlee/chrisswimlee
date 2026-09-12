@@ -16,12 +16,10 @@ export const site = {
 };
 
 export const nav = [
-  { href: '/#systems', label: 'Build' },
   { href: '/#achievements', label: 'Achievements' },
   { href: '/#range', label: 'Range' },
   { href: '/#work', label: 'Work' },
   { href: '/#experience', label: 'Experience' },
-  { href: '/#about', label: 'About' },
 ];
 
 export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Chris Swim Lee')}&body=${encodeURIComponent('What you need (role / project / tutoring):\n\nWhat’s stuck, or what you’re hiring for:\n\nWhere (city / remote):\n')}`;
@@ -29,44 +27,16 @@ export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent
 export const hero = {
   kicker: 'Problem solver · New York',
   lede: 'Put the problem in front of me. I will find a way through it — even if I have to learn the stack first.',
-  stack: ['Java', 'Python', 'Kafka', 'PyTorch', 'MLX', 'SQL'],
 };
 
-export const thesis = {
-  why: {
-    line: 'I am a problem solver.',
-    detail: 'I love coding, learning how a business actually works, and putting both to work. I want as many hard problems as I can take — especially the ones that build the future of AI.',
-  },
-  how: {
-    line: 'I attack it. I break it down.',
-    detail: 'I am not always the person who already knows. I am the person who learns it, cuts the work into modules, and does not stop until it ships.',
-  },
-  what: {
-    line: 'Modular systems you can upgrade.',
-    detail: 'The product is not a one-off. It is a system with clean seams — so the next version, the next model, the next constraint can land without a rewrite.',
-  },
-};
+export const thesis = [
+  'I learn the unfamiliar piece, cut it into modules, and ship.',
+  'The product is a system with seams — so the next constraint can land.',
+];
 
-export const experienceIntro = 'Goldman. A founding CTO seat. Then the systems you can open.';
+export const experienceIntro = 'Goldman. A founding CTO seat. Then HAIT. Click a job to open the work.';
 
-export const buildSystem = {
-  paragraphs: [
-    'The last six years are the proof of range, not of a specialty. Java and Kafka under Goldman compliance. Python agents and PyTorch on a founding clock. PHP, hosting, and security for an institute that does not have a campus yet. A playable site. An OpenAI-compatible gateway on PyPI. Each one started as a problem I had not shipped before.',
-    'Give me the brief and enough time. I will learn the unfamiliar piece, make the seams clean, and leave something you can run — and change — without a rewrite.',
-  ],
-  links: [
-    { label: 'Local Lattice', hint: 'GitHub', href: 'https://github.com/chrisswimlee/local-lattice' },
-    { label: 'Local Lattice', hint: 'PyPI', href: 'https://pypi.org/project/local-lattice/' },
-    { label: 'HAIT', hint: 'haitedu.com', href: 'https://haitedu.com' },
-    { label: 'D22-soso', hint: 'd22soso.com', href: 'https://d22soso.com' },
-    { label: 'GitHub', hint: 'everything else', href: 'https://github.com/chrisswimlee' },
-  ],
-};
-
-export const sectionMessages = {
-  systems: 'I find the constraint, learn the stack, and ship a system you can upgrade.',
-  achievements: 'Proof that the method holds.',
-};
+export const achievementsNote = 'Goldman, then a founding clock.';
 
 type Spike = {
   id: 'theory' | 'build' | 'strategy';
@@ -106,7 +76,7 @@ export const range = {
       id: 'strategy',
       label: 'Strategic execution',
       domain: 'Competitive meta and rapid learning',
-      trains: 'A clock, a hidden hand, then a system I have not seen yet.',
+      trains: 'Nine years apart at the top of the same ladder, three different metagames.',
       proof: [
         '#1 on the Hearthstone Americas Wild ladder — October 2016, January 2019, and November 2025.',
         '#1 seed for the 2019 Wild Open.',
@@ -115,21 +85,6 @@ export const range = {
     },
   ] as Spike[],
 };
-
-type Proof = {
-  prefix?: string;
-  value: number | string;
-  suffix: string;
-  label: string;
-  hint: string;
-};
-
-export const proof: Proof[] = [
-  { value: 10000, suffix: '+', label: 'client accounts', hint: 'Goldman beneficiary system' },
-  { value: 80, suffix: '%', label: 'faster processing', hint: 'data pipeline rewrite' },
-  { value: 50, suffix: '+', label: 'internal teams', hint: 'Java and Kafka APIs' },
-  { value: 'PyPI', suffix: '', label: 'local-lattice', hint: 'OpenAI-compatible gateway' },
-];
 
 export type TechnicalAchievement = {
   id: string;
@@ -158,16 +113,7 @@ export const technicalAchievements: TechnicalAchievement[] = [
     prefix: '<',
     suffix: 'ms',
     claim: 'Market-data in, end to end.',
-    proof: 'Kafka across exchanges. Millions of ticks. Sub-100ms from feed to the book the agents traded on.',
-  },
-  {
-    id: 'agents',
-    label: 'Agents',
-    value: 4,
-    suffix: '',
-    claim: 'Swarm modes over HTTP.',
-    proof:
-      'Local Lattice on PyPI — role:coder, role:reasoner, role:fast, then fanout, vote, pipeline, debate.',
+    proof: 'Kafka on Kraken crypto futures. Millions of ticks. Sub-100ms from feed to the book the agents traded on.',
   },
   {
     id: 'models',
@@ -178,122 +124,25 @@ export const technicalAchievements: TechnicalAchievement[] = [
     proof:
       'PyTorch time-series signals. Unified-memory training on Apple silicon next to cloud. Daily pre-market briefings that cut the manual pass by 90%.',
   },
-  {
-    id: 'zero',
-    label: 'Zero to one',
-    value: 3,
-    suffix: '',
-    claim: 'Systems that did not exist.',
-    proof:
-      'Founding CTO: market-data to live signals. HAIT’s public site, PHP, hosting, and security before there is a campus. D22-soso with a Random race roll and an in-site 2 Hand Hold’em table.',
-  },
-  {
-    id: 'earlier',
-    label: 'Earlier',
-    value: 70,
-    suffix: '%',
-    claim: 'Faster on the email path.',
-    proof: 'One Dave. Full-stack for national defense and nuclear energy. A system-wide upgrade that cut email-server response time by 70%.',
-  },
 ];
 
-type CaseBrief = {
-  problem: string;
-  constraint: string;
-  decision: string;
-  outcome: string;
-  interfaces?: string;
-  again?: string;
+export const trading = {
+  kicker: 'Stealth fintech · founding CTO',
+  title: 'Agentic trading engine',
+  metric: '0 → 1',
+  metricLabel: 'market-data to live signals',
+  problem: 'A stealth desk needed market-data in and live futures execution out. No pipeline existed.',
+  constraint: 'Kraken crypto futures, a legacy SQL book. The product cannot be shown.',
+  decision: 'Python and Kafka on the Kraken feed. Agents audit SQL. A PyTorch brief on a clock.',
+  outcome: 'Zero to one on a clock the desk can run.',
 };
-
-export const cases: Record<'lattice' | 'goldman' | 'trading', CaseBrief> = {
-  lattice: {
-    problem: 'Agents were bound to model strings. Switching a backend meant rewriting the call site.',
-    constraint: 'Local-first — MLX and LM Studio — without locking out cloud when a role needs it.',
-    decision: 'An OpenAI-compatible gateway. Assign role:coder, role:reasoner, role:fast. Swarm primitives over HTTP.',
-    outcome:
-      'Published on PyPI, Apache-2.0. Agents ask for a capability and get a model back.',
-  },
-  goldman: {
-    problem: 'Beneficiary data for 10,000+ client accounts was too slow to operate.',
-    constraint: 'Compliance, 50+ internal consumers, and the pager after it shipped.',
-    decision:
-      'Java and Kafka on beneficiary.* plus REST /v1/accounts. TestNG and Selenium on the KYC and compliance cases. Stayed on the line.',
-    outcome: '80% faster processing. 15% lower data-access latency. Test accuracy up 22%.',
-    interfaces: 'kafka topic beneficiary.* · REST /v1/accounts · TestNG + Selenium KYC',
-    again: 'I would split the batch job from the serving path earlier. The 80% was the pipeline; the pager was the coupling.',
-  },
-  trading: {
-    problem: 'A stealth desk needed market-data in and signals out. No pipeline existed.',
-    constraint: 'Multiple exchanges, a legacy SQL book. The product cannot be shown.',
-    decision: 'Python and Kafka across the feeds. Agents audit SQL. A PyTorch brief on a clock.',
-    outcome: 'Zero to one on a clock the desk can run.',
-  },
-};
-
-type System = {
-  id: 'lattice' | 'goldman' | 'trading';
-  kind: string;
-  year: string;
-  kicker: string;
-  title: string;
-  metric: string;
-  metricLabel: string;
-  summary: string;
-  stack: string[];
-  href?: string;
-  command?: string;
-};
-
-export const systems: System[] = [
-  {
-    id: 'lattice',
-    kind: 'Open source',
-    year: '2026',
-    kicker: 'Apache-2.0 · PyPI',
-    title: 'Local Lattice',
-    metric: 'role:*',
-    metricLabel: 'capability, not a model string',
-    summary:
-      'Local-first OpenAI-compatible gateway. Plug MLX, LM Studio, or cloud into Lattice, then assign the role switch. Agents ask for coder or reasoner — not a model string.',
-    stack: ['Python', 'MLX', 'OpenAI API', 'Swarm'],
-    href: 'https://github.com/chrisswimlee/local-lattice',
-    command: 'pip install local-lattice',
-  },
-  {
-    id: 'goldman',
-    kind: 'System',
-    year: '2022–25',
-    kicker: 'Goldman Sachs · 2022–2025',
-    title: 'Beneficiary management',
-    metric: '80%',
-    metricLabel: 'faster processing, 10k+ accounts',
-    summary:
-      'Designed and shipped the beneficiary system behind 10,000+ client accounts. Java and Kafka pipelines used by 50+ internal teams. Stayed on the line after it shipped.',
-    stack: ['Java', 'Kafka', 'REST', 'Selenium'],
-  },
-  {
-    id: 'trading',
-    kind: 'System',
-    year: '2025–26',
-    kicker: 'Stealth fintech · founding CTO',
-    title: 'Agentic trading engine',
-    metric: '0 → 1',
-    metricLabel: 'market-data to live signals',
-    summary:
-      'Python and Kafka across multiple exchanges. Agents that audit portfolios against legacy SQL. PyTorch time-series, backtests, and a daily pre-market brief.',
-    stack: ['Python', 'Kafka', 'PyTorch', 'LLMs'],
-  },
-];
 
 export const work = {
-  lede: 'Three things you can open. The trading engine cannot be shown.',
+  lede: 'The engine stays off-site. Lattice is on PyPI. Two sites you can open.',
 };
 
 type Project = {
   id: string;
-  featured: boolean;
-  tone: 'accent' | 'warm';
   kind: string;
   title: string;
   url: string;
@@ -301,16 +150,14 @@ type Project = {
   summary: string;
   image?: string;
   points: string[];
-  tags: string[];
   command?: string;
+  commandNote?: string;
   links: { label: string; href: string }[];
 };
 
 export const projects: Project[] = [
   {
     id: 'lattice',
-    featured: true,
-    tone: 'accent',
     kind: 'Open source',
     title: 'Local Lattice',
     url: 'pypi.org/project/local-lattice',
@@ -320,10 +167,9 @@ export const projects: Project[] = [
     points: [
       'Backends fit in — MLX, LM Studio, cloud — then you assign role:coder, role:reasoner, role:fast.',
       'Swarm primitives as HTTP: fanout, vote, pipeline, debate.',
-      'Admission queue and a hybrid local + cloud swarm, MLX-native. Apache-2.0.',
     ],
-    tags: ['Python', 'MLX', 'OpenAI API', 'Apache-2.0'],
     command: 'pip install local-lattice',
+    commandNote: 'role:coder · role:reasoner · role:fast',
     links: [
       { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-lattice' },
       { label: 'PyPI', href: 'https://pypi.org/project/local-lattice/' },
@@ -331,27 +177,21 @@ export const projects: Project[] = [
   },
   {
     id: 'haitedu',
-    featured: true,
-    tone: 'accent',
     kind: 'Site',
     title: 'HAIT',
     url: 'haitedu.com',
     year: '2026',
     summary:
-      'The public site for Hebron Asia International Institute of Technology (HAIT), an AI institute in Chiang Rai still recruiting before there is a campus. I built the site and the systems behind it.',
+      'Public site and systems for Hebron Asia International Institute of Technology, an AI institute standing up in Chiang Rai.',
     image: '/images/work/haitedu.jpg',
     points: [
       'Redesigned the front-end and upgraded the PHP underneath it.',
-      'The sites were slow. I reconfigured them so they run.',
       'Now designing their IT systems — hosting, security, and the stack the school will run on.',
     ],
-    tags: ['PHP', 'Hosting', 'Chiang Rai'],
     links: [{ label: 'Live site', href: 'https://haitedu.com' }],
   },
   {
     id: 'd22soso',
-    featured: true,
-    tone: 'warm',
     kind: 'Site',
     title: 'D22-soso',
     url: 'd22soso.com',
@@ -363,61 +203,332 @@ export const projects: Project[] = [
       'Championship record, WSOP media, and the patented two-hand game, on one site.',
       'Playable pieces in the record — a Random race roll and an in-site 2HH table.',
     ],
-    tags: ['Brood War', 'WSOP', '2 Hand Hold’em'],
     links: [{ label: 'Live site', href: 'https://d22soso.com' }],
   },
 ];
 
-export const roles = [
+export type RoleProject = {
+  id: string;
+  title: string;
+  oneLiner: string;
+  stack?: string[];
+  points: string[];
+  brief?: { problem: string; constraint: string; decision: string; outcome: string };
+  links?: { label: string; href: string }[];
+};
+
+export type Role = {
+  id: string;
+  company: string;
+  title: string;
+  dates: string;
+  location: string;
+  note: string;
+  scan: string;
+  bullets: string[];
+  projects: RoleProject[];
+};
+
+export const roles: Role[] = [
   {
+    id: 'hait',
     company: 'HAIT',
     title: 'Technical Lead',
     dates: '2026 — present',
     location: 'Chiang Rai, remote',
-    note: 'Public site and IT systems',
-    scan: 'Public site, hosting, and the stack before there is a campus.',
+    note: 'Public site, IT, and AI curriculum',
+    scan: 'Public site, curriculum, and agents before there is a campus.',
     bullets: [
       'Own the IT — hosting, security, and the stack the school runs on.',
       'Rebuilt the public site and the PHP under it so recruiting works.',
-      'Standing up the systems a new institution needs before it has a campus.',
+      'Designed the foundational AI curriculum, audited systems, and taught the inaugural cohort.',
+      'Built multi-agent ecosystems (OpenClaw, OpenAgent, Cursor) and collaborated with a Korea University expert on AI orchestration for data recollection.',
+    ],
+    projects: [
+      {
+        id: 'hait-site',
+        title: 'Public site',
+        oneLiner: 'PHP rebuild so recruiting works before there is a campus.',
+        stack: ['PHP', 'Hosting'],
+        points: [
+          'Redesigned the front-end and upgraded the PHP underneath it.',
+          'The sites were slow. I reconfigured them so they run.',
+        ],
+        brief: {
+          problem: 'An AI institute still recruiting before there is a campus. The public site was slow and the PHP underneath it was dated.',
+          constraint: 'Recruiting has to work now, on hosting the school already has.',
+          decision: 'Redesign the front-end, upgrade the PHP, and reconfigure the sites so they run.',
+          outcome: 'Recruiting works on haitedu.com before there is a campus.',
+        },
+        links: [{ label: 'haitedu.com', href: 'https://haitedu.com' }],
+      },
+      {
+        id: 'hait-it',
+        title: 'Institutional IT',
+        oneLiner: 'Hosting, security, and the stack the school will run on.',
+        stack: ['Hosting', 'Security'],
+        points: [
+          'Own hosting, security, and the stack a new institution needs before it has a campus.',
+          'The public site is live. The rest of the systems are standing up behind it.',
+        ],
+        brief: {
+          problem: 'A new institution needs hosting, security, and a stack before it has a campus.',
+          constraint: 'No campus IT org yet. The public site is already live.',
+          decision: 'Own the IT — hosting, security, and the stack the school will run on.',
+          outcome: 'The systems a new institution needs are standing up before the building exists.',
+        },
+      },
+      {
+        id: 'hait-curriculum',
+        title: 'AI curriculum',
+        oneLiner: 'Foundational curriculum, audited systems, inaugural cohort.',
+        points: [
+          'Designed the foundational curriculum for a pioneering AI institute.',
+          'Audited the systems the first students would learn on, then taught the inaugural cohort.',
+        ],
+        brief: {
+          problem: 'The institute needed a foundational curriculum and someone to teach the first students.',
+          constraint: 'Inaugural cohort. Systems that had not been audited.',
+          decision: 'Design the curriculum, audit the systems, teach the cohort.',
+          outcome: 'The first students have a curriculum and a path through it.',
+        },
+      },
+      {
+        id: 'hait-agents',
+        title: 'Multi-agent orchestration',
+        oneLiner: 'OpenClaw, OpenAgent, Cursor — and data recollection with a Korea University collaborator.',
+        stack: ['OpenClaw', 'OpenAgent', 'Cursor'],
+        points: [
+          'Built multi-agent ecosystems the institute can run — OpenClaw, OpenAgent, Cursor.',
+          'Collaborated with a Korea University expert on AI orchestration for data recollection.',
+        ],
+        brief: {
+          problem: 'The institute needed multi-agent systems for teaching and for data recollection.',
+          constraint: 'A stack students and staff can actually run.',
+          decision: 'Build the agent ecosystem. Design recollection orchestration with a Korea University collaborator.',
+          outcome: 'Agents in the curriculum loop, and a recollection path designed with that collaborator.',
+        },
+      },
     ],
   },
   {
+    id: 'stealth',
     company: 'Stealth fintech',
     title: 'Founding CTO',
     dates: 'Sep 2025 — Aug 2026',
     location: 'New York',
-    note: 'Agentic stock trading engine, zero to one',
-    scan: 'Zero to one: market-data to live signals on a founding clock.',
+    note: 'Agentic Kraken futures engine, zero to one',
+    scan: 'Kraken futures. Sub-100ms ingest. Signals on a founding clock.',
     bullets: [
-      'Built the Python and Kafka market-data pipeline the agents traded on, across multiple exchanges — millions of ticks, sub-100ms end to end.',
+      'Built a fully agentic trading engine executing Kraken crypto futures via a sub-100ms Python/Kafka ingestion pipeline.',
       'Built the agent loop that audits portfolios against legacy SQL with modern LLMs.',
-      'Owned MLOps: PyTorch time-series models, unified-memory local training alongside cloud, live signals, backtesting, and daily pre-market briefings that cut manual analysis 90%.',
+      'Owned MLOps: PyTorch time-series models, 24/7 retraining, news processors for episodic pivots, and daily pre-market briefings that cut manual analysis 90%.',
+    ],
+    projects: [
+      {
+        id: 'stealth-ingest',
+        title: 'Kraken futures ingestion',
+        oneLiner: 'Sub-100ms Python/Kafka pipeline. Agents execute on Kraken crypto futures.',
+        stack: ['Python', 'Kafka'],
+        points: [
+          'Python and Kafka on the Kraken crypto futures feed — millions of ticks, sub-100ms end to end.',
+          'A fully agentic engine on that book. The product cannot be shown.',
+        ],
+        brief: {
+          problem: 'A stealth desk needed market-data in and live futures execution out. No pipeline existed.',
+          constraint: 'Kraken crypto futures. Sub-100ms. The product cannot be shown.',
+          decision: 'Python and Kafka on the Kraken feed. Agents on the book.',
+          outcome: 'Zero to one: ticks in, executions out, on a founding clock.',
+        },
+      },
+      {
+        id: 'stealth-forecast',
+        title: 'Forecasting and retraining',
+        oneLiner: 'PyTorch time-series models on a 24/7 retraining loop.',
+        stack: ['PyTorch'],
+        points: [
+          'PyTorch time-series models for live signals and backtests.',
+          'Automated 24/7 retraining. Unified-memory local training next to cloud.',
+        ],
+        brief: {
+          problem: 'The desk needed signals, not a one-off model.',
+          constraint: 'Markets do not pause for a retraining window.',
+          decision: 'PyTorch time-series models and a 24/7 retraining pipeline. Train locally on unified memory next to cloud.',
+          outcome: 'Live signals and backtests the desk can run without a manual train.',
+        },
+      },
+      {
+        id: 'stealth-news',
+        title: 'News processors',
+        oneLiner: 'Unstructured news in, episodic pivot signals out.',
+        points: [
+          'News processors on the same clock as the models.',
+          'Live unstructured text, aimed at episodic market pivots.',
+        ],
+        brief: {
+          problem: 'Episodic pivots show up in unstructured news before they show up in the book.',
+          constraint: 'Live text, not a clean feed. The product cannot be shown.',
+          decision: 'News processors on the same clock as the forecasting path.',
+          outcome: 'Pivot signals from news, next to the time-series path.',
+        },
+      },
+      {
+        id: 'stealth-agents',
+        title: 'Portfolio audit and pre-market brief',
+        oneLiner: 'Agents against legacy SQL. Daily brief that cut the manual pass 90%.',
+        stack: ['Python', 'SQL', 'LLMs'],
+        points: [
+          'Agents that audit portfolios against a legacy SQL book with modern LLMs.',
+          'Daily pre-market briefings that cut the manual analysis pass by 90%.',
+        ],
+        brief: {
+          problem: 'The book lived in legacy SQL. Manual pre-market analysis ate the morning.',
+          constraint: 'Modern LLMs on an old schema. A daily clock.',
+          decision: 'Agents that audit portfolios against the SQL. A PyTorch brief before the open.',
+          outcome: 'Manual analysis down 90%. The desk runs the brief.',
+        },
+      },
     ],
   },
   {
+    id: 'goldman',
     company: 'Goldman Sachs',
     title: 'Full Stack Engineer',
     dates: 'May 2022 — Jul 2025',
     location: 'New York',
     note: 'Forward deployment and automation',
-    scan: '80% faster processing. 10,000+ accounts. 50+ internal teams.',
+    scan: '80% faster processing. Forward-deployed. 50+ internal teams.',
     bullets: [
+      'Served as a forward-deployment engineer — developers, traders, and lawyers on one reporting path, so the numbers stayed auditable and legally compliant.',
       'Designed and shipped a beneficiary management system serving 10,000+ client accounts and cut data processing time by 80%.',
       'Scaled Java and Kafka pipelines and REST APIs used by 50+ internal teams, cutting data-access latency by 15%.',
       'Built a Selenium and TestNG suite that raised test accuracy 22% across hundreds of financial and compliance scenarios, and stayed on the line for trading, compliance, and market-data APIs after they shipped.',
     ],
+    projects: [
+      {
+        id: 'gs-beneficiary',
+        title: 'Beneficiary management',
+        oneLiner: '10,000+ accounts. Processing time down 80%.',
+        stack: ['Java', 'Kafka'],
+        points: [
+          'Designed and shipped the beneficiary system behind 10,000+ client accounts.',
+          'Cut data processing time by 80%. Stayed on the line after it shipped.',
+        ],
+        brief: {
+          problem: 'Beneficiary data for 10,000+ client accounts was too slow to operate.',
+          constraint: 'Compliance, 50+ internal consumers, and the pager after it shipped.',
+          decision: 'Java and Kafka on beneficiary.* plus REST /v1/accounts.',
+          outcome: '80% faster processing. The system stayed in service.',
+        },
+      },
+      {
+        id: 'gs-apis',
+        title: 'Java, Kafka, and REST',
+        oneLiner: 'Pipelines and APIs used by 50+ internal teams. Latency down 15%.',
+        stack: ['Java', 'Kafka', 'REST'],
+        points: [
+          'Scaled Java and Kafka pipelines and REST APIs used by 50+ internal teams.',
+          'Cut data-access latency by 15%.',
+        ],
+        brief: {
+          problem: 'Internal teams needed beneficiary and account data over APIs they could share.',
+          constraint: '50+ consumers. Compliance. The pager after it shipped.',
+          decision: 'Java and Kafka pipelines plus REST /v1/accounts.',
+          outcome: 'Data-access latency down 15%. Fifty-plus teams on the APIs.',
+        },
+      },
+      {
+        id: 'gs-forward',
+        title: 'Forward deployment',
+        oneLiner: 'Developers, traders, and lawyers on one reporting path.',
+        points: [
+          'Bridged downstream developers, traders, and lawyers on the same reporting path.',
+          'The job was auditability — one set of numbers the three sides could stand behind.',
+        ],
+        brief: {
+          problem: 'Reporting had to be auditable for developers, traders, and lawyers at once.',
+          constraint: 'Downstream consumers who do not share a stack, and legal review on the same numbers.',
+          decision: 'Forward-deploy: sit between the teams and make the reporting path one system.',
+          outcome: 'Reporting the three sides can stand behind.',
+        },
+      },
+      {
+        id: 'gs-test',
+        title: 'Selenium and TestNG',
+        oneLiner: 'Test accuracy up 22%. Stayed on the line after it shipped.',
+        stack: ['Selenium', 'TestNG'],
+        points: [
+          'Built a Selenium and TestNG suite across hundreds of financial and compliance scenarios.',
+          'Raised test accuracy 22%, then stayed on trading, compliance, and market-data APIs after they shipped.',
+        ],
+        brief: {
+          problem: 'KYC and compliance cases were too easy to miss in a manual pass.',
+          constraint: 'Hundreds of financial and compliance scenarios. The APIs stay live after ship.',
+          decision: 'Selenium and TestNG on the KYC and compliance cases. Stay on the line.',
+          outcome: 'Test accuracy up 22%. The APIs still owned after they shipped.',
+        },
+      },
+    ],
   },
   {
+    id: 'onedave',
     company: 'One Dave Software',
     title: 'Full Stack Software Engineer',
     dates: 'Oct 2020 — May 2022',
     location: 'La Brea, CA',
-    note: '',
-    scan: 'Full-stack for defense and nuclear. Email path 70% faster.',
+    note: 'Curtis, defense, and email systems',
+    scan: 'Curtis inventory. Defense apps. Email path 70% faster.',
     bullets: [
-      'Built and maintained full-stack web applications for clients in national defense and nuclear energy.',
+      'Built inventory pipelines and frontends for Curtis, a government nuclear pipeline contractor.',
       'Led a system-wide upgrade that improved email server response time by 70%.',
+      'Built and maintained secure National Defense web applications.',
+    ],
+    projects: [
+      {
+        id: 'od-curtis',
+        title: 'Curtis inventory',
+        oneLiner: 'Pipelines and frontends for a government nuclear contractor.',
+        points: [
+          'Full-stack inventory pipelines and the interfaces on top of them.',
+          'Curtis — a government nuclear pipeline contractor.',
+        ],
+        brief: {
+          problem: 'Curtis needed inventory pipelines and interfaces for a government nuclear contract.',
+          constraint: 'A contractor stack, not a greenfield product.',
+          decision: 'Build the inventory pipelines and the frontends on top of them.',
+          outcome: 'Inventory the contractor can run.',
+        },
+      },
+      {
+        id: 'od-email',
+        title: 'Email systems',
+        oneLiner: 'System-wide upgrade. Response time down 70%.',
+        points: [
+          'Managed the email path for the same clients.',
+          'A system-wide upgrade that cut email-server response time by 70%.',
+        ],
+        brief: {
+          problem: 'Email server response was too slow for the clients on it.',
+          constraint: 'A system-wide upgrade, not a single mailbox fix.',
+          decision: 'Upgrade the email path across the system.',
+          outcome: 'Response time down 70%.',
+        },
+      },
+      {
+        id: 'od-defense',
+        title: 'National Defense apps',
+        oneLiner: 'Full-stack web applications under a security constraint.',
+        points: [
+          'Built and maintained full-stack web applications for national defense clients.',
+          'Security was the constraint on the work, not a later pass.',
+        ],
+        brief: {
+          problem: 'National defense clients needed web applications that stay up and stay closed.',
+          constraint: 'Security is the product constraint, not a later pass.',
+          decision: 'Build and maintain the full-stack apps under that constraint.',
+          outcome: 'Defense applications that stayed in service.',
+        },
+      },
     ],
   },
 ];
@@ -443,11 +554,7 @@ export const record = [
     href: 'https://liquipedia.net/hearthstone/2016_Hearthstone_Championship_Tour/Spring/Americas/Preliminary',
   },
   {
-    label: '2016 · Lower bracket',
-    href: 'https://liquipedia.net/hearthstone/2016_Hearthstone_Championship_Tour/Spring/Americas/Preliminary/LB3',
-  },
-  {
-    label: 'Oct 2016 · #1 deck',
+    label: 'Oct 2016 · #1 Americas Hearthstone',
     href: 'https://www.hearthpwn.com/decks/661171-1-wild-aggro-beast-druid',
   },
   {
@@ -455,22 +562,16 @@ export const record = [
     href: 'https://liquipedia.net/hearthstone/2017_Hearthstone_Championship_Tour/Summer/Preliminary/Americas',
   },
   {
-    label: '2017 · Tavern Hero path',
-    href: 'https://news.blizzard.com/en-us/article/20942617/join-us-for-the-2017-hct-summer-season',
-  },
-  {
-    label: 'Jan 2019 · Liquipedia ladder',
+    label: 'Jan 2019 · Wild Open Qualifier Rank #1',
     href: 'https://liquipedia.net/hearthstone/Ladder_Ranking/2019/Americas/Wild/January',
   },
   {
-    label: '2019 · Wild Open',
-    href: 'https://hearthstone.blizzard.com/en-us/news/22887052',
-  },
-  {
-    label: 'Nov 2025 · Rank 1 again',
+    label: 'Nov 2025 · Rank 1 Hearthstone Americas',
     href: 'https://x.com/chrisswimlee/status/1994461923346452901',
   },
 ];
+
+export const recordProof = record.filter((item) => /#1|Rank 1/.test(item.label));
 
 export const competitive = [
   {
@@ -491,17 +592,12 @@ export const skills = {
 
 export const about = {
   lede: 'Chris SuYoung Lee. Suyoung means swim.',
-  paragraphs: [
-    'I double-majored in Mathematics and Computer Science at Trinity College in Connecticut, on a full-ride 1823 scholarship. Six years since: Goldman infrastructure, founding CTO at a stealth fintech, now technical lead at HAIT.',
-    'Math taught me to find the constraint. Goldman taught me what happens when it is wrong at scale. I leave systems modular on purpose — so the next upgrade has a place to land.',
-    'Hearthstone: #1 Americas Wild in October 2016, January 2019, and November 2025. The record is public.',
-    'I shipped haitedu.com and d22soso.com. I want as many hard problems as I can take — especially the ones that invest in the future of AI.',
-  ],
+  line: 'Math taught me to find the constraint. Goldman taught me what happens when it is wrong at scale.',
 };
 
 export const engage = {
   heading: 'Engage',
-  lede: 'A role, a stuck system, or tutoring. One inbox.',
+  lede: 'A role or a stuck system. Tutoring by request.',
   promise: 'Tell me which it is. You get a clear yes or no — and for builds, everything in writing before I start.',
   paths: [
     { name: 'Role', detail: 'A seat where the work is hard and the stack may be new.' },
@@ -524,7 +620,7 @@ export const engage = {
 
 export const contact = {
   heading: 'Email',
-  lede: 'One inbox. A role, a stuck system, or tutoring.',
+  lede: 'One inbox. A role or a stuck system.',
   projectCta: 'Email me',
   href: mail,
 };

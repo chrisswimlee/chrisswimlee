@@ -1,8 +1,12 @@
 ---
-import { contact, site } from '../data/site';
+import { about, built, contact, site } from '../data/site';
 ---
 
 <section class="section contact-section" id="contact">
+  <div class="contact-about">
+    <p class="note" id="about" data-reveal>{about.lede}</p>
+    <p data-reveal>{about.line}</p>
+  </div>
   <div class="contact-box">
     <div>
       <h2>{contact.heading}</h2>
@@ -15,6 +19,13 @@ import { contact, site } from '../data/site';
         <a class="btn" href="/resume/">Resume</a>
         <a class="btn" href="/engage/">Engage</a>
       </div>
+    </div>
+  </div>
+  <div class="built" data-reveal>
+    <p class="kicker">{built.lede}</p>
+    <p>{built.detail}</p>
+    <div class="card-links">
+      <a class="btn" href={built.href} target="_blank" rel="noopener noreferrer">Site source</a>
     </div>
   </div>
 </section>

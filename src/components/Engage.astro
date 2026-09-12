@@ -1,5 +1,5 @@
 ---
-import { engage, site } from '../data/site';
+import { engage } from '../data/site';
 ---
 
 <div class="engage-block">
@@ -28,8 +28,4 @@ import { engage, site } from '../data/site';
   <ul class="services-notes">
     {engage.notes.map((note) => <li>{note}</li>)}
   </ul>
-  <div class="card-links" style="margin-top: 1.6rem;">
-    <a class="btn btn-solid" href={engage.href}>{engage.cta}</a>
-    <a class="btn" href={`mailto:${site.email}`}>{site.email}</a>
-  </div>
 </div>

@@ -5,13 +5,19 @@ import { nav } from '../data/site';
 <header class="nav">
   <div class="wrap nav-inner">
     <a class="brand" href="/">Chris <em>Swim</em> Lee</a>
-    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
-      Menu
-    </button>
     <nav class="nav-links" id="nav-menu" aria-label="Primary">
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a class="nav-resume" href="/resume/">Resume</a>
     </nav>
-    <a class="nav-resume" href="/resume/">Resume</a>
+    <div class="nav-tools">
+      <button class="nav-theme" type="button" aria-label="Switch to light mode">
+        <span class="to-light">Light</span>
+        <span class="to-dark">Dark</span>
+      </button>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+        Menu
+      </button>
+    </div>
   </div>
 </header>
 
@@ -19,12 +25,47 @@ import { nav } from '../data/site';
   const nav = document.querySelector<HTMLElement>('.nav');
   const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
   const menu = document.getElementById('nav-menu');
+  const brand = document.querySelector<HTMLAnchorElement>('.brand');
+  const themeBtn = document.querySelector<HTMLButtonElement>('.nav-theme');
+  const themeMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+
+  const setOpen = (open: boolean) => {
+    if (!nav || !toggle) return;
+    nav.classList.toggle('is-open', open);
+    document.documentElement.classList.toggle('is-nav-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.textContent = open ? 'Close' : 'Menu';
+  };
+
+  const applyTheme = (theme: 'dark' | 'light', persist = true) => {
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    if (persist) {
+      try {
+        localStorage.setItem('csl-theme', theme);
+      } catch (_) {}
+    }
+    const next = theme === 'light' ? 'dark' : 'light';
+    themeBtn?.setAttribute('aria-label', `Switch to ${next} mode`);
+    themeMeta?.setAttribute('content', theme === 'light' ? '#eceae4' : '#000000');
+    root.dispatchEvent(new CustomEvent('themechange', { detail: theme }));
+  };
+
+  const currentTheme = () =>
+    document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+
+  applyTheme(currentTheme(), false);
+  themeBtn?.addEventListener('click', () => applyTheme(currentTheme() === 'light' ? 'dark' : 'light'));
+  matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+    try {
+      if (localStorage.getItem('csl-theme')) return;
+    } catch (_) {
+      return;
+    }
+    applyTheme(e.matches ? 'light' : 'dark', false);
+  });
+
   if (nav && toggle && menu) {
-    const setOpen = (open: boolean) => {
-      nav.classList.toggle('is-open', open);
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.textContent = open ? 'Close' : 'Menu';
-    };
     toggle.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
     menu.addEventListener('click', (e) => {
       const target = e.target as HTMLElement | null;
@@ -33,5 +74,30 @@ import { nav } from '../data/site';
     addEventListener('keydown', (e) => {
       if (e.key === 'Escape') setOpen(false);
     });
+    document.addEventListener('pointerdown', (e) => {
+      if (!nav.classList.contains('is-open')) return;
+      if (!nav.contains(e.target as Node)) setOpen(false);
+    });
+    addEventListener('resize', () => {
+      if (window.innerWidth > 980) setOpen(false);
+    }, { passive: true });
   }
+
+  brand?.addEventListener('click', (e) => {
+    if (location.pathname !== '/') return;
+    e.preventDefault();
+    setOpen(false);
+    const mobile = matchMedia('(pointer: coarse)').matches || window.innerWidth <= 860;
+    if (mobile && window.scrollY > 48) {
+      if (location.hash) history.replaceState(null, '', '/');
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      return;
+    }
+    try {
+      sessionStorage.removeItem('sky-seen');
+      sessionStorage.setItem('sky-replay', '1');
+    } catch (_) {}
+    if (location.hash) location.assign('/');
+    else location.reload();
+  });
 </script>

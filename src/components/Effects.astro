@@ -4,20 +4,8 @@
 <script>
   const motion = !matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarse = matchMedia('(pointer: coarse)').matches;
-  const boot = document.documentElement;
 
-  const whenHero = (fn: () => void) => {
-    let ran = false;
-    const run = () => {
-      if (ran) return;
-      ran = true;
-      fn();
-    };
-    boot.addEventListener('hero:in', run, { once: true });
-    if (!boot.classList.contains('is-booting')) run();
-  };
-
-  const bar = document.querySelector<HTMLElement>('.fx-progress i');
+  const bar = coarse ? null : document.querySelector<HTMLElement>('.fx-progress i');
   if (bar) {
     let queued = false;
     const paint = () => {
@@ -35,89 +23,15 @@
       },
       { passive: true },
     );
+    addEventListener('resize', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(paint);
+    }, { passive: true });
     paint();
   }
 
   if (motion) {
-    const glyphs = '01<>/\\|{}[]#$%&*+=-_~^:;.';
-    const decode = (el: HTMLElement, duration = 900) => {
-      if (el.dataset.decoded) return;
-      el.dataset.decoded = '1';
-      const text = el.textContent ?? '';
-      const chars = [...text];
-      const start = performance.now();
-      const width = el.getBoundingClientRect().width;
-      el.style.minWidth = `${width}px`;
-      el.setAttribute('aria-label', text);
-      const tick = (now: number) => {
-        const t = Math.min(1, (now - start) / duration);
-        const settled = Math.floor(t * chars.length);
-        let out = '';
-        for (let i = 0; i < chars.length; i++) {
-          const c = chars[i];
-          if (c === ' ' || i < settled) out += c;
-          else out += glyphs[Math.floor(Math.random() * glyphs.length)];
-        }
-        el.textContent = out;
-        if (t < 1) requestAnimationFrame(tick);
-        else {
-          el.textContent = text;
-          el.style.minWidth = '';
-          el.removeAttribute('aria-label');
-        }
-      };
-      requestAnimationFrame(tick);
-    };
-
-    const typewrite = (el: HTMLElement, delay = 0) => {
-      if (el.dataset.typed) return;
-      el.dataset.typed = '1';
-      const text = el.textContent ?? '';
-      const height = el.getBoundingClientRect().height;
-      el.style.minHeight = `${height}px`;
-      el.textContent = '';
-
-      const sr = document.createElement('span');
-      sr.className = 'visually-hidden';
-      sr.textContent = text;
-      const out = document.createElement('span');
-      out.className = 'fx-type';
-      out.setAttribute('aria-hidden', 'true');
-      el.append(sr, out);
-
-      const chars = [...text];
-      let i = 0;
-      const pace = (c: string, prev: string) => {
-        let ms = 34 + Math.random() * 46;
-        if (Math.random() < 0.08) ms += 90 + Math.random() * 120;
-        if (c === ' ') ms += 18;
-        if (/[,;:—–]/.test(prev)) ms += 140;
-        if (/[.!?]/.test(prev)) ms += 300;
-        return ms;
-      };
-      const step = () => {
-        if (i >= chars.length) {
-          setTimeout(() => {
-            out.classList.add('is-done');
-            el.style.minHeight = '';
-          }, 800);
-          return;
-        }
-        const c = chars[i++];
-        out.textContent += c;
-        setTimeout(step, pace(c, chars[i - 2] ?? ''));
-      };
-      setTimeout(step, delay);
-    };
-
-    whenHero(() => {
-      if (coarse) return;
-      const kicker = document.querySelector<HTMLElement>('.hero-kicker');
-      if (kicker) setTimeout(() => decode(kicker, 700), 120);
-      const lede = document.querySelector<HTMLElement>('.hero .lede');
-      if (lede) typewrite(lede, 280);
-    });
-
     const counters = [...document.querySelectorAll<HTMLElement>('[data-count-to]')];
     if (counters.length) {
       const ease = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -144,133 +58,6 @@
       );
       counters.forEach((c) => io.observe(c));
     }
-
-    document.addEventListener('pointerdown', (e) => {
-      const target = e.target;
-      if (!(target instanceof Element)) return;
-      const btn = target.closest<HTMLElement>('.btn');
-      if (!btn) return;
-      const r = btn.getBoundingClientRect();
-      const ripple = document.createElement('span');
-      ripple.className = 'fx-ripple';
-      const size = Math.max(r.width, r.height) * 2;
-      ripple.style.width = ripple.style.height = `${size}px`;
-      ripple.style.left = `${e.clientX - r.left - size / 2}px`;
-      ripple.style.top = `${e.clientY - r.top - size / 2}px`;
-      btn.appendChild(ripple);
-      ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
-    });
-  }
-
-  if (motion) {
-    const artifacts = [...document.querySelectorAll<HTMLElement>('.work-piece')];
-    if (artifacts.length) {
-      const io = new IntersectionObserver(
-        (entries, obs) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-            const el = entry.target as HTMLElement;
-            el.classList.add('is-glitch');
-            el.addEventListener('animationend', () => el.classList.remove('is-glitch'), { once: true });
-            obs.unobserve(el);
-          }
-        },
-        { threshold: 0.3 },
-      );
-      artifacts.forEach((a) => io.observe(a));
-    }
-  }
-
-  if (motion && coarse) {
-    whenHero(() => {
-      const root = document.documentElement;
-      let startY = 0;
-      let pulling: 'top' | 'bottom' | null = null;
-      const atBottom = () => window.innerHeight + window.scrollY >= root.scrollHeight - 2;
-      addEventListener(
-        'touchstart',
-        (e) => {
-          startY = e.touches[0]?.clientY ?? 0;
-          pulling = null;
-        },
-        { passive: true },
-      );
-      addEventListener(
-        'touchmove',
-        (e) => {
-          const y = e.touches[0]?.clientY ?? 0;
-          const dy = y - startY;
-          if (window.scrollY <= 0 && dy > 0) pulling = 'top';
-          else if (atBottom() && dy < 0) pulling = 'bottom';
-          else pulling = null;
-          if (!pulling) {
-            root.style.setProperty('--pull', '0');
-            root.classList.remove('is-pulling');
-            return;
-          }
-          const amt = Math.min(1, Math.abs(dy) / 180);
-          root.style.setProperty('--pull', amt.toFixed(3));
-          root.classList.add('is-pulling');
-          root.dataset.pull = pulling;
-        },
-        { passive: true },
-      );
-      const release = () => {
-        root.style.setProperty('--pull', '0');
-        root.classList.remove('is-pulling');
-        pulling = null;
-      };
-      addEventListener('touchend', release, { passive: true });
-      addEventListener('touchcancel', release, { passive: true });
-
-      let gyro = false;
-      const onTilt = (e: DeviceOrientationEvent) => {
-        if (e.gamma == null || e.beta == null) return;
-        gyro = true;
-        const gx = Math.max(-1, Math.min(1, e.gamma / 30));
-        const gy = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
-        root.style.setProperty('--tilt-x', gx.toFixed(3));
-        root.style.setProperty('--tilt-y', gy.toFixed(3));
-      };
-      const arm = async () => {
-        const DOE = (
-          window as Window & {
-            DeviceOrientationEvent?: { requestPermission?: () => Promise<'granted' | 'denied'> };
-          }
-        ).DeviceOrientationEvent;
-        try {
-          if (DOE?.requestPermission) {
-            const state = await DOE.requestPermission();
-            if (state !== 'granted') return;
-          }
-          addEventListener('deviceorientation', onTilt, { passive: true });
-        } catch {
-          /* permission declined; scroll fallback below */
-        }
-      };
-      addEventListener('touchend', () => void arm(), { once: true, passive: true });
-      if (!('requestPermission' in (window.DeviceOrientationEvent ?? {}))) void arm();
-
-      let lastY = window.scrollY;
-      let vel = 0;
-      let raf = 0;
-      const settle = () => {
-        vel *= 0.86;
-        if (!gyro) root.style.setProperty('--tilt-y', Math.max(-1, Math.min(1, vel / 40)).toFixed(3));
-        if (Math.abs(vel) > 0.2) raf = requestAnimationFrame(settle);
-        else raf = 0;
-      };
-      addEventListener(
-        'scroll',
-        () => {
-          const y = window.scrollY;
-          vel = y - lastY;
-          lastY = y;
-          if (!raf) raf = requestAnimationFrame(settle);
-        },
-        { passive: true },
-      );
-    });
   }
 
   if (motion && !coarse) {
@@ -278,27 +65,30 @@
     for (const card of playables) {
       if (card.classList.contains('fx-play')) continue;
       card.classList.add('fx-play');
-      let grab: { x: number; y: number; px: number; py: number } | null = null;
-      let pos = { x: 0, y: 0 };
+      const max = card.dataset.islandKind === 'photo' ? 22 : 14;
+      let grab: { x: number; y: number; ax: number; ay: number } | null = null;
+      let angle = { x: 0, y: 0 };
       let vel = { x: 0, y: 0 };
       let coast = 0;
-      const apply = () => {
-        card.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+      const apply = (hoverX = 0, hoverY = 0) => {
+        const rx = angle.x + hoverX;
+        const ry = angle.y + hoverY;
+        card.style.transform = rx || ry ? `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)` : '';
       };
       const settle = () => {
         cancelAnimationFrame(coast);
         const tick = () => {
-          vel.x *= 0.94;
-          vel.y *= 0.94;
-          pos.x += vel.x;
-          pos.y += vel.y;
-          pos.x += -pos.x * 0.055;
-          pos.y += -pos.y * 0.055;
+          vel.x *= 0.88;
+          vel.y *= 0.88;
+          angle.x += vel.x;
+          angle.y += vel.y;
+          angle.x += -angle.x * 0.14;
+          angle.y += -angle.y * 0.14;
           apply();
-          if (Math.hypot(pos.x, pos.y) > 0.4 || Math.hypot(vel.x, vel.y) > 0.2) {
+          if (Math.hypot(angle.x, angle.y) > 0.12 || Math.hypot(vel.x, vel.y) > 0.06) {
             coast = requestAnimationFrame(tick);
           } else {
-            pos = { x: 0, y: 0 };
+            angle = { x: 0, y: 0 };
             vel = { x: 0, y: 0 };
             card.style.transform = '';
           }
@@ -310,7 +100,7 @@
         const target = e.target;
         if (target instanceof Element && target.closest('a, button')) return;
         cancelAnimationFrame(coast);
-        grab = { x: e.clientX, y: e.clientY, px: pos.x, py: pos.y };
+        grab = { x: e.clientX, y: e.clientY, ax: angle.x, ay: angle.y };
         vel = { x: 0, y: 0 };
         card.setPointerCapture(e.pointerId);
         card.classList.add('is-held');
@@ -322,14 +112,14 @@
             const r = card.getBoundingClientRect();
             const px = (e.clientX - r.left) / r.width - 0.5;
             const py = (e.clientY - r.top) / r.height - 0.5;
-            const deep = card.dataset.islandKind === 'photo' ? 10 : 6;
-            card.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) perspective(900px) rotateX(${-py * deep}deg) rotateY(${px * deep}deg)`;
+            const deep = card.dataset.islandKind === 'photo' ? 8 : 5;
+            apply(-py * deep, px * deep);
             return;
           }
-          const nx = grab.px + (e.clientX - grab.x);
-          const ny = grab.py + (e.clientY - grab.y);
-          vel = { x: nx - pos.x, y: ny - pos.y };
-          pos = { x: nx, y: ny };
+          const nextX = Math.max(-max, Math.min(max, grab.ax - (e.clientY - grab.y) * 0.09));
+          const nextY = Math.max(-max, Math.min(max, grab.ay + (e.clientX - grab.x) * 0.09));
+          vel = { x: nextX - angle.x, y: nextY - angle.y };
+          angle = { x: nextX, y: nextY };
           apply();
         },
         { passive: true },
@@ -343,43 +133,7 @@
       card.addEventListener('pointerup', letGo);
       card.addEventListener('pointercancel', letGo);
       card.addEventListener('pointerleave', () => {
-        if (!grab) card.style.transform = pos.x || pos.y ? `translate3d(${pos.x}px, ${pos.y}px, 0)` : '';
-      });
-    }
-
-    const magnets = [...document.querySelectorAll<HTMLElement>('.btn, .nav-resume')];
-    for (const m of magnets) {
-      m.classList.add('fx-magnet');
-      m.addEventListener(
-        'pointermove',
-        (e) => {
-          const r = m.getBoundingClientRect();
-          const dx = e.clientX - (r.left + r.width / 2);
-          const dy = e.clientY - (r.top + r.height / 2);
-          m.style.transform = `translate(${dx * 0.22}px, ${dy * 0.28}px)`;
-        },
-        { passive: true },
-      );
-      m.addEventListener('pointerleave', () => {
-        m.style.transform = '';
-      });
-    }
-
-    const tilts = [...document.querySelectorAll<HTMLElement>('.work-piece, .achieve-card, .spike')];
-    for (const card of tilts) {
-      card.classList.add('fx-tilt');
-      card.addEventListener(
-        'pointermove',
-        (e) => {
-          const r = card.getBoundingClientRect();
-          const px = (e.clientX - r.left) / r.width - 0.5;
-          const py = (e.clientY - r.top) / r.height - 0.5;
-          card.style.transform = `perspective(900px) rotateX(${-py * 5}deg) rotateY(${px * 5}deg) translateZ(0)`;
-        },
-        { passive: true },
-      );
-      card.addEventListener('pointerleave', () => {
-        card.style.transform = '';
+        if (!grab) apply();
       });
     }
   }

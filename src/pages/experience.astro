@@ -1,0 +1,119 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { roles, site } from '../data/site';
+---
+
+<Layout
+  title={`Experience — ${site.name}`}
+  description={`Experience archive for ${site.legalName}: four seats, the projects underneath each one.`}
+>
+  <main id="main" class="resume-page archive-page wrap">
+    <div class="resume-top">
+      <div>
+        <p class="kicker">Archive</p>
+        <h1>Experience</h1>
+      </div>
+      <div class="resume-meta">
+        <p>Four seats. Open a project.</p>
+        <div class="hero-actions">
+          <a class="btn" href="/#experience">Back to site</a>
+          <a class="btn" href="/resume/">Resume</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline archive-timeline">
+      {
+        roles.map((role) => (
+          <article class="role role-explore archive-role">
+            <details class="role-fold" id={role.id} open>
+              <summary class="role-summary">
+                <div class="when-col">
+                  <p class="when">{role.dates}</p>
+                  {role.location && <p class="when">{role.location}</p>}
+                </div>
+                <div>
+                  <h3>{role.title}</h3>
+                  <p class="company">{role.company}</p>
+                  <p class="role-note">{role.scan}</p>
+                </div>
+              </summary>
+              <div class="role-projects">
+                {role.projects.map((project) => (
+                  <details class="project-fold" id={project.id}>
+                    <summary class="project-summary">
+                      <span class="project-title">{project.title}</span>
+                      <span class="project-line">{project.oneLiner}</span>
+                    </summary>
+                    <div class="project-body">
+                      {
+                        project.stack && project.stack.length > 0 && (
+                          <div class="tags">
+                            {project.stack.map((item) => (
+                              <span class="tag">{item}</span>
+                            ))}
+                          </div>
+                        )
+                      }
+                      {
+                        project.points.length > 0 && (
+                          <ul>
+                            {project.points.map((point) => (
+                              <li>{point}</li>
+                            ))}
+                          </ul>
+                        )
+                      }
+                      {
+                        project.brief && (
+                          <dl class="case-steps">
+                            <div>
+                              <dt>Problem</dt>
+                              <dd>{project.brief.problem}</dd>
+                            </div>
+                            <div>
+                              <dt>Constraint</dt>
+                              <dd>{project.brief.constraint}</dd>
+                            </div>
+                            <div>
+                              <dt>Decision</dt>
+                              <dd>{project.brief.decision}</dd>
+                            </div>
+                            <div>
+                              <dt>Outcome</dt>
+                              <dd>{project.brief.outcome}</dd>
+                            </div>
+                          </dl>
+                        )
+                      }
+                      {
+                        project.links && project.links.length > 0 && (
+                          <div class="card-links">
+                            {project.links.map((link) => (
+                              <a
+                                class="btn"
+                                href={link.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {link.label}
+                              </a>
+                            ))}
+                          </div>
+                        )
+                      }
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </details>
+          </article>
+        ))
+      }
+    </div>
+  </main>
+</Layout>
+
+<script>
+  import '../scripts/open-hash-details';
+</script>
