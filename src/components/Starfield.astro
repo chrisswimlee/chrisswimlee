@@ -73,8 +73,7 @@
       wrap.classList.add('is-static');
       if (root.classList.contains('is-booting')) skipBoot();
     } else {
-      const coarse = matchMedia('(pointer: coarse)').matches;
-      const lite = coarse || window.innerWidth < 720;
+      const lite = matchMedia('(pointer: coarse)').matches || window.innerWidth < 720;
       const play = shouldPlay();
 
       type Star = {
@@ -117,8 +116,6 @@
       let sky = { x: '0', y: '0' };
       let pressing = false;
       let pressAge = 0;
-      let holdTimer = 0;
-      let downAt = { x: 0, y: 0, scroll: 0 };
       let scrollY = window.scrollY;
       let leave = 0;
       let lastBox = { w: 0, h: 0 };
@@ -151,8 +148,8 @@
       const COMPRESS = lite ? 700 : 2000;
       const NAME_HOLD = lite ? 80 : 560;
       const PRINT_AT = COMPRESS + NAME_HOLD + (lite ? 60 : 160);
-      const GLYPHS = lite ? 170 : 400;
-      const FIELD = lite ? 40 : 220;
+      const GLYPHS = lite ? 0 : 400;
+      const FIELD = lite ? 56 : 220;
       let nameBox = { x0: 0.18, y0: 0.16, x1: 0.82, y1: 0.4 };
       let nebulaLayer: HTMLCanvasElement | null = null;
 
@@ -194,11 +191,7 @@
         Boolean(t.closest('a, button, input, textarea, select, label, .nav, .cmd-copy, .fx-play'));
 
       const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-      const docked = () => wrap.classList.contains('is-docked');
-      const pageLeave = () => {
-        if (docked()) return 0;
-        return Math.min(1, Math.max(0, (scrollY - h * 0.06) / Math.max(1, h * 0.7)));
-      };
+      const pageLeave = () => Math.min(1, Math.max(0, (scrollY - h * 0.06) / Math.max(1, h * 0.7)));
 
       const snapHome = () => {
         for (const s of stars) {
@@ -248,11 +241,9 @@
         raf = requestAnimationFrame(paint);
       };
 
-      const dock = () => {};
-
       const sampleName = () => {
         const pts: { x: number; y: number; gold: boolean }[] = [];
-        if (!w || !h) return pts;
+        if (lite || !w || !h) return pts;
         const words = [
           { text: 'Chris', gold: false },
           { text: 'Swim', gold: true },
@@ -263,8 +254,8 @@
         const sky = skyEl?.getBoundingClientRect();
         const canvasBox = wrap.getBoundingClientRect();
         const skyTop = sky ? sky.top - canvasBox.top : h * 0.12;
-        const skyH = sky && sky.height > 32 ? sky.height : h * (lite ? 0.24 : 0.42);
-        let size = Math.min(w * 0.145, h * 0.112, lite ? 64 : 88);
+        const skyH = sky && sky.height > 32 ? sky.height : h * 0.42;
+        let size = Math.min(w * 0.145, h * 0.112, 88);
         const off = document.createElement('canvas');
         const g = off.getContext('2d');
         if (!g) return pts;
@@ -272,7 +263,7 @@
           g.font = `italic 600 ${size}px Fraunces, Georgia, serif`;
         };
         setFont();
-        while (size > 22 && g.measureText(phrase).width > w * (lite ? 0.86 : 0.88)) {
+        while (size > 22 && g.measureText(phrase).width > w * 0.88) {
           size -= 2;
           setFont();
         }
@@ -284,7 +275,7 @@
         g.textBaseline = 'middle';
         g.fillStyle = '#fff';
         const mid = off.height * 0.52;
-        const nameCenterY = skyTop + Math.max(size * 0.62, (skyH - (lite ? 26 : 44)) * 0.5);
+        const nameCenterY = skyTop + Math.max(size * 0.62, (skyH - 44) * 0.5);
         const originX = (w - tw) / 2;
         const originY = nameCenterY - mid;
         let cursorX = pad;
@@ -298,7 +289,7 @@
           const x1 = Math.min(off.width, Math.ceil(cursorX + ww + 4));
           const y1 = Math.min(off.height, Math.ceil(mid + size * 0.55));
           const img = g.getImageData(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
-          const step = lite ? 2 : 2;
+          const step = 2;
           for (let y = 0; y < img.height; y += step) {
             for (let x = 0; x < img.width; x += step) {
               if (img.data[(y * img.width + x) * 4 + 3] > 88) {
@@ -330,9 +321,9 @@
 
       const weaveName = (glyphs: Star[]) => {
         nameEdges = [];
-        if (lite || glyphs.length < 8) return;
+        if (glyphs.length < 8) return;
         const seen = new Set<string>();
-        const cap = lite ? 56 : 80;
+        const cap = 80;
         const step = Math.max(1, Math.floor(glyphs.length / cap));
         const maxD = 22 / Math.max(w, 1);
         for (let i = 0; i < glyphs.length && nameEdges.length < cap; i += step) {
@@ -427,7 +418,7 @@
         const x1 = x0 * view.cy + z * view.sy;
         const z1 = z * view.cy - x0 * view.sy;
         const y1 = y0 * view.cx - z1 * view.sx;
-        const drift = docked() ? 0 : s.glyph ? scrollY : scrollY * (0.05 + (1 - s.z) * 0.07);
+        const drift = s.glyph ? scrollY : scrollY * (0.05 + (1 - s.z) * 0.07);
         return {
           x: (0.5 + x1) * w,
           y: (0.48 + y1) * h - drift,
@@ -507,16 +498,11 @@
         if (wallpaper || tones.light) return;
         const shiftX = cam.x / Math.max(w, 1);
         const shiftY = cam.y / Math.max(h, 1);
-        const blobs = lite
-          ? [
-              { x: 0.32 + Math.sin(t * 0.07) * 0.04 + shiftX * 0.2, y: 0.3 + Math.cos(t * 0.05) * 0.03 + shiftY * 0.2, r: 0.5, c: '107, 159, 255' },
-              { x: 0.7 + Math.cos(t * 0.06) * 0.03 + shiftX * 0.14, y: 0.24 + Math.sin(t * 0.08) * 0.02 + shiftY * 0.14, r: 0.36, c: '224, 177, 92' },
-            ]
-          : [
-              { x: 0.3 + Math.sin(t * 0.07) * 0.06 + shiftX * 0.36, y: 0.36 + Math.cos(t * 0.05) * 0.04 + shiftY * 0.36, r: 0.44, c: '107, 159, 255' },
-              { x: 0.68 + Math.cos(t * 0.06) * 0.04 + shiftX * 0.24, y: 0.28 + Math.sin(t * 0.08) * 0.03 + shiftY * 0.24, r: 0.38, c: '224, 177, 92' },
-            ];
-        const nebula = (lite ? 0.14 : 0.16) * (1 - leave * 0.45);
+        const blobs = [
+          { x: 0.3 + Math.sin(t * 0.07) * 0.06 + shiftX * 0.36, y: 0.36 + Math.cos(t * 0.05) * 0.04 + shiftY * 0.36, r: 0.44, c: '107, 159, 255' },
+          { x: 0.68 + Math.cos(t * 0.06) * 0.04 + shiftX * 0.24, y: 0.28 + Math.sin(t * 0.08) * 0.03 + shiftY * 0.24, r: 0.38, c: '224, 177, 92' },
+        ];
+        const nebula = 0.16 * (1 - leave * 0.45);
         for (const b of blobs) {
           const g = ctx.createRadialGradient(b.x * w, b.y * h, 0, b.x * w, b.y * h, b.r * Math.max(w, h));
           g.addColorStop(0, `rgba(${b.c}, ${nebula})`);
@@ -556,7 +542,7 @@
 
       const growConstellation = () => {
         if (!pressing || !cursor.on) return;
-        const reach = (lite ? 78 : 96) + Math.min(160, pressAge * 60);
+        const reach = 96 + Math.min(160, pressAge * 60);
         const near: { s: Star; d: number }[] = [];
         for (const s of stars) {
           if (s.glyph && !named) continue;
@@ -565,7 +551,7 @@
           if (d < reach) near.push({ s, d });
         }
         near.sort((a, b) => a.d - b.d);
-        const keep = near.slice(0, lite ? 10 : 14);
+        const keep = near.slice(0, 14);
         for (let i = 0; i < keep.length; i++) {
           for (let j = i + 1; j < keep.length; j++) {
             const pa = screen(keep[i].s);
@@ -656,8 +642,6 @@
           return;
         }
 
-        const frozen = lite && landed && !pressing;
-
         if (pressing) {
           pressAge += dt;
           growConstellation();
@@ -707,7 +691,7 @@
         }
 
         if (pressing && cursor.on && leave < 0.55) {
-          const reach = (lite ? 80 : 110) + Math.min(140, pressAge * 50);
+          const reach = 110 + Math.min(140, pressAge * 50);
           const near: Star[] = [];
           for (const s of stars) {
             const p = screen(s);
@@ -726,7 +710,7 @@
           if (!formed) {
             if (s.glyph && s.gx != null && s.gy != null) spiralTo(s, s.gx, s.gy, compress);
             else if (play) spiralTo(s, s.hx, s.hy, compress);
-          } else if (!wallpaper && !frozen) {
+          } else if (!wallpaper) {
             const homeX = s.glyph && s.gx != null ? s.gx : s.hx;
             const homeY = s.glyph && s.gy != null ? s.gy : s.hy;
             const p = screen(s);
@@ -780,7 +764,7 @@
           const p = screen(s);
           if (p.x < -16 || p.y < -16 || p.x > w + 16 || p.y > h + 16) continue;
           const twinkle =
-            lite || wallpaper ? 0.82 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * (1.2 + s.z) + s.tw));
+            wallpaper ? 0.82 : 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * (1.2 + s.z) + s.tw));
           const glyphLit = s.glyph && compress > 0.28 ? 1 : twinkle;
           const fieldA =
             (tones.light ? 0.35 + 0.55 * (1 - s.z) : 0.14 + 0.4 * (1 - s.z)) *
@@ -788,8 +772,8 @@
           const alpha = (s.glyph ? (tones.light ? 1 : 0.94) * (1 - leave) : fieldA) * glyphLit;
           const col = tones.light ? tones.star : s.gold ? tones.gold : s.cyan ? tones.cyan : tones.star;
           if (!wallpaper && s.glyph) {
-            const halo = tones.light ? 0.1 : lite ? 0.1 : 0.14;
-            const haloR = tones.light ? p.r * 2.4 : lite ? p.r * 2.6 : p.r * 4;
+            const halo = tones.light ? 0.1 : 0.14;
+            const haloR = tones.light ? p.r * 2.4 : p.r * 4;
             ctx.fillStyle = `rgba(${col}, ${alpha * halo})`;
             ctx.beginPath();
             ctx.arc(p.x, p.y, haloR, 0, Math.PI * 2);
@@ -797,7 +781,7 @@
           }
           ctx.fillStyle = `rgba(${col}, ${alpha})`;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, s.glyph ? (lite ? Math.max(1.2, p.r * 1.08) : p.r * 1.06) : p.r, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, s.glyph ? p.r * 1.06 : p.r, 0, Math.PI * 2);
           ctx.fill();
         }
 
@@ -806,13 +790,6 @@
           return;
         }
         raf = requestAnimationFrame(paint);
-      };
-
-      const cancelHold = () => {
-        if (holdTimer) {
-          clearTimeout(holdTimer);
-          holdTimer = 0;
-        }
       };
 
       const setSkyDrag = (on: boolean) => {
@@ -828,9 +805,9 @@
         pressAge = 0;
         ripples.push({ x, y, r: 8, life: 1 });
         if (userLines.length > 36) return;
-        const hit = nearest(x, y, lite ? 52 : 40);
+        const hit = nearest(x, y, 40);
         if (!hit) return;
-        const other = nearest(x, y, lite ? 90 : 72, hit.id);
+        const other = nearest(x, y, 72, hit.id);
         if (other) userLines.push({ a: hit, b: other, life: 8 });
       };
 
@@ -847,37 +824,17 @@
         }
         lastPtr = { x: e.clientX, y: e.clientY };
         cursor = { x: e.clientX, y: e.clientY, on: true };
-        if (coarse && !pressing && holdTimer) {
-          const adx = Math.abs(e.clientX - downAt.x);
-          const ady = Math.abs(e.clientY - downAt.y);
-          if (ady > 12 && ady > adx) cancelHold();
-          else if (adx > 16) {
-            cancelHold();
-            beginPlay(e.clientX, e.clientY);
-          }
-        }
       };
 
       const onDown = (e: PointerEvent) => {
         if (blocked(e.target) || away) return;
-        if (lite && landed && !(e.target instanceof Element && e.target.closest('.hero-stage'))) return;
         lastPtr = { x: e.clientX, y: e.clientY };
         cursor = { x: e.clientX, y: e.clientY, on: true };
-        downAt = { x: e.clientX, y: e.clientY, scroll: scrollY };
-        cancelHold();
-        if (!coarse) {
-          e.preventDefault();
-          beginPlay(e.clientX, e.clientY);
-          return;
-        }
-        holdTimer = window.setTimeout(() => {
-          holdTimer = 0;
-          if (Math.abs(window.scrollY - downAt.scroll) < 10) beginPlay(downAt.x, downAt.y);
-        }, 160);
+        e.preventDefault();
+        beginPlay(e.clientX, e.clientY);
       };
 
       const onUp = () => {
-        cancelHold();
         if (pressing) {
           cam.vx += ptrV.x * 1.1;
           cam.vy += ptrV.y * 1.1;
@@ -887,7 +844,6 @@
       };
 
       const onLeave = () => {
-        cancelHold();
         cursor.on = false;
         pressing = false;
         setSkyDrag(false);

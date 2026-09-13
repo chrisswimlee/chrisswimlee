@@ -12,7 +12,7 @@ export const site = {
   photo: '/images/chris.jpg',
   ogImage: '/images/chris-og.jpg',
   jobTitle: 'Technical Lead',
-  built: 'Astro. No React. A live constellation field. Printable CV.',
+  built: 'Astro. No React. A constellation field. Printable CV.',
 };
 
 export const nav = [
@@ -627,6 +627,6 @@ export const contact = {
 export const built = {
   lede: 'This site.',
   detail:
-    'Astro. No React. A constellation you can draw in. Printable CV. The source is the proof.',
+    'Astro. No React. A constellation field. Printable CV. The source is the proof.',
   href: 'https://github.com/chrisswimlee/chrisswimlee',
 };

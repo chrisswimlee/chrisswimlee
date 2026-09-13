@@ -269,16 +269,6 @@ p {
   contain: layout paint;
 }
 
-.starfield.is-docked {
-  position: absolute;
-  inset: auto;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 56dvh;
-  min-height: 0;
-}
-
 .starfield.is-away,
 html.is-sky-away .starfield {
   visibility: hidden;
@@ -374,7 +364,11 @@ html:not(.is-booting) .starfield-skip {
 }
 
 .btn:hover {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
     0 12px 32px -14px color-mix(in srgb, var(--accent) 70%, transparent);
 }
 
@@ -424,12 +418,6 @@ html:not(.is-booting) .starfield-skip {
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   background-size: 160px 160px;
-}
-
-.btn:hover {
-  color: var(--bg);
-  background: var(--accent);
-  border-color: var(--accent);
 }
 
 .btn:active {
@@ -2081,8 +2069,8 @@ html.is-landed:not(.is-landing) [data-island] {
 
   .hero-stage {
     display: flex;
-    min-height: 40dvh;
-    padding: calc(var(--nav-offset, var(--nav-h)) + 0.2rem) 0 0.7rem;
+    min-height: 0;
+    padding: calc(var(--nav-offset, var(--nav-h)) + 0.15rem) 0 0.4rem;
     align-items: center;
     justify-content: flex-end;
     transition: min-height 700ms var(--ease-buoy);
@@ -2090,7 +2078,7 @@ html.is-landed:not(.is-landing) [data-island] {
   }
 
   html.is-booting:not(.is-landing) .hero-stage {
-    min-height: 62dvh;
+    min-height: 58dvh;
     transition: none;
   }
 
@@ -2506,7 +2494,6 @@ html.is-landed:not(.is-landing) [data-island] {
     min-height: 0;
     padding-bottom: 0.55rem;
   }
-
 
   @view-transition {
     navigation: none;
