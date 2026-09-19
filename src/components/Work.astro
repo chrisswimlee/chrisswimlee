@@ -36,6 +36,7 @@ import { projects, trading, work } from '../data/site';
     {
       projects.map((project) => {
         const live = project.links[0];
+        const offsite = live ? /^https?:\/\//.test(live.href) : false;
         return (
           <article class="work-piece" data-reveal>
             {
@@ -50,7 +51,13 @@ import { projects, trading, work } from '../data/site';
               ) : (
                 project.image &&
                 live && (
-                  <a class="polaroid" href={live.href} target="_blank" rel="noopener noreferrer">
+                  <a
+                    class="polaroid"
+                    href={live.href}
+                    aria-label={project.title}
+                    target={offsite ? '_blank' : undefined}
+                    rel={offsite ? 'noopener noreferrer' : undefined}
+                  >
                     <img
                       src={project.image}
                       alt={`${project.title} — ${project.url}`}
@@ -79,16 +86,19 @@ import { projects, trading, work } from '../data/site';
               )
             }
             <div class="card-links">
-              {project.links.map((link) => (
-                <a
-                  class:list={['btn', link === live && 'btn-solid']}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {project.links.map((link) => {
+                const offsite = /^https?:\/\//.test(link.href);
+                return (
+                  <a
+                    class:list={['btn', link === live && 'btn-solid']}
+                    href={link.href}
+                    target={offsite ? '_blank' : undefined}
+                    rel={offsite ? 'noopener noreferrer' : undefined}
+                  >
+                    {link.label}
+                  </a>
+                );
+              })}
             </div>
           </article>
         );

@@ -1,5 +1,5 @@
 ---
-import { hero, mail, site, thesis } from '../data/site';
+import { hero, mail, site } from '../data/site';
 ---
 
 <header class="hero" id="top">
@@ -12,10 +12,7 @@ import { hero, mail, site, thesis } from '../data/site';
       <figure class="hero-photo" data-island data-play data-island-kind="photo" style="--i: 4">
         <img src={site.photo} alt={site.name} width="320" height="320" fetchpriority="high" decoding="async" />
       </figure>
-      <ul class="hero-method" data-island style="--i: 3">
-        {thesis.map((line) => <li>{line}</li>)}
-      </ul>
-      <div class="hero-actions" data-island style="--i: 4">
+      <div class="hero-actions" data-island style="--i: 3">
         <a class="btn btn-solid" href="/#work">See the work</a>
         <a class="btn" href={mail}>Email</a>
       </div>

@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { fluidSubtitles, latestPreviewZip, site } from '../data/site';
+
+const zip = await latestPreviewZip();
+---
+
+<Layout title={`${fluidSubtitles.title} — ${site.name}`} description={fluidSubtitles.description}>
+  <main id="main" class="resume-page wrap">
+    <div class="resume-top">
+      <div>
+        <p class="kicker">{fluidSubtitles.kicker}</p>
+        <h1>{fluidSubtitles.title}</h1>
+      </div>
+      <div class="resume-meta">
+        <p>{fluidSubtitles.lede}</p>
+        <div class="hero-actions">
+          <a class="btn btn-solid" href="#install">Install</a>
+          <a class="btn" href={fluidSubtitles.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="btn" href="/#work">The work</a>
+        </div>
+      </div>
+    </div>
+
+    <figure class="project-shot">
+      <img
+        src={fluidSubtitles.image}
+        alt="Theater captions: Hello. and 안녕."
+        width="1200"
+        height="750"
+      />
+    </figure>
+
+    <section class="resume-block" id="install">
+      <h2>Install</h2>
+      <p class="resume-copy">
+        Preview zip <strong>{zip.name}</strong>
+        {' · '}
+        {zip.tag}. No Xcode.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href={zip.href}>{`Download ${zip.name}`}</a>
+      </div>
+      <div class="get-cmd">
+        <code>{zip.command}</code>
+        <button class="cmd-copy" type="button" data-copy={zip.command}>Copy</button>
+      </div>
+      <ol class="points project-steps">
+        {fluidSubtitles.open.map((step) => (
+          <li>{step}</li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="resume-block">
+      <h2>What it is</h2>
+      <ul class="points">
+        {fluidSubtitles.about.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="resume-block">
+      <h2>What you need</h2>
+      <ul class="points">
+        {fluidSubtitles.needs.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  import '../scripts/copy-buttons';
+</script>

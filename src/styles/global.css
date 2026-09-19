@@ -697,7 +697,7 @@ html:has(.starfield.is-static) .hero-stage {
 }
 
 .hero .lede {
-  max-width: 52ch;
+  max-width: 58ch;
   font-size: 1.12rem;
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -1349,7 +1349,7 @@ html:has(.starfield.is-static) .hero-stage {
 
 .work-board {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.4rem;
   align-items: start;
 }
@@ -1799,6 +1799,48 @@ html:has(.starfield.is-static) .hero-stage {
 
 .resume-copy-gap {
   margin-top: 0.75rem;
+}
+
+.project-shot {
+  display: block;
+  margin: 0 0 1.6rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.project-shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.get-cmd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.get-cmd code {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--cobalt);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.project-steps {
+  margin-top: 1.1rem;
 }
 
 .resume-page .role {
@@ -2271,6 +2313,14 @@ html.is-landed:not(.is-landing) [data-island] {
   }
 
   .polaroid-cmd .cmd-copy {
+    margin-left: 0;
+  }
+
+  .get-cmd {
+    flex-direction: column;
+  }
+
+  .get-cmd .cmd-copy {
     margin-left: 0;
   }
 
