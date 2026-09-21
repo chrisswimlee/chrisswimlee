@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { fluidSubtitles, latestPreviewZip, site } from '../data/site';
+import { commercialLicense, fluidSubtitles, latestPreviewZip, site } from '../data/site';
 
 const zip = await latestPreviewZip();
+const zipMark = zip.tag.replace(/^preview-/, '').replace(/-\d+$/, '') || zip.tag;
 ---
 
 <Layout title={`${fluidSubtitles.title} — ${site.name}`} description={fluidSubtitles.description}>
@@ -14,32 +15,42 @@ const zip = await latestPreviewZip();
       </div>
       <div class="resume-meta">
         <p>{fluidSubtitles.lede}</p>
+        <p class="project-langs">{fluidSubtitles.langs.join(' · ')}</p>
         <div class="hero-actions">
-          <a class="btn btn-solid" href="#install">Install</a>
+          <a class="btn btn-solid" href={zip.href}>Download zip</a>
+          <a class="btn btn-solid" href={commercialLicense.path}>{commercialLicense.cta}</a>
           <a class="btn" href={fluidSubtitles.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
           <a class="btn" href="/#work">The work</a>
         </div>
       </div>
     </div>
 
-    <figure class="project-shot">
-      <img
-        src={fluidSubtitles.image}
-        alt="Theater captions: Hello. and 안녕."
-        width="1200"
-        height="750"
-      />
-    </figure>
+    <div class="project-shots">
+      <figure class="project-shot">
+        <img
+          src={fluidSubtitles.image}
+          alt="Theater captions: Hello. and 안녕."
+          width="1200"
+          height="750"
+        />
+      </figure>
+      <figure class="project-shot">
+        <img
+          src={fluidSubtitles.homeImage}
+          alt="Theater Home: English to Korean, on this Mac."
+          width="1200"
+          height="750"
+        />
+      </figure>
+    </div>
 
     <section class="resume-block" id="install">
       <h2>Install</h2>
       <p class="resume-copy">
-        Preview zip <strong>{zip.name}</strong>
-        {' · '}
-        {zip.tag}. No Xcode.
+        Unsigned preview <strong>{zipMark}</strong>. No Xcode.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-solid" href={zip.href}>{`Download ${zip.name}`}</a>
+        <a class="btn btn-solid" href={zip.href}>Download zip</a>
       </div>
       <div class="get-cmd">
         <code>{zip.command}</code>
@@ -52,22 +63,41 @@ const zip = await latestPreviewZip();
       </ol>
     </section>
 
-    <section class="resume-block">
-      <h2>What it is</h2>
-      <ul class="points">
-        {fluidSubtitles.about.map((point) => (
-          <li>{point}</li>
-        ))}
-      </ul>
-    </section>
+    <div class="project-split">
+      <section class="resume-block">
+        <h2>What it is</h2>
+        <ul class="points">
+          {fluidSubtitles.about.map((point) => (
+            <li>{point}</li>
+          ))}
+        </ul>
+      </section>
+      <section class="resume-block">
+        <h2>What you need</h2>
+        <ul class="points">
+          {fluidSubtitles.needs.map((point) => (
+            <li>{point}</li>
+          ))}
+        </ul>
+      </section>
+    </div>
 
-    <section class="resume-block">
-      <h2>What you need</h2>
-      <ul class="points">
-        {fluidSubtitles.needs.map((point) => (
-          <li>{point}</li>
+    <section class="resume-block" id="work">
+      <h2>{commercialLicense.workTitle}</h2>
+      <p class="resume-copy">{commercialLicense.workLede}</p>
+      <ul class="points resume-list">
+        {commercialLicense.answers.map((item) => (
+          <li>
+            <strong>{item.question}</strong>
+            {' '}
+            {item.answer}
+          </li>
         ))}
       </ul>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href={commercialLicense.path}>{commercialLicense.cta}</a>
+        <a class="btn" href={commercialLicense.href}>{commercialLicense.emailCta}</a>
+      </div>
     </section>
   </main>
 </Layout>

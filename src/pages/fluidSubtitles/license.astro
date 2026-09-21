@@ -1,0 +1,79 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { commercialLicense, fluidSubtitles, site } from '../../data/site';
+---
+
+<Layout
+  title={`${commercialLicense.title} — ${fluidSubtitles.title}`}
+  description={commercialLicense.lede}
+>
+  <main id="main" class="resume-page wrap">
+    <div class="resume-top">
+      <div>
+        <p class="kicker">{commercialLicense.kicker}</p>
+        <h1>{commercialLicense.heading}</h1>
+      </div>
+      <div class="resume-meta">
+        <p>{commercialLicense.lede}</p>
+        <div class="hero-actions">
+          <a class="btn btn-solid" href={commercialLicense.href}>{commercialLicense.emailCta}</a>
+          <a class="btn" href={fluidSubtitles.path}>Get the zip</a>
+          <a class="btn" href={fluidSubtitles.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="resume-block">
+      <h2>What you are buying</h2>
+      <p class="resume-copy">
+        GPLv3 still lets a firm run the free zip. A commercial license is the
+        paper IT can file: a named organization, an offline activation key, and
+        a person who answers when something breaks.
+      </p>
+      <ul class="points resume-list">
+        {commercialLicense.includes.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="resume-block">
+      <h2>What IT usually asks</h2>
+      <ul class="points">
+        {commercialLicense.answers.map((item) => (
+          <li>
+            <strong>{item.question}</strong>
+            {' '}
+            {item.answer}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="resume-block">
+      <h2>How a key works</h2>
+      <ul class="points">
+        {commercialLicense.points.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+      <p class="resume-copy resume-copy-gap">
+        Paste the key in fluidSubtitles → Settings → General. Listen does not
+        lock. The key only replaces the work notice with
+        <strong>Licensed to</strong> your organization.
+      </p>
+    </section>
+
+    <section class="resume-block">
+      <h2>Request a license</h2>
+      <p class="resume-copy">
+        Email {site.email}. Say the organization, how many Macs, and whether
+        you need a written SLA. For a build, that’s the
+        <a href="/engage/">contract page</a>.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href={commercialLicense.href}>{commercialLicense.emailCta}</a>
+      </div>
+    </section>
+  </main>
+</Layout>
