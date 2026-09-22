@@ -1,5 +1,5 @@
 ---
-import { projects, trading, work } from '../data/site';
+import { projects, work } from '../data/site';
 ---
 
 <section class="section" id="work">
@@ -7,38 +7,13 @@ import { projects, trading, work } from '../data/site';
     <h2>Work</h2>
     <p class="note" data-reveal>{work.lede}</p>
   </div>
-  <article class="case-brief work-case work-lead" data-reveal>
-    <p class="kicker">{trading.kicker}</p>
-    <h3 class="case-title">{trading.title}</h3>
-    <p class="gal-metric">
-      {trading.metric} · {trading.metricLabel}
-    </p>
-    <dl class="case-steps">
-      <div>
-        <dt>Problem</dt>
-        <dd>{trading.problem}</dd>
-      </div>
-      <div>
-        <dt>Constraint</dt>
-        <dd>{trading.constraint}</dd>
-      </div>
-      <div>
-        <dt>Decision</dt>
-        <dd>{trading.decision}</dd>
-      </div>
-      <div>
-        <dt>Outcome</dt>
-        <dd>{trading.outcome}</dd>
-      </div>
-    </dl>
-  </article>
   <div class="work-board">
     {
       projects.map((project) => {
         const live = project.links[0];
         const offsite = live ? /^https?:\/\//.test(live.href) : false;
         return (
-          <article class="work-piece" data-reveal>
+          <article class:list={['work-piece', project.featured && 'work-feature']} data-reveal>
             {
               project.command ? (
                 <div class="polaroid polaroid-cmd">
@@ -88,9 +63,10 @@ import { projects, trading, work } from '../data/site';
             <div class="card-links">
               {project.links.map((link) => {
                 const offsite = /^https?:\/\//.test(link.href);
+                const github = link.label === 'GitHub';
                 return (
                   <a
-                    class:list={['btn', link === live && 'btn-solid']}
+                    class:list={['btn', link === live && 'btn-solid', github && 'btn-text']}
                     href={link.href}
                     target={offsite ? '_blank' : undefined}
                     rel={offsite ? 'noopener noreferrer' : undefined}

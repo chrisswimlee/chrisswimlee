@@ -3,9 +3,9 @@ export const site = {
   legalName: 'Chris SuYoung Lee',
   title: 'Chris Swim Lee, New York',
   description:
-    'Local AI on your own hardware. College professor and school IT. Owner of local-host.ai. Open source. Available for contract work.',
+    'local-host.ai, local AI on your own hardware. fluidSubtitles, live captions on a Mac. College professor and school IT. Available for contract work.',
   url: 'https://chrisswimlee.com',
-  location: 'New York, NY',
+  location: 'New York · remote',
   email: 'suyoung.lee99@gmail.com',
   github: 'https://github.com/chrisswimlee',
   linkedin: 'https://www.linkedin.com/in/chris-suyoung-lee',
@@ -16,10 +16,9 @@ export const site = {
 };
 
 export const nav = [
-  { href: '/#achievements', label: 'Achievements' },
-  { href: '/#range', label: 'Range' },
   { href: '/#work', label: 'Work' },
-  { href: '/#experience', label: 'Experience' },
+  { href: '/#achievements', label: 'Achievements' },
+  { href: '/#tools', label: 'Tools' },
 ];
 
 export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Call — Chris Swim Lee')}&body=${encodeURIComponent('Which project:\n\nWhat you need:\n\nWhen to call:\n')}`;
@@ -31,14 +30,14 @@ export const commercialMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeUR
 )}`;
 
 export const hero = {
-  kicker: 'New York',
-  lede: 'Local AI that holds up on your own hardware. College professor, running IT for a school. Owner of local-host.ai, with the other tools in open source. Available for contract work.',
+  kicker: 'New York · remote',
+  lede: 'local-host.ai is local AI that runs on your hardware, offline included. fluidSubtitles is live captions on a Mac. College professor and school IT. Available for contract work.',
   cta: 'Set up a call',
 };
 
 export const experienceIntro = 'College professor and IT at HAIT. Contracts start with an email.';
 
-export const achievementsNote = 'From Goldman and the trading desk.';
+export const achievementsNote = 'The hardest part of each job. The full record is on the resume.';
 
 type Spike = {
   id: 'theory' | 'build' | 'strategy';
@@ -72,8 +71,8 @@ export const range = {
         'Three years at Goldman Sachs — 10,000+ accounts, 50+ internal teams on the APIs.',
         'Founding CTO on a Kraken futures trading engine.',
         'local-host.ai, a local AI framework.',
-        'Local Lattice, an OpenAI-compatible gateway on PyPI.',
         'fluidSubtitles, live Korean, English, Thai, and Japanese captions on macOS.',
+        'Local Lattice, an OpenAI-compatible gateway on PyPI.',
       ],
     },
     {
@@ -92,39 +91,40 @@ export const range = {
 
 export type TechnicalAchievement = {
   id: string;
-  label: string;
-  value: number;
-  prefix?: string;
-  suffix: string;
+  place: string;
+  when: string;
   claim: string;
   proof: string;
 };
 
 export const technicalAchievements: TechnicalAchievement[] = [
   {
-    id: 'scale',
-    label: 'Scale',
-    value: 10000,
-    suffix: '+',
-    claim: 'Accounts on one beneficiary system.',
-    proof: 'At Goldman, processing time dropped 80%. More than 50 teams used the APIs.',
+    id: 'hait',
+    place: 'HAIT',
+    when: '2026 — present',
+    claim: 'Taught the first AI course while running the school’s IT.',
+    proof: 'Wrote the curriculum, checked the lab machines, and taught the cohort. OpenClaw and OpenAgent for students and staff. Hosting and security included.',
   },
   {
-    id: 'speed',
-    label: 'Speed',
-    value: 100,
-    prefix: '<',
-    suffix: 'ms',
-    claim: 'Kraken futures data, feed to book.',
-    proof: 'Python and Kafka. Millions of ticks. That is what the trading agents sat on.',
+    id: 'stealth',
+    place: 'Stealth fintech',
+    when: 'Sep 2025 – Aug 2026',
+    claim: 'A live Kraken futures engine, from an empty pipeline to orders going out.',
+    proof: 'Founding CTO. Python and Kafka, under 100ms from feed to book. Models that retrain all day, and a morning brief that took about 90% of the analysis off the desk.',
   },
   {
-    id: 'models',
-    label: 'Models',
-    value: 90,
-    suffix: '%',
-    claim: 'Most of the morning analysis, done before the open.',
-    proof: 'PyTorch time-series models on a 24/7 loop, plus a daily pre-market brief.',
+    id: 'goldman',
+    place: 'Goldman Sachs',
+    when: 'May 2022 – Jul 2025',
+    claim: 'One reporting path that developers, traders, and lawyers would sign.',
+    proof: 'Forward-deployed on the beneficiary system behind 10,000+ accounts. That path ran 80% faster than the one it replaced. More than 50 teams on the APIs.',
+  },
+  {
+    id: 'onedave',
+    place: 'One Dave',
+    when: 'Oct 2020 – May 2022',
+    claim: 'Systems for a government nuclear contractor and national defense clients.',
+    proof: 'Inventory pipelines for Curtis, inside the systems they already had. Defense web apps with security review from the first ticket.',
   },
 ];
 
@@ -140,7 +140,7 @@ export const trading = {
 };
 
 export const work = {
-  lede: 'local-host.ai, Lattice, two Mac apps, two sites.',
+  lede: 'local-host.ai and fluidSubtitles lead. DeskBreak, two sites, and Lattice follow.',
 };
 
 type Project = {
@@ -154,6 +154,7 @@ type Project = {
   points: string[];
   command?: string;
   commandNote?: string;
+  featured?: boolean;
   links: { label: string; href: string }[];
 };
 
@@ -161,6 +162,7 @@ export const projects: Project[] = [
   {
     id: 'localhost',
     kind: 'Local framework',
+    featured: true,
     title: 'local-host.ai',
     url: 'local-host.ai',
     year: '2026',
@@ -174,25 +176,6 @@ export const projects: Project[] = [
     links: [
       { label: 'Live site', href: 'https://local-host.ai' },
       { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-host.ai' },
-    ],
-  },
-  {
-    id: 'lattice',
-    kind: 'Open source',
-    title: 'Local Lattice',
-    url: 'pypi.org/project/local-lattice',
-    year: '2026',
-    summary:
-      'A local gateway that speaks the OpenAI API. You ask for a role like coder or reasoner, and it picks a model.',
-    points: [
-      'Works with MLX, LM Studio, or a cloud key.',
-      'Can send one question to several models and vote, pipeline, or debate the answers.',
-    ],
-    command: 'pip install local-lattice',
-    commandNote: 'role:coder · role:reasoner · role:fast',
-    links: [
-      { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-lattice' },
-      { label: 'PyPI', href: 'https://pypi.org/project/local-lattice/' },
     ],
   },
   {
@@ -257,6 +240,25 @@ export const projects: Project[] = [
       'A random race roll and a 2HH table you can play in the browser.',
     ],
     links: [{ label: 'Live site', href: 'https://d22soso.com' }],
+  },
+  {
+    id: 'lattice',
+    kind: 'Open source',
+    title: 'Local Lattice',
+    url: 'pypi.org/project/local-lattice',
+    year: '2026',
+    summary:
+      'A local gateway that speaks the OpenAI API. You ask for a role like coder or reasoner, and it picks a model.',
+    points: [
+      'Works with MLX, LM Studio, or a cloud key.',
+      'Can send one question to several models and vote, pipeline, or debate the answers.',
+    ],
+    command: 'pip install local-lattice',
+    commandNote: 'role:coder · role:reasoner · role:fast',
+    links: [
+      { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-lattice' },
+      { label: 'PyPI', href: 'https://pypi.org/project/local-lattice/' },
+    ],
   },
 ];
 
@@ -766,14 +768,16 @@ export const competitive = [
 export const skills = {
   Languages: ['Java', 'Python', 'Swift', 'SQL', 'JavaScript', 'C++', 'C#'],
   'AI & ML': ['PyTorch', 'TensorFlow', 'Scikit-Learn', 'LangChain', 'NumPy', 'Quantitative modeling'],
-  Platforms: ['Spring Boot', 'ASP.NET', 'Apache Kafka', 'Docker', 'GitLab CI/CD'],
+  Data: ['SQL', 'Apache Kafka'],
+  Delivery: ['Docker', 'GitLab CI/CD', 'Git'],
+  Platforms: ['Spring Boot', 'ASP.NET'],
   'Agent tooling': ['Claude', 'Cursor', 'n8n', 'OpenClaw'],
-  Tools: ['Git', 'Selenium', 'TestNG', 'JUnit'],
+  Testing: ['Selenium', 'TestNG', 'JUnit'],
 };
 
 export const about = {
   lede: 'Chris SuYoung Lee. Suyoung means swim.',
-  line: 'Trinity was proofs. The work now is local AI, and IT for a school.',
+  line: 'Trinity was proofs. The work now is local-host.ai, fluidSubtitles, and IT for a school.',
 };
 
 export const engage = {
@@ -782,7 +786,7 @@ export const engage = {
   promise: 'Send the project and a time that works.',
   paths: [
     { name: 'Contract', detail: 'Local AI on your machines, or help with the IT around it.' },
-    { name: 'A project', detail: 'local-host.ai, Lattice, or anything else on the site.' },
+    { name: 'A project', detail: 'local-host.ai, fluidSubtitles, or anything else on the site.' },
     { name: 'A call', detail: 'Name a time that works.' },
   ],
   rates: [

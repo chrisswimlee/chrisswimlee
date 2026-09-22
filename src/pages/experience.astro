@@ -14,9 +14,9 @@ import { roles, site } from '../data/site';
         <h1>Experience</h1>
       </div>
       <div class="resume-meta">
-        <p>Four jobs. Open a project for the writeup.</p>
+        <p>Four jobs. Highlights first. Open a role for the writeup.</p>
         <div class="hero-actions">
-          <a class="btn" href="/#experience">Back to site</a>
+          <a class="btn" href="/#work">Back to site</a>
           <a class="btn" href="/resume/">Resume</a>
         </div>
       </div>
@@ -26,17 +26,26 @@ import { roles, site } from '../data/site';
       {
         roles.map((role) => (
           <article class="role role-explore archive-role">
-            <details class="role-fold" id={role.id} open>
-              <summary class="role-summary">
-                <div class="when-col">
-                  <p class="when">{role.dates}</p>
-                  {role.location && <p class="when">{role.location}</p>}
-                </div>
-                <div>
-                  <h3>{role.title}</h3>
-                  <p class="company">{role.company}</p>
-                  <p class="role-note">{role.scan}</p>
-                </div>
+            <div class="role-head">
+              <div class="when-col">
+                <p class="when">{role.dates}</p>
+                {role.location && <p class="when">{role.location}</p>}
+              </div>
+              <div>
+                <h3>{role.title}</h3>
+                <p class="company">{role.company}</p>
+                <p class="role-note">{role.scan}</p>
+              </div>
+            </div>
+            <ul class="role-highlights">
+              {role.bullets.map((bullet) => (
+                <li>{bullet}</li>
+              ))}
+            </ul>
+            <details class="role-fold" id={role.id}>
+              <summary class="project-summary">
+                <span class="project-title">Writeups</span>
+                <span class="project-line">{role.projects.length} projects</span>
               </summary>
               <div class="role-projects">
                 {role.projects.map((project) => (

@@ -12,7 +12,7 @@ import {
 
 <Layout
   title={`Resume — ${site.name}`}
-  description={`Resume for ${site.legalName}: local AI, school IT, and contract work.`}
+  description={`Resume for ${site.legalName}: local-host.ai, fluidSubtitles, school IT, and contract work.`}
 >
   <main id="main" class="resume-page wrap">
     <div class="resume-top">
@@ -42,9 +42,9 @@ import {
     <section class="resume-block">
       <h2>Profile</h2>
       <p class="resume-copy">
-        Local AI that runs on the hardware in front of you. College professor
-        at HAIT, and the IT there. Owner of local-host.ai. The other tools are
-        open source. Available for contract work.
+        local-host.ai, local AI on the hardware in front of you. fluidSubtitles,
+        live captions on a Mac. College professor at HAIT, and the IT there.
+        Available for contract work.
       </p>
     </section>
 
@@ -85,15 +85,6 @@ import {
         <a href="https://github.com/chrisswimlee/local-host.ai" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-host.ai</a>
       </p>
       <p class="resume-copy resume-copy-gap">
-        <strong>Local Lattice</strong> — local gateway that speaks the
-        OpenAI API (Apache-2.0). You ask for a role like coder or reasoner,
-        and it picks a model.
-        {' '}
-        <a href="/#work">The work</a>
-        {' · '}
-        <a href="https://github.com/chrisswimlee/local-lattice" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-lattice</a>
-      </p>
-      <p class="resume-copy resume-copy-gap">
         <strong>fluidSubtitles</strong> — live Korean, English, Thai, and
         Japanese captions on macOS (GPLv3). A FluidVoice branch with Theater
         captions and on-device Apple Translation.
@@ -109,6 +100,15 @@ import {
         <a href="/#work">The work</a>
         {' · '}
         <a href="https://github.com/chrisswimlee/deskbreak" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/deskbreak</a>
+      </p>
+      <p class="resume-copy resume-copy-gap">
+        <strong>Local Lattice</strong> — local gateway that speaks the
+        OpenAI API (Apache-2.0). You ask for a role like coder or reasoner,
+        and it picks a model.
+        {' '}
+        <a href="/#work">The work</a>
+        {' · '}
+        <a href="https://github.com/chrisswimlee/local-lattice" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-lattice</a>
       </p>
     </section>
 
@@ -169,7 +169,7 @@ import {
         {
           technicalAchievements.map((item) => (
             <li>
-              <strong>{item.label} — {item.prefix ?? ''}{item.value.toLocaleString('en-US')}{item.suffix}.</strong>
+              <strong>{item.place}, {item.when}.</strong>
               {' '}
               {item.claim} {item.proof}
             </li>

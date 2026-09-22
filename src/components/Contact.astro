@@ -16,9 +16,11 @@ import { about, built, contact, site } from '../data/site';
       <a class="mail" href={`mailto:${site.email}`}>{site.email}</a>
       <div class="card-links">
         <a class="btn btn-solid" href={contact.href}>{contact.projectCta}</a>
-        <a class="btn" href="/resume/">Resume</a>
-        <a class="btn" href="/engage/">Engage</a>
+        <a class="btn btn-text" href="/resume/?from=contact">Resume</a>
       </div>
+      <p class="contact-aside" data-reveal>
+        Rates for a scoped build are on the <a href="/engage/">contract page</a>.
+      </p>
     </div>
   </div>
   <div class="built" data-reveal>

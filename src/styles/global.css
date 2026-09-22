@@ -438,6 +438,33 @@ a.btn-solid:hover {
   border-color: var(--ink);
 }
 
+.btn-text,
+a.btn-text {
+  border-color: transparent;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 0.28em;
+  width: auto;
+}
+
+.btn-text:hover,
+a.btn-text:hover {
+  color: var(--ink);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.contact-aside {
+  margin: 0.85rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.contact-aside a {
+  color: var(--ink);
+}
+
 .nav {
   position: sticky;
   top: 0;
@@ -1163,11 +1190,26 @@ html:has(.starfield.is-static) .hero-stage {
   content: '';
 }
 
-.role-summary {
+.role-summary,
+.role-head {
   display: grid;
   grid-template-columns: minmax(150px, 210px) 1fr;
   gap: 1rem 2rem;
   padding-right: 1.6rem;
+}
+
+.role-head {
+  padding-right: 0;
+}
+
+.role-highlights {
+  margin: 0.85rem 0 0.2rem;
+  padding-left: 1.1rem;
+  color: var(--muted);
+}
+
+.role-highlights li + li {
+  margin-top: 0.35rem;
 }
 
 .role-summary:focus-visible,
@@ -1368,6 +1410,10 @@ html:has(.starfield.is-static) .hero-stage {
   margin-bottom: clamp(1.8rem, 4vw, 2.6rem);
 }
 
+.work-feature {
+  grid-column: 1 / -1;
+}
+
 .work-piece {
   position: relative;
   min-width: 0;
@@ -1384,7 +1430,7 @@ html:has(.starfield.is-static) .hero-stage {
 
 .achieve-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.1rem;
   margin: 0;
   padding: 0;
@@ -1410,10 +1456,13 @@ html:has(.starfield.is-static) .hero-stage {
 
 .achieve-card h3 {
   font-family: var(--display);
-  font-size: 1.25rem;
+  font-size: clamp(1.45rem, 2.2vw, 1.85rem);
   font-style: italic;
+  font-weight: 500;
   letter-spacing: -0.03em;
-  margin: 0 0 0.45rem;
+  line-height: 1.15;
+  margin: 0.55rem 0 0.55rem;
+  color: var(--ink);
 }
 
 .achieve-card p {
@@ -2476,8 +2525,9 @@ html.is-landed:not(.is-landing) [data-island] {
     gap: 0.25rem 0;
   }
 
-  .role-summary {
-    grid-template-columns: 1fr 1rem;
+  .role-summary,
+  .role-head {
+    grid-template-columns: 1fr;
     gap: 0.2rem 0.7rem;
     padding-right: 0;
   }
@@ -2520,6 +2570,13 @@ html.is-landed:not(.is-landing) [data-island] {
   .work-piece .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .work-piece .btn-text,
+  .contact-actions .btn-text,
+  .resume-jump .btn-text {
+    width: auto;
+    justify-content: flex-start;
   }
 
   .section-head .note {
