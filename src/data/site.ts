@@ -18,7 +18,7 @@ export const site = {
 export const nav = [
   { href: '/#work', label: 'Work' },
   { href: '/#achievements', label: 'Achievements' },
-  { href: '/#tools', label: 'Tools' },
+  { href: '/experience/', label: 'Experience' },
 ];
 
 export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Call — Chris Swim Lee')}&body=${encodeURIComponent('Which project:\n\nWhat you need:\n\nWhen to call:\n')}`;
@@ -37,7 +37,7 @@ export const hero = {
 
 export const experienceIntro = 'College professor and IT at HAIT. Contracts start with an email.';
 
-export const achievementsNote = 'The hardest part of each job. The full record is on the resume.';
+export const achievementsNote = 'The hardest part of each job. The writeups are in Experience.';
 
 type Spike = {
   id: 'theory' | 'build' | 'strategy';
@@ -140,7 +140,7 @@ export const trading = {
 };
 
 export const work = {
-  lede: 'local-host.ai and fluidSubtitles lead. DeskBreak, two sites, and Lattice follow.',
+  lede: 'local-host.ai runs on your hardware. fluidSubtitles captions a Mac.',
 };
 
 type Project = {
@@ -174,7 +174,7 @@ export const projects: Project[] = [
       'Owned outright. Skills are files you can open and change.',
     ],
     links: [
-      { label: 'Live site', href: 'https://local-host.ai' },
+      { label: 'The site', href: 'https://local-host.ai' },
       { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-host.ai' },
     ],
   },
@@ -781,8 +781,8 @@ export const about = {
 };
 
 export const engage = {
-  heading: 'Contract work',
-  lede: 'Ask about a project and set up a call.',
+  heading: 'Rates',
+  lede: 'Prices for a scoped build. A call is how it starts.',
   promise: 'Send the project and a time that works.',
   paths: [
     { name: 'Contract', detail: 'Local AI on your machines, or help with the IT around it.' },
