@@ -1,9 +1,7 @@
 ---
+import FluidInstallLinks from '../components/FluidInstallLinks.astro';
 import Layout from '../layouts/Layout.astro';
-import { commercialLicense, fluidSubtitles, latestPreviewZip, site } from '../data/site';
-
-const zip = await latestPreviewZip();
-const zipMark = zip.tag.replace(/^preview-/, '').replace(/-\d+$/, '') || zip.tag;
+import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '../data/site';
 ---
 
 <Layout title={`${fluidSubtitles.title} — ${site.name}`} description={fluidSubtitles.description}>
@@ -17,7 +15,7 @@ const zipMark = zip.tag.replace(/^preview-/, '').replace(/-\d+$/, '') || zip.tag
         <p>{fluidSubtitles.lede}</p>
         <p class="project-langs">{fluidSubtitles.langs.join(' · ')}</p>
         <div class="hero-actions">
-          <a class="btn btn-solid" href={zip.href}>Download zip</a>
+          <a class="btn btn-solid" href={fluidSubtitlesRelease.href}>Download {fluidSubtitlesRelease.version}</a>
           <a class="btn btn-solid" href={commercialLicense.path}>{commercialLicense.cta}</a>
           <a class="btn" href={fluidSubtitles.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
           <a class="btn" href="/#work">The work</a>
@@ -46,16 +44,8 @@ const zipMark = zip.tag.replace(/^preview-/, '').replace(/-\d+$/, '') || zip.tag
 
     <section class="resume-block" id="install">
       <h2>Install</h2>
-      <p class="resume-copy">
-        Unsigned preview <strong>{zipMark}</strong>. No Xcode.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-solid" href={zip.href}>Download zip</a>
-      </div>
-      <div class="get-cmd">
-        <code>{zip.command}</code>
-        <button class="cmd-copy" type="button" data-copy={zip.command}>Copy</button>
-      </div>
+      <p class="resume-copy">{fluidSubtitles.installLede}</p>
+      <FluidInstallLinks />
       <ol class="points project-steps">
         {fluidSubtitles.open.map((step) => (
           <li>{step}</li>

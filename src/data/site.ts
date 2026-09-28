@@ -268,7 +268,7 @@ export const fluidSubtitles = {
   kicker: 'Open source · 2026',
   lede: 'Live captions on a Mac. Speak Korean, English, Thai, or Japanese. A translation or a caption shows up on screen.',
   description:
-    'Live Korean, English, Thai, and Japanese captions for macOS. Download the preview zip.',
+    'Live Korean, English, Thai, and Japanese captions for macOS. The zip is notarized.',
   repo: 'https://github.com/chrisswimlee/fluidSubtitles',
   image: '/images/work/fluidsubtitles.jpg',
   homeImage: '/images/work/fluidsubtitles-home.jpg',
@@ -279,13 +279,24 @@ export const fluidSubtitles = {
     'Voice stays on this Mac. A cloud speech model is something you turn on.',
   ],
   needs: [
-    'macOS 15 or later. Theater streaming needs Apple Silicon.',
+    'macOS 15 or later. Apple Silicon.',
     'Microphone for Listen. Accessibility only if you type into another app.',
   ],
+  installLede: 'macOS 15 or later, Apple Silicon. The zip is notarized.',
   open: [
     'Unzip it and drag fluidSubtitles to Applications.',
-    'The zip is not signed. macOS will block it once. Open Anyway under Privacy & Security.',
-    'Open Theater, allow the microphone, pick Voice or Translate, then Listen.',
+    'Open Theater, allow the microphone, then press Listen.',
+  ],
+};
+
+export const fluidSubtitlesRelease = {
+  version: '1.6.12',
+  name: 'fluidsubtitles-1.6.12.zip',
+  href: 'https://github.com/chrisswimlee/fluidSubtitles/releases/download/v1.6.12/fluidsubtitles-1.6.12.zip',
+  brew: [
+    'brew tap chrisswimlee/fluidsubtitles',
+    'brew trust chrisswimlee/fluidsubtitles',
+    'brew install --cask fluidsubtitles',
   ],
 };
 
@@ -300,7 +311,7 @@ export const commercialLicense = {
   href: commercialMail,
   workTitle: 'For work',
   workLede:
-    'The free zip is for people. Firms that need a named license, a security contact, or an SLA should buy a commercial license.',
+    'Personal use stays free. If IT or legal need a named license or an SLA, request a commercial license.',
   answers: [
     {
       question: 'How does this monetize?',
@@ -348,8 +359,8 @@ const fallbackZip = (name: string, tag: string): PreviewZip => {
 };
 
 const fallbackPreview = fallbackZip(
-  'fluidsubtitles-1.6.11-preview-unsigned.zip',
-  'preview-1.6.11-1',
+  'fluidsubtitles-1.6.12.zip',
+  'v1.6.12',
 );
 
 type GithubRelease = {
