@@ -1,5 +1,4 @@
 ---
-import FluidInstallLinks from '../components/FluidInstallLinks.astro';
 import Layout from '../layouts/Layout.astro';
 import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '../data/site';
 ---
@@ -45,12 +44,21 @@ import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '
     <section class="resume-block" id="install">
       <h2>Install</h2>
       <p class="resume-copy">{fluidSubtitles.installLede}</p>
-      <FluidInstallLinks />
+      <div class="hero-actions">
+        <a class="btn btn-solid" href={fluidSubtitlesRelease.href}>
+          Download {fluidSubtitlesRelease.name}
+        </a>
+      </div>
       <ol class="points project-steps">
         {fluidSubtitles.open.map((step) => (
           <li>{step}</li>
         ))}
       </ol>
+      <h3 id="homebrew">Homebrew</h3>
+      <div class="get-cmd">
+        <code>{fluidSubtitlesRelease.brew.join('\n')}</code>
+        <button class="cmd-copy" type="button" data-copy={fluidSubtitlesRelease.brew.join('\n')}>Copy</button>
+      </div>
     </section>
 
     <div class="project-split">
