@@ -1,9 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { commercialLicense, connectingCaptions, latestReleaseZip, site } from '../data/site';
+import { commercialLicense, connectingCaptions, releaseDownload, site } from '../data/site';
 
-const zip = await latestReleaseZip();
-const zipMark = zip.tag;
 const brew = connectingCaptions.brew.join('\n');
 ---
 
@@ -18,7 +16,7 @@ const brew = connectingCaptions.brew.join('\n');
         <p>{connectingCaptions.lede}</p>
         <p class="project-langs">{connectingCaptions.langs.join(' · ')}</p>
         <div class="hero-actions">
-          <a class="btn btn-solid" href={zip.href}>Download {zipMark}</a>
+          <a class="btn btn-solid" href={releaseDownload.href}>Download Connecting Captions</a>
           <a class="btn btn-solid" href={commercialLicense.path}>{commercialLicense.cta}</a>
           <a class="btn" href={connectingCaptions.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
           <a class="btn" href="/#work">The work</a>
@@ -48,11 +46,11 @@ const brew = connectingCaptions.brew.join('\n');
     <section class="resume-block" id="install">
       <h2>Install</h2>
       <p class="resume-copy">
-        Latest release <strong>{zipMark}</strong>. Unzip <strong>{zip.name}</strong> and drag Connecting Captions to Applications. No Xcode.
+        Unzip <strong>{releaseDownload.name}</strong> and drag Connecting Captions to Applications. No Xcode.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-solid" href={zip.href}>Download {zip.name}</a>
-        <a class="btn" href={zip.page} target="_blank" rel="noopener noreferrer">Release notes</a>
+        <a class="btn btn-solid" href={releaseDownload.href}>Download Connecting Captions</a>
+        <a class="btn" href={releaseDownload.page} target="_blank" rel="noopener noreferrer">Release notes</a>
       </div>
       <p class="resume-copy resume-copy-gap">
         Or install Connecting Captions with Homebrew.

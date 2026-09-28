@@ -306,6 +306,13 @@ export const connectingCaptions = {
   ],
 };
 
+/** Same bytes as the versioned release zip. GitHub /releases/latest/download serves this name from the newest release. */
+export const releaseDownload = {
+  href: 'https://github.com/chrisswimlee/connectingCaptions/releases/latest/download/Connecting-Captions.zip',
+  name: 'Connecting-Captions.zip',
+  page: 'https://github.com/chrisswimlee/connectingCaptions/releases/latest',
+};
+
 export const commercialLicense = {
   path: '/connectingCaptions/license/',
   title: 'Commercial license',
@@ -427,47 +434,6 @@ export type Role = {
   bullets: string[];
   projects: RoleProject[];
 };
-
-export type ReleaseZip = {
-  href: string;
-  name: string;
-  tag: string;
-  page: string;
-};
-
-const fallbackRelease: ReleaseZip = {
-  href: 'https://github.com/chrisswimlee/connectingCaptions/releases/download/v1.6.13/Connecting-Captions-1.6.13.zip',
-  name: 'Connecting-Captions-1.6.13.zip',
-  tag: 'v1.6.13',
-  page: 'https://github.com/chrisswimlee/connectingCaptions/releases/tag/v1.6.13',
-};
-
-export async function latestReleaseZip(): Promise<ReleaseZip> {
-  try {
-    const res = await fetch('https://api.github.com/repos/chrisswimlee/connectingCaptions/releases/latest', {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'chrisswimlee.com',
-      },
-    });
-    if (!res.ok) return fallbackRelease;
-    const release = (await res.json()) as GithubRelease & { html_url?: string };
-    const zip = release.assets?.find(
-      (asset) => asset.name?.endsWith('.zip') && !asset.name.includes('unsigned'),
-    );
-    if (zip?.browser_download_url && zip.name && release.tag_name) {
-      return {
-        href: zip.browser_download_url,
-        name: zip.name,
-        tag: release.tag_name,
-        page: release.html_url ?? fallbackRelease.page,
-      };
-    }
-  } catch {
-    return fallbackRelease;
-  }
-  return fallbackRelease;
-}
 
 export const roles: Role[] = [
   {
