@@ -53,14 +53,13 @@ const brew = connectingCaptions.brew.join('\n');
         <a class="btn" href={releaseDownload.page} target="_blank" rel="noopener noreferrer">Release notes</a>
       </div>
       <p class="resume-copy resume-copy-gap">
-        Or install Connecting Captions with Homebrew.
+        Or install Connecting Captions with Homebrew. Trust the tap when asked.
       </p>
       <div class="get-cmd">
         <code>{brew}</code>
         <button id="brew-copy" class="cmd-copy" type="button">Copy</button>
       </div>
       <ol class="points project-steps">
-        <li>Run the three Homebrew commands. Trust the tap when asked.</li>
         {connectingCaptions.open.map((step) => (
           <li>{step}</li>
         ))}
