@@ -1,0 +1,44 @@
+---
+import { localHost } from '../data/site';
+---
+
+<section class="section" id="localhost">
+  <div class="section-head">
+    <h2>{localHost.title}</h2>
+    <p class="note" data-reveal>{localHost.kicker}</p>
+  </div>
+  <div class="product-dossier">
+    <div>
+      <p class="lede">{localHost.pitch}</p>
+      <ul class="points">
+        {localHost.points.map((point) => (
+          <li>{point}</li>
+        ))}
+      </ul>
+      <div class="card-links">
+        {
+          localHost.links.map((link, index) => (
+            <a
+              class:list={['btn', index === 0 && 'btn-solid', index > 0 && 'btn-text']}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+    <a class="polaroid" href={localHost.links[0].href} target="_blank" rel="noopener noreferrer">
+      <img
+        src={localHost.image}
+        alt="local-host.ai"
+        width="1200"
+        height="750"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+  </div>
+</section>

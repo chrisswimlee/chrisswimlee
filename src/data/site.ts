@@ -3,7 +3,7 @@ export const site = {
   legalName: 'Chris SuYoung Lee',
   title: 'Chris Swim Lee, New York',
   description:
-    'local-host.ai, local AI on your own hardware. fluidSubtitles, live captions on a Mac. College professor and school IT. Available for contract work.',
+    'Forward-deployed data systems, local software for work that cannot leave the machine, and a college course in AI. local-host.ai and Connecting Captions.',
   url: 'https://chrisswimlee.com',
   location: 'New York · remote',
   email: 'suyoung.lee99@gmail.com',
@@ -16,28 +16,39 @@ export const site = {
 };
 
 export const nav = [
+  { href: '/#localhost', label: 'local-host.ai' },
   { href: '/#work', label: 'Work' },
-  { href: '/#achievements', label: 'Achievements' },
+  { href: '/#achievements', label: 'Record' },
   { href: '/experience/', label: 'Experience' },
 ];
 
-export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Call — Chris Swim Lee')}&body=${encodeURIComponent('Which project:\n\nWhat you need:\n\nWhen to call:\n')}`;
+export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Advisory — Chris Swim Lee')}&body=${encodeURIComponent('System:\n\nConstraint:\n\nRequest: technical advisory, architecture audit, or a product question\n')}`;
 
 export const commercialMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent(
-  'fluidSubtitles commercial license',
+  'Connecting Captions commercial license',
 )}&body=${encodeURIComponent(
   'Organization:\n\nSeat count:\n\nDo you need a written SLA?\n\nAnything else IT or legal needs:\n',
 )}`;
 
 export const hero = {
   kicker: 'New York · remote',
-  lede: 'local-host.ai is local AI that runs on your hardware, offline included. fluidSubtitles is live captions on a Mac. College professor and school IT. Available for contract work.',
-  cta: 'Set up a call',
+  lede: 'Forward-deployed data engineering, local execution where a vendor API is not allowed, and a college course in AI.',
+  constraints: [
+    'One reporting path that developers, traders, and lawyers would sign.',
+    'A live futures book, under 100ms from feed to book.',
+    'Defense systems and a nuclear contractor, reviewed from the first ticket.',
+    'A college course in AI, and the school’s IT, in the same term.',
+  ],
+  actions: [
+    { label: 'local-host.ai', href: '/#localhost' },
+    { label: 'Connecting Captions', href: '/connectingCaptions/' },
+    { label: 'Advisory', href: '/engage/' },
+  ],
 };
 
 export const experienceIntro = 'College professor and IT at HAIT. Contracts start with an email.';
 
-export const achievementsNote = 'The hardest part of each job. The writeups are in Experience.';
+export const achievementsNote = 'The constraint on each job. The writeups are in Experience.';
 
 type Spike = {
   id: 'theory' | 'build' | 'strategy';
@@ -71,7 +82,7 @@ export const range = {
         'Three years at Goldman Sachs — 10,000+ accounts, 50+ internal teams on the APIs.',
         'Founding CTO on a Kraken futures trading engine.',
         'local-host.ai, a local AI framework.',
-        'fluidSubtitles, live Korean, English, Thai, and Japanese captions on macOS.',
+        'Connecting Captions, live Korean, English, Thai, and Japanese captions on macOS.',
         'Local Lattice, an OpenAI-compatible gateway on PyPI.',
       ],
     },
@@ -140,7 +151,25 @@ export const trading = {
 };
 
 export const work = {
-  lede: 'local-host.ai runs on your hardware. fluidSubtitles captions a Mac.',
+  lede: 'Connecting Captions is the install. The other cards are the rest of the software.',
+};
+
+export const localHost = {
+  kicker: 'Product · 2026',
+  title: 'local-host.ai',
+  url: 'local-host.ai',
+  pitch:
+    'A local-first agent for private work. It thinks on the Mac, keeps memory on disk, and runs skills you can open.',
+  points: [
+    'Execution stays on the machine. A vendor API is not part of the design.',
+    'Memory stays on disk. Skills are files you can open and change.',
+    'For work that is not allowed to leave the building.',
+  ],
+  image: '/images/work/local-host.jpg',
+  links: [
+    { label: 'The site', href: 'https://local-host.ai' },
+    { label: 'Repository', href: 'https://github.com/chrisswimlee/local-host.ai' },
+  ],
 };
 
 type Project = {
@@ -160,41 +189,22 @@ type Project = {
 
 export const projects: Project[] = [
   {
-    id: 'localhost',
-    kind: 'Local framework',
-    featured: true,
-    title: 'local-host.ai',
-    url: 'local-host.ai',
-    year: '2026',
-    summary:
-      'A local agent that lives on your Mac. It thinks on-device, remembers on disk, and runs skills you can open.',
-    image: '/images/work/local-host.jpg',
-    points: [
-      'Models and memory stay on the Mac.',
-      'Owned outright. Skills are files you can open and change.',
-    ],
-    links: [
-      { label: 'The site', href: 'https://local-host.ai' },
-      { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-host.ai' },
-    ],
-  },
-  {
-    id: 'fluidsubtitles',
+    id: 'connectingCaptions',
     kind: 'Open source',
-    title: 'fluidSubtitles',
-    url: 'chrisswimlee.com/fluidSubtitles',
+    title: 'Connecting Captions',
+    url: 'chrisswimlee.com/connectingCaptions',
     year: '2026',
     summary:
-      'Live captions on a Mac. Speak Korean, English, Thai, or Japanese. A translation or a caption shows up on screen.',
-    image: '/images/work/fluidsubtitles.jpg',
+      'Live subtitles on a Mac. Translation stays on the machine. Each sentence appears when it is ready.',
+    image: '/images/work/connectingCaptions.jpg',
     points: [
-      'A Theater window over slides. It can hide from Zoom and screen share.',
-      'On-device Apple Translation. It’s a branch of FluidVoice.',
+      'Set I speak and Show as. A Theater window sits over the slides.',
+      'Share the slides window when the room should not see the captions.',
     ],
     links: [
-      { label: 'Get it', href: '/fluidSubtitles/' },
-      { label: 'For work', href: '/fluidSubtitles/license/' },
-      { label: 'GitHub', href: 'https://github.com/chrisswimlee/fluidSubtitles' },
+      { label: 'Get it', href: '/connectingCaptions/' },
+      { label: 'For work', href: '/connectingCaptions/license/' },
+      { label: 'GitHub', href: 'https://github.com/chrisswimlee/connectingCaptions' },
     ],
   },
   {
@@ -262,46 +272,42 @@ export const projects: Project[] = [
   },
 ];
 
-export const fluidSubtitles = {
-  path: '/fluidSubtitles/',
-  title: 'fluidSubtitles',
+export const connectingCaptions = {
+  path: '/connectingCaptions/',
+  title: 'Connecting Captions',
   kicker: 'Open source · 2026',
-  lede: 'Live captions on a Mac. Speak Korean, English, Thai, or Japanese. A translation or a caption shows up on screen.',
+  lede: 'Live subtitles on a Mac. Translation stays on the machine. Each sentence appears when it is ready.',
   description:
-    'Live Korean, English, Thai, and Japanese captions for macOS. The zip is notarized.',
-  repo: 'https://github.com/chrisswimlee/fluidSubtitles',
-  image: '/images/work/fluidsubtitles.jpg',
-  homeImage: '/images/work/fluidsubtitles-home.jpg',
+    'Live subtitles for macOS, with translation on the machine. Download the latest release.',
+  repo: 'https://github.com/chrisswimlee/connectingCaptions',
+  image: '/images/work/connectingCaptions.jpg',
+  homeImage: '/images/work/connectingCaptions-home.jpg',
   langs: ['Korean', 'English', 'Thai', 'Japanese'],
+  brew: [
+    'brew tap chrisswimlee/connectingcaptions',
+    'brew trust chrisswimlee/connectingcaptions',
+    'brew install --cask connectingcaptions',
+  ],
   about: [
-    'A Theater window over slides. It can hide from Zoom and screen share.',
-    'On-device Apple Translation. It’s a branch of FluidVoice.',
-    'Voice stays on this Mac. A cloud speech model is something you turn on.',
+    'Set I speak and Show as. Translate follows one into the other. The same language needs no download.',
+    'Open Theater and press Listen. A new Listen starts with an empty board. A sentence appears when it is ready.',
+    'A whole-screen share includes Theater. Share the slides window when viewers should not see the captions.',
+    'Translation uses Apple’s on-device Translation. Voice stays on the Mac unless a cloud model is turned on.',
   ],
   needs: [
-    'macOS 15 or later. Apple Silicon.',
-    'Microphone for Listen. Accessibility only if you type into another app.',
+    'macOS 15 or later. Theater streaming needs Apple Silicon.',
+    'Microphone for Listen. Accessibility only if a translation is typed into another app.',
+    'A language pack downloads once when I speak and Show as differ.',
   ],
-  installLede: 'macOS 15 or later, Apple Silicon. The zip is notarized.',
   open: [
-    'Unzip it and drag fluidSubtitles to Applications.',
-    'Open Theater, allow the microphone, then press Listen.',
-  ],
-};
-
-export const fluidSubtitlesRelease = {
-  version: '1.6.12',
-  name: 'fluidsubtitles-1.6.12.zip',
-  href: 'https://github.com/chrisswimlee/fluidSubtitles/releases/download/v1.6.12/fluidsubtitles-1.6.12.zip',
-  brew: [
-    'brew tap chrisswimlee/fluidsubtitles',
-    'brew trust chrisswimlee/fluidsubtitles',
-    'brew install --cask fluidsubtitles',
+    'Download the latest zip and drag Connecting Captions to Applications.',
+    'A notarized zip should open without an extra prompt.',
+    'Open Theater, allow the microphone, and press Listen.',
   ],
 };
 
 export const commercialLicense = {
-  path: '/fluidSubtitles/license/',
+  path: '/connectingCaptions/license/',
   title: 'Commercial license',
   kicker: 'For work',
   heading: 'Commercial license',
@@ -311,7 +317,7 @@ export const commercialLicense = {
   href: commercialMail,
   workTitle: 'For work',
   workLede:
-    'Personal use stays free. If IT or legal need a named license or an SLA, request a commercial license.',
+    'The free zip is for people. Firms that need a named license, a security contact, or an SLA should buy a commercial license.',
   answers: [
     {
       question: 'How does this monetize?',
@@ -349,7 +355,7 @@ export type PreviewZip = {
 };
 
 const fallbackZip = (name: string, tag: string): PreviewZip => {
-  const href = `https://github.com/chrisswimlee/fluidSubtitles/releases/download/${tag}/${name}`;
+  const href = `https://github.com/chrisswimlee/connectingCaptions/releases/download/${tag}/${name}`;
   return {
     href,
     name,
@@ -359,8 +365,8 @@ const fallbackZip = (name: string, tag: string): PreviewZip => {
 };
 
 const fallbackPreview = fallbackZip(
-  'fluidsubtitles-1.6.12.zip',
-  'v1.6.12',
+  'fluidsubtitles-1.6.11-preview-unsigned.zip',
+  'preview-1.6.11-1',
 );
 
 type GithubRelease = {
@@ -370,7 +376,7 @@ type GithubRelease = {
 
 export async function latestPreviewZip(): Promise<PreviewZip> {
   try {
-    const res = await fetch('https://api.github.com/repos/chrisswimlee/fluidSubtitles/releases', {
+    const res = await fetch('https://api.github.com/repos/chrisswimlee/connectingCaptions/releases', {
       headers: {
         Accept: 'application/vnd.github+json',
         'User-Agent': 'chrisswimlee.com',
@@ -421,6 +427,47 @@ export type Role = {
   bullets: string[];
   projects: RoleProject[];
 };
+
+export type ReleaseZip = {
+  href: string;
+  name: string;
+  tag: string;
+  page: string;
+};
+
+const fallbackRelease: ReleaseZip = {
+  href: 'https://github.com/chrisswimlee/connectingCaptions/releases/download/v1.6.13/Connecting-Captions-1.6.13.zip',
+  name: 'Connecting-Captions-1.6.13.zip',
+  tag: 'v1.6.13',
+  page: 'https://github.com/chrisswimlee/connectingCaptions/releases/tag/v1.6.13',
+};
+
+export async function latestReleaseZip(): Promise<ReleaseZip> {
+  try {
+    const res = await fetch('https://api.github.com/repos/chrisswimlee/connectingCaptions/releases/latest', {
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'chrisswimlee.com',
+      },
+    });
+    if (!res.ok) return fallbackRelease;
+    const release = (await res.json()) as GithubRelease & { html_url?: string };
+    const zip = release.assets?.find(
+      (asset) => asset.name?.endsWith('.zip') && !asset.name.includes('unsigned'),
+    );
+    if (zip?.browser_download_url && zip.name && release.tag_name) {
+      return {
+        href: zip.browser_download_url,
+        name: zip.name,
+        tag: release.tag_name,
+        page: release.html_url ?? fallbackRelease.page,
+      };
+    }
+  } catch {
+    return fallbackRelease;
+  }
+  return fallbackRelease;
+}
 
 export const roles: Role[] = [
   {
@@ -788,17 +835,26 @@ export const skills = {
 
 export const about = {
   lede: 'Chris SuYoung Lee. Suyoung means swim.',
-  line: 'Trinity was proofs. The work now is local-host.ai, fluidSubtitles, and IT for a school.',
+  line: 'Trinity was proofs. Goldman was one reporting path. The work now is local software and a college course.',
 };
 
 export const engage = {
-  heading: 'Rates',
-  lede: 'Prices for a scoped build. A call is how it starts.',
-  promise: 'Send the project and a time that works.',
+  heading: 'Advisory',
+  lede: 'A written advisory, an architecture audit, or a product you run. Prices are for the first two.',
+  promise: 'Name the system, the constraint, and which of the three you want.',
   paths: [
-    { name: 'Contract', detail: 'Local AI on your machines, or help with the IT around it.' },
-    { name: 'A project', detail: 'local-host.ai, fluidSubtitles, or anything else on the site.' },
-    { name: 'A call', detail: 'Name a time that works.' },
+    {
+      name: 'Technical advisory',
+      detail: 'Ninety minutes on a system that is already running. The diagnostic rate is the price.',
+    },
+    {
+      name: 'Architecture audit',
+      detail: 'The data path, the boundary, and what is not allowed to leave.',
+    },
+    {
+      name: 'Product trial',
+      detail: 'Connecting Captions is a notarized zip. local-host.ai is the product site and the repository.',
+    },
   ],
   rates: [
     { name: 'Diagnostic', price: '$1,000', unit: '90 minutes' },
@@ -808,17 +864,17 @@ export const engage = {
   ],
   notes: [
     'New York or remote.',
-    'Mention the project in the email.',
+    'The email should name the system and the constraint.',
   ],
-  cta: 'Set up a call',
+  cta: 'Request an advisory',
   href: mail,
 };
 
 export const contact = {
-  heading: 'Call',
-  lede: 'If a project here is useful, send a note and set a call.',
-  projectCta: 'Set up a call',
-  href: mail,
+  heading: 'Advisory',
+  lede: 'Inbound is a written advisory, an architecture audit, or a product you run.',
+  projectCta: 'Advisory',
+  href: '/engage/',
 };
 
 export const built = {

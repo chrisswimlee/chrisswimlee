@@ -1,5 +1,5 @@
 ---
-import { about, built, contact, site } from '../data/site';
+import { about, built, contact, mail, site } from '../data/site';
 ---
 
 <section class="section contact-section" id="contact">
@@ -13,14 +13,12 @@ import { about, built, contact, site } from '../data/site';
       <p data-reveal>{contact.lede}</p>
     </div>
     <div class="contact-actions" data-reveal>
-      <a class="mail" href={`mailto:${site.email}`}>{site.email}</a>
+      <a class="mail" href={mail}>{site.email}</a>
       <div class="card-links">
-        <a class="btn btn-solid" href={contact.href}>{contact.projectCta}</a>
-        <a class="btn btn-text" href="/resume/">Resume</a>
+        <a class="btn btn-solid" href="/engage/">Advisory</a>
+        <a class="btn btn-text" href="/connectingCaptions/">Connecting Captions</a>
+        <a class="btn btn-text" href="/#localhost">local-host.ai</a>
       </div>
-      <p class="contact-aside" data-reveal>
-        <a href="/engage/">Rates</a> for a scoped build.
-      </p>
     </div>
   </div>
   <div class="built" data-reveal>

@@ -1,5 +1,5 @@
 ---
-import { site } from '../data/site';
+import { mail, site } from '../data/site';
 ---
 
 <footer class="footer wrap">
@@ -11,8 +11,8 @@ import { site } from '../data/site';
     <span>{site.location}</span>
     <a href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
     <a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-    <a href={`mailto:${site.email}`}>Email</a>
+    <a href={mail}>Email</a>
     <a href="/experience/">Experience</a>
-    <a href="/engage/">Rates</a>
+    <a href="/engage/">Advisory</a>
   </nav>
 </footer>

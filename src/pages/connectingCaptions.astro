@@ -1,22 +1,26 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '../data/site';
+import { commercialLicense, connectingCaptions, latestReleaseZip, site } from '../data/site';
+
+const zip = await latestReleaseZip();
+const zipMark = zip.tag;
+const brew = connectingCaptions.brew.join('\n');
 ---
 
-<Layout title={`${fluidSubtitles.title} — ${site.name}`} description={fluidSubtitles.description}>
+<Layout title={`${connectingCaptions.title} — ${site.name}`} description={connectingCaptions.description}>
   <main id="main" class="resume-page wrap">
     <div class="resume-top">
       <div>
-        <p class="kicker">{fluidSubtitles.kicker}</p>
-        <h1>{fluidSubtitles.title}</h1>
+        <p class="kicker">{connectingCaptions.kicker}</p>
+        <h1>{connectingCaptions.title}</h1>
       </div>
       <div class="resume-meta">
-        <p>{fluidSubtitles.lede}</p>
-        <p class="project-langs">{fluidSubtitles.langs.join(' · ')}</p>
+        <p>{connectingCaptions.lede}</p>
+        <p class="project-langs">{connectingCaptions.langs.join(' · ')}</p>
         <div class="hero-actions">
-          <a class="btn btn-solid" href={fluidSubtitlesRelease.href}>Download {fluidSubtitlesRelease.version}</a>
+          <a class="btn btn-solid" href={zip.href}>Download {zipMark}</a>
           <a class="btn btn-solid" href={commercialLicense.path}>{commercialLicense.cta}</a>
-          <a class="btn" href={fluidSubtitles.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="btn" href={connectingCaptions.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
           <a class="btn" href="/#work">The work</a>
         </div>
       </div>
@@ -25,7 +29,7 @@ import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '
     <div class="project-shots">
       <figure class="project-shot">
         <img
-          src={fluidSubtitles.image}
+          src={connectingCaptions.image}
           alt="Theater captions: Hello. and 안녕."
           width="1200"
           height="750"
@@ -33,7 +37,7 @@ import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '
       </figure>
       <figure class="project-shot">
         <img
-          src={fluidSubtitles.homeImage}
+          src={connectingCaptions.homeImage}
           alt="Theater Home: English to Korean, on this Mac."
           width="1200"
           height="750"
@@ -43,29 +47,33 @@ import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '
 
     <section class="resume-block" id="install">
       <h2>Install</h2>
-      <p class="resume-copy">{fluidSubtitles.installLede}</p>
+      <p class="resume-copy">
+        Latest release <strong>{zipMark}</strong>. Unzip <strong>{zip.name}</strong> and drag Connecting Captions to Applications. No Xcode.
+      </p>
       <div class="hero-actions">
-        <a class="btn btn-solid" href={fluidSubtitlesRelease.href}>
-          Download {fluidSubtitlesRelease.name}
-        </a>
+        <a class="btn btn-solid" href={zip.href}>Download {zip.name}</a>
+        <a class="btn" href={zip.page} target="_blank" rel="noopener noreferrer">Release notes</a>
+      </div>
+      <p class="resume-copy resume-copy-gap">
+        Or install Connecting Captions with Homebrew.
+      </p>
+      <div class="get-cmd">
+        <code>{brew}</code>
+        <button id="brew-copy" class="cmd-copy" type="button">Copy</button>
       </div>
       <ol class="points project-steps">
-        {fluidSubtitles.open.map((step) => (
+        <li>Run the three Homebrew commands. Trust the tap when asked.</li>
+        {connectingCaptions.open.map((step) => (
           <li>{step}</li>
         ))}
       </ol>
-      <h3 id="homebrew">Homebrew</h3>
-      <div class="get-cmd">
-        <code>{fluidSubtitlesRelease.brew.join('\n')}</code>
-        <button class="cmd-copy" type="button" data-copy={fluidSubtitlesRelease.brew.join('\n')}>Copy</button>
-      </div>
     </section>
 
     <div class="project-split">
       <section class="resume-block">
         <h2>What it is</h2>
         <ul class="points">
-          {fluidSubtitles.about.map((point) => (
+          {connectingCaptions.about.map((point) => (
             <li>{point}</li>
           ))}
         </ul>
@@ -73,7 +81,7 @@ import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '
       <section class="resume-block">
         <h2>What you need</h2>
         <ul class="points">
-          {fluidSubtitles.needs.map((point) => (
+          {connectingCaptions.needs.map((point) => (
             <li>{point}</li>
           ))}
         </ul>
@@ -102,4 +110,8 @@ import { commercialLicense, fluidSubtitles, fluidSubtitlesRelease, site } from '
 
 <script>
   import '../scripts/copy-buttons';
+</script>
+<script define:vars={{ brew }}>
+  const btn = document.getElementById('brew-copy');
+  if (btn) btn.dataset.copy = brew;
 </script>

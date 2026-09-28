@@ -25,14 +25,14 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://chrisswimlee.com/fluidSubtitles/</loc>
-    <lastmod>2026-09-21</lastmod>
+    <loc>https://chrisswimlee.com/connectingCaptions/</loc>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://chrisswimlee.com/fluidSubtitles/license/</loc>
-    <lastmod>2026-09-21</lastmod>
+    <loc>https://chrisswimlee.com/connectingCaptions/license/</loc>
+    <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

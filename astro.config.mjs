@@ -5,5 +5,8 @@ export default defineConfig({
   trailingSlash: 'always',
   redirects: {
     '/tutor': '/engage',
+    '/fluidTranslation': '/connectingCaptions/',
+    '/fluidSubtitles': '/connectingCaptions/',
+    '/fluidSubtitles/license': '/connectingCaptions/license/',
   },
 });
