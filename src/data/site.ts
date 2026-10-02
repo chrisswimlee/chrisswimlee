@@ -22,7 +22,7 @@ export const nav = [
   { href: '/experience/', label: 'Experience' },
 ];
 
-export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Advisory — Chris Swim Lee')}&body=${encodeURIComponent('System:\n\nConstraint:\n\nRequest: technical advisory, architecture audit, or a product question\n')}`;
+export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Pricing — Chris Swim Lee')}&body=${encodeURIComponent('Which tier: scoping call, architecture audit, custom build, or complete works\n\nWhat you need:\n\nConstraint:\n')}`;
 
 export const commercialMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent(
   'Connecting Captions commercial license',
@@ -42,7 +42,7 @@ export const hero = {
   actions: [
     { label: 'local-host.ai', href: '/#localhost' },
     { label: 'Connecting Captions', href: '/connectingCaptions/' },
-    { label: 'Advisory', href: '/engage/' },
+    { label: 'Pricing', href: '/engage/' },
   ],
 };
 
@@ -805,41 +805,45 @@ export const about = {
 };
 
 export const engage = {
-  heading: 'Advisory',
-  lede: 'A written advisory, an architecture audit, or a product you run. Prices are for the first two.',
-  promise: 'Name the system, the constraint, and which of the three you want.',
+  heading: 'Pricing',
+  lede: 'Four fixed prices. A scoping call first, then an audit, a custom build, or a complete works.',
+  promise: 'Name the tier, what you need, and the constraint.',
   paths: [
     {
-      name: 'Technical advisory',
-      detail: 'Ninety minutes on a system that is already running. The diagnostic rate is the price.',
+      name: 'Scoping & call',
+      detail: 'Name the system and the constraint. What ships next comes from that call.',
     },
     {
       name: 'Architecture audit',
-      detail: 'The data path, the boundary, and what is not allowed to leave.',
+      detail: 'A written boundary, the data path, and what is not allowed to leave.',
     },
     {
-      name: 'Product trial',
-      detail: 'Connecting Captions is a notarized zip. local-host.ai is the product site and the repository.',
+      name: 'Custom build',
+      detail: 'One scoped local system or product install.',
+    },
+    {
+      name: 'Complete works',
+      detail: 'Site, product pages, install, and the systems work to put it live.',
     },
   ],
   rates: [
-    { name: 'Diagnostic', price: '$1,000', unit: '90 minutes' },
-    { name: 'Build', price: 'From $20,000', unit: 'scoped project' },
-    { name: 'Retainer', price: '$12,000', unit: 'per month' },
-    { name: 'Day', price: '$3,000', unit: 'day' },
+    { name: 'Scoping & call', price: '$1,000', unit: 'call' },
+    { name: 'Architecture audit', price: '$5,000', unit: 'written audit' },
+    { name: 'Custom build', price: '$10,000', unit: 'scoped build' },
+    { name: 'Complete works', price: 'From $20,000', unit: 'full build' },
   ],
   notes: [
     'New York or remote.',
-    'The email should name the system and the constraint.',
+    'The email should name the tier and the constraint.',
   ],
-  cta: 'Request an advisory',
+  cta: 'Request a scope',
   href: mail,
 };
 
 export const contact = {
-  heading: 'Advisory',
-  lede: 'Inbound is a written advisory, an architecture audit, or a product you run.',
-  projectCta: 'Advisory',
+  heading: 'Pricing',
+  lede: 'Inbound is a scoping call, an architecture audit, a custom build, or a complete works.',
+  projectCta: 'Pricing',
   href: '/engage/',
 };
 
