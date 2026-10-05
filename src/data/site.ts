@@ -27,7 +27,7 @@ export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent
 export const commercialMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent(
   'Connecting Captions commercial license',
 )}&body=${encodeURIComponent(
-  'Organization:\n\nSeat count:\n\nDo you need a written SLA?\n\nAnything else IT or legal needs:\n',
+  'Organization:\n\nMac count (5 minimum):\n\nNamed license $60/Mac/year. Add written SLA +$90/Mac/year? (yes/no)\n\nMDM / Jamf pkg $1,500 once? (yes/no)\n\nAnything else IT or legal needs:\n',
 )}`;
 
 export const hero = {
@@ -318,18 +318,42 @@ export const commercialLicense = {
   title: 'Commercial license',
   kicker: 'For work',
   heading: 'Commercial license',
-  lede: 'Personal, student, and evaluation use is free under GPLv3. If IT or legal need a vendor they can sanction, request a named commercial license.',
-  cta: 'For work: Request a commercial license',
-  emailCta: 'Email IT or legal',
+  lede: 'Personal, student, and evaluation use is free under GPLv3. A named license is $60 per Mac per year, five Macs minimum. Email the organization and Mac count. A key goes out the same day.',
+  cta: 'For work: prices',
+  emailCta: 'Email to buy',
   href: commercialMail,
   workTitle: 'For work',
   workLede:
-    'The free zip is for people. Firms that need a named license, a security contact, or an SLA should buy a commercial license.',
+    'The free zip is for people. Firms that need Licensed to on the Mac, a security contact, or an SLA buy a commercial license at the prices on this page.',
+  rates: [
+    {
+      name: 'Named license',
+      price: '$60',
+      unit: 'Mac / year',
+      detail: 'Five Macs minimum. Air-gapped key. Licensed to the organization.',
+    },
+    {
+      name: 'Written SLA',
+      price: '+$90',
+      unit: 'Mac / year',
+      detail: 'Security reply in 7 days, plus a weekday window if Listen breaks.',
+    },
+    {
+      name: 'MDM / Jamf pkg',
+      price: '$1,500',
+      unit: 'once',
+      detail: 'App, key, seat list, and caption policy. IT signs the pkg.',
+    },
+  ],
+  buyCopy:
+    'Email the organization and how many Macs. Use these prices. A key goes out the same day. Custom overlay, glossary, or fleet work is Engage, not this license.',
+  eitherWay:
+    'Apple Speech is the default for one speaker. Either way downloads Whisper Small once if the room talks both languages of the pair.',
   answers: [
     {
       question: 'How does this monetize?',
       answer:
-        'A named license, and support if you want it. Transcripts, voiceprints, and training data are not part of the sale.',
+        'Named license $60 per Mac per year, five Macs minimum. Written SLA +$90 per Mac per year. MDM pkg $1,500 once. Transcripts, voiceprints, and training data are not part of the sale.',
     },
     {
       question: 'Does voice leave this Mac?',

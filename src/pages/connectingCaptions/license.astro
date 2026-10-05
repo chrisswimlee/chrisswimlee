@@ -23,6 +23,21 @@ import { commercialLicense, connectingCaptions, site } from '../../data/site';
       </div>
     </div>
 
+    <section class="resume-block" id="prices">
+      <h2>Price</h2>
+      <p class="resume-copy">{commercialLicense.eitherWay}</p>
+      <ul class="engage-rates">
+        {commercialLicense.rates.map((item) => (
+          <li>
+            <p class="kicker">{item.unit}</p>
+            <strong>{item.name}</strong>
+            <p class="engage-price">{item.price}</p>
+            <p>{item.detail}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
     <section class="resume-block">
       <h2>What you are buying</h2>
       <p class="resume-copy">
@@ -65,11 +80,10 @@ import { commercialLicense, connectingCaptions, site } from '../../data/site';
     </section>
 
     <section class="resume-block">
-      <h2>Request a license</h2>
+      <h2>Buy a license</h2>
       <p class="resume-copy">
-        Email {site.email}. Say the organization, how many Macs, and whether
-        you need a written SLA. A system build is on the
-        <a href="/engage/">pricing page</a>.
+        Email {site.email}. {commercialLicense.buyCopy} Consulting rates stay on
+        <a href="/engage/">Engage</a>.
       </p>
       <div class="hero-actions">
         <a class="btn btn-solid" href={commercialLicense.href}>{commercialLicense.emailCta}</a>
