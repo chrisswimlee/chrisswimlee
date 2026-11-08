@@ -1,0 +1,349 @@
+---
+import '../styles/system.css';
+import { hire, hireMail, site, competitive } from '../data/site';
+import { kindLabel, lanes, legacyAlias, legacyToTown, schools, shipped, type Lane, type SysNode } from '../data/system';
+
+const all: { node: SysNode; lane?: Lane }[] = [
+  ...lanes.flatMap((lane) => lane.nodes.map((node) => ({ node, lane }))),
+  ...shipped.map((node) => ({ node })),
+];
+const byId = new Map(all.map((x) => [x.node.id, x.node]));
+const flowsFor = (lane: Lane | undefined, id: string) => {
+  if (!lane) return { ins: [], outs: [] };
+  const name = (nid: string) => byId.get(nid)?.title ?? nid;
+  return {
+    ins: lane.edges.filter((e) => e.to === id).map((e) => ({ from: name(e.from), label: e.label ?? '' })),
+    outs: lane.edges.filter((e) => e.from === id).map((e) => ({ to: name(e.to), label: e.label ?? '' })),
+  };
+};
+const statusText = { live: 'live', shipped: 'shipped', building: 'in progress' } as const;
+const hearthstone = competitive[0];
+const flowsJson = JSON.stringify({
+  lanes: Object.fromEntries(lanes.map((l) => [l.id, l.edges])),
+  nodes: Object.fromEntries(all.map(({ node, lane }) => [node.id, { lane: lane?.id ?? 'shipped', detail: Boolean(node.detail) }])),
+  toTown: legacyToTown,
+  alias: legacyAlias,
+}).replace(/</g, '\\u003c');
+---
+
+<main id="main" class="sys" data-sys>
+  <header class="sys-hero wrap">
+    <div class="sys-hero-main">
+      <p class="sys-status"><span class="sys-led is-on" aria-hidden="true"></span>{hire.kicker}</p>
+      <h1 class="sys-name">Chris <em>Swim</em> Lee</h1>
+      <p class="sys-role">{hire.role}</p>
+      <p class="sys-lede">
+        {hire.lede} Below is everything I’ve built, drawn as the systems it is. Click any box for the problem, the
+        constraint, what I decided, and what happened.
+      </p>
+      <div class="sys-actions">
+        <a class="btn btn-solid" href="/resume/">Resume</a>
+        <a class="btn" href={hireMail}>Email me</a>
+        <a class="btn" href="/hire/">Hiring page</a>
+        <a class="btn" href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </div>
+    <dl class="sys-proof" aria-label="Numbers from the systems below">
+      {
+        hire.proof.map((item) => (
+          <div>
+            <dt>{item.value}</dt>
+            <dd>
+              {item.label}
+              <small>{item.source}</small>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </header>
+
+  <section class="sys-map wrap" aria-labelledby="sys-map-title">
+    <div class="sys-map-head">
+      <div>
+        <p class="kicker">System map</p>
+        <h2 id="sys-map-title">Everything I’ve built, wired together.</h2>
+      </div>
+      <ul class="sys-legend" aria-label="Legend">
+        <li><span class="sys-key is-built"></span>I built it</li>
+        <li><span class="sys-key is-ext"></span>Outside system</li>
+        <li><span class="sys-key is-flow"></span>Data flow</li>
+      </ul>
+      <p class="sys-hint">
+        <span class="sys-hint-fine">Hover a box to trace its flow · click for the case study · drag boxes around</span>
+        <span class="sys-hint-touch">Tap a box for the case study</span>
+      </p>
+    </div>
+
+    {
+      lanes.map((lane) => (
+        <article class="sys-lane" id={lane.id} data-lane={lane.id} style={`--cols:${lane.cols};--rows:${lane.rows}`}>
+          <header class="sys-lane-head">
+            <p class="sys-lane-index">
+              {lane.index}
+              <span class:list={['sys-lane-state', `is-${lane.status}`]}>
+                <span class="sys-led" aria-hidden="true" />
+                {lane.status}
+              </span>
+            </p>
+            <h3>{lane.org}</h3>
+            <p class="sys-lane-role">{lane.role}</p>
+            <p class="sys-lane-when">
+              {lane.dates} · {lane.place}
+            </p>
+            <p class="sys-lane-summary">{lane.summary}</p>
+            {lane.more && (
+              <a
+                class="sys-lane-more"
+                href={lane.more.href}
+                target={lane.more.href.startsWith('http') ? '_blank' : undefined}
+                rel={lane.more.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+              >
+                {lane.more.label} →
+              </a>
+            )}
+          </header>
+          <div class="sys-lane-body" data-lane-body>
+            <svg class="sys-wires" data-wires aria-hidden="true" />
+            {lane.nodes.map((node) => {
+              const style = `--c:${node.col};--r:${node.row};--rs:${node.rowSpan ?? 1}`;
+              const inner = (
+                <>
+                  <span class="sys-node-top">
+                    <span class="sys-kind">{kindLabel[node.kind]}</span>
+                    {node.status && <span class:list={['sys-node-state', `is-${node.status}`]}>{statusText[node.status]}</span>}
+                  </span>
+                  <span class="sys-node-title">{node.title}</span>
+                  {node.metric && <span class="sys-node-metric">{node.metric}</span>}
+                  {node.stack && node.stack.length > 0 && (
+                    <span class="sys-node-stack">
+                      {node.stack.slice(0, 3).map((s) => (
+                        <span>{s}</span>
+                      ))}
+                    </span>
+                  )}
+                </>
+              );
+              return node.external ? (
+                <div class="sys-node is-ext" data-node={node.id} data-kind={node.kind} style={style}>
+                  {inner}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  class="sys-node"
+                  id={`node-${node.id}`}
+                  data-node={node.id} data-kind={node.kind}
+                  data-open={node.id}
+                  style={style}
+                  aria-haspopup="dialog"
+                  aria-controls="sys-panel"
+                >
+                  {inner}
+                </button>
+              );
+            })}
+          </div>
+          <ul class="visually-hidden" aria-label={`${lane.org} data flows`}>
+            {lane.edges.map((e) => (
+              <li>
+                {byId.get(e.from)?.title} sends {e.label ?? 'data'} to {byId.get(e.to)?.title}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+
+    <section class="sys-shipped" id="shipped" aria-labelledby="sys-shipped-title">
+      <header class="sys-lane-head">
+        <p class="sys-lane-index">06</p>
+        <h3 id="sys-shipped-title">Also shipped</h3>
+        <p class="sys-lane-summary">Apps, sites, and one pixel town, each live or in build.</p>
+      </header>
+      <div class="sys-shipped-grid">
+        {
+          shipped.map((node) => (
+            <button
+              type="button"
+              class="sys-node"
+              id={`node-${node.id}`}
+              data-node={node.id} data-kind={node.kind}
+              data-open={node.id}
+              aria-haspopup="dialog"
+              aria-controls="sys-panel"
+            >
+              <span class="sys-node-top">
+                <span class="sys-kind">{kindLabel[node.kind]}</span>
+                {node.status && <span class:list={['sys-node-state', `is-${node.status}`]}>{statusText[node.status]}</span>}
+              </span>
+              <span class="sys-node-title">{node.title}</span>
+              {node.metric && <span class="sys-node-metric">{node.metric}</span>}
+              {node.stack && (
+                <span class="sys-node-stack">
+                  {node.stack.slice(0, 3).map((s) => (
+                    <span>{s}</span>
+                  ))}
+                </span>
+              )}
+            </button>
+          ))
+        }
+      </div>
+    </section>
+  </section>
+
+  <section class="sys-foot wrap" aria-label="Education and contact">
+    <div class="sys-foot-grid">
+      <div>
+        <p class="kicker">Education</p>
+        <ul class="sys-schools">
+          {
+            schools.map((s) => (
+              <li>
+                <strong>{s.school}</strong>
+                <span>{s.degree}</span>
+                <small>
+                  {s.dates}
+                  {s.note && ` · ${s.note}`}
+                </small>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <p class="kicker">Off the clock</p>
+        <p class="sys-off">
+          {hearthstone.title}. #1 to finish the Americas Wild season twice, and rank 1 Legend again in 2025.
+        </p>
+        <p class="sys-off-links">
+          <a href="/">The Developer’s World</a>
+          <a href="/#play">See the Hearthstone record</a>
+        </p>
+      </div>
+      <div class="sys-cta">
+        <p class="kicker">Hiring for AI or data systems?</p>
+        <p class="sys-cta-line">{hire.contactLede}</p>
+        <div class="sys-actions">
+          <a class="btn btn-solid" href={hireMail}>Email me</a>
+          <a class="btn" href="/resume/">Resume</a>
+          <a class="btn" href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Case studies, rendered on the server so they are readable without JavaScript and by search engines. */}
+  <div class="sys-details" data-details>
+    {
+      all
+        .filter(({ node }) => node.detail)
+        .map(({ node, lane }) => {
+          const d = node.detail!;
+          const flows = flowsFor(lane, node.id);
+          return (
+            <article class="sys-detail" data-kind={node.kind} id={`detail-${node.id}`} data-detail={node.id} aria-labelledby={`detail-title-${node.id}`}>
+              <p class="sys-detail-kicker">
+                <span class="sys-kind">{kindLabel[node.kind]}</span>
+                {lane ? `${lane.org} · ${lane.role} · ${lane.dates}` : 'Independent'}
+              </p>
+              <h2 id={`detail-title-${node.id}`}>{node.title}</h2>
+              <p class="sys-detail-lede">{d.lede}</p>
+              {d.brief && (
+                <ol class="sys-brief">
+                  <li>
+                    <span>Problem</span>
+                    {d.brief.problem}
+                  </li>
+                  <li>
+                    <span>Constraint</span>
+                    {d.brief.constraint}
+                  </li>
+                  <li>
+                    <span>Decision</span>
+                    {d.brief.decision}
+                  </li>
+                  <li>
+                    <span>Outcome</span>
+                    {d.brief.outcome}
+                  </li>
+                </ol>
+              )}
+              {(flows.ins.length > 0 || flows.outs.length > 0) && (
+                <dl class="sys-io">
+                  {flows.ins.length > 0 && (
+                    <div>
+                      <dt>In</dt>
+                      {flows.ins.map((f) => (
+                        <dd>
+                          {f.from} <code>{f.label}</code>
+                        </dd>
+                      ))}
+                    </div>
+                  )}
+                  {flows.outs.length > 0 && (
+                    <div>
+                      <dt>Out</dt>
+                      {flows.outs.map((f) => (
+                        <dd>
+                          <code>{f.label}</code> {f.to}
+                        </dd>
+                      ))}
+                    </div>
+                  )}
+                </dl>
+              )}
+              {node.stack && node.stack.length > 0 && (
+                <p class="sys-detail-stack">
+                  {node.stack.map((s) => (
+                    <span>{s}</span>
+                  ))}
+                </p>
+              )}
+              {d.points.length > 0 && (
+                <ul class="sys-detail-points">
+                  {d.points.map((pt) => (
+                    <li>{pt}</li>
+                  ))}
+                </ul>
+              )}
+              {d.links.length > 0 && (
+                <p class="sys-detail-links">
+                  {d.links.map((l, i) => (
+                    <a
+                      class:list={['btn', i === 0 && 'btn-solid']}
+                      href={l.href}
+                      target={l.href.startsWith('http') ? '_blank' : undefined}
+                      rel={l.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    >
+                      {l.label}
+                    </a>
+                  ))}
+                </p>
+              )}
+            </article>
+          );
+        })
+    }
+  </div>
+
+  <aside class="sys-panel" id="sys-panel" data-panel role="dialog" aria-modal="false" aria-label="Case study" hidden>
+    <button type="button" class="sys-panel-x" data-panel-close aria-label="Close case study">Close ✕</button>
+    <div class="sys-panel-body" data-panel-body></div>
+  </aside>
+  <div class="sys-scrim" data-scrim hidden></div>
+  <script type="application/json" id="sys-flows" set:html={flowsJson} />
+</main>
+
+<script>
+  import { mountSystem } from '../scripts/system';
+  const root = document.querySelector<HTMLElement>('[data-sys]');
+  if (root) {
+    try {
+      mountSystem(root);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+</script>

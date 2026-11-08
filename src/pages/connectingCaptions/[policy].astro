@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { connectingCaptions } from '../../data/site';
+import { connectingCaptionsPolicies, policyLabels, policyOrder, policyUpdated } from '../../data/connectingCaptionsPolicies';
+
+export function getStaticPaths() {
+  return policyOrder.map((policy) => ({ params: { policy } }));
+}
+
+const { policy } = Astro.params as { policy: string };
+const page = connectingCaptionsPolicies[policy];
+// `page.lead` / `section.html` are rendered with set:html below. That data is
+// first-party generated copy (connectingCaptionsPolicies.ts) — never feed it
+// user input without sanitizing first.
+---
+
+<Layout title={`${page.title} — ${connectingCaptions.title}`} description={page.description}>
+  <main id="main" class="resume-page wrap">
+    <div class="resume-top">
+      <div>
+        <p class="kicker">{connectingCaptions.title}</p>
+        <h1>{page.title}</h1>
+      </div>
+      <div class="resume-meta">
+        <p set:html={page.lead} />
+        <p>Last updated {policyUpdated}</p>
+        <div class="hero-actions">
+          <a class="btn" href="/connectingCaptions/pricing/">Pricing</a>
+          {policyOrder.filter((p) => p !== policy).map((p) => (
+            <a class="btn" href={`/connectingCaptions/${p}/`}>{policyLabels[p]}</a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {page.sections.map((section) => (
+      <section class="resume-block">
+        <h2>{section.heading}</h2>
+        <Fragment set:html={section.html} />
+      </section>
+    ))}
+  </main>
+</Layout>

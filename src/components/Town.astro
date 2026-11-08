@@ -1,0 +1,272 @@
+---
+import { Image, getImage } from 'astro:assets';
+import '../styles/town.css';
+import { hire, hireMail, roles, site } from '../data/site';
+import { townName } from '../data/town';
+import { worldData, type FaceArt, type FaceCard, type WorldData, type WorldImage } from '../data/worlds';
+import type { TownPayload } from '../scripts/town';
+
+const { overview, record, worlds } = worldData;
+
+async function cardSrc(card: FaceCard) {
+  if (card.image.format === 'svg') return card.image.src;
+  const out = await getImage({ src: card.image, width: Math.min(1024, card.image.width), format: 'webp', quality: 80 });
+  return out.src;
+}
+
+async function faceImage({ image, alt, card }: FaceArt): Promise<WorldImage> {
+  const width = Math.min(800, image.width);
+  const out = await getImage({ src: image, width, widths: [480, width], format: 'webp', quality: 76 });
+  return {
+    src: out.src,
+    srcset: out.srcSet.attribute,
+    width,
+    height: Math.round((image.height / image.width) * width),
+    alt,
+    card: card
+      ? { src: await cardSrc(card), fit: card.fit, background: card.background }
+      : { src: out.src, fit: 'cover', background: '#05070b' },
+  };
+}
+
+const client: WorldData<WorldImage> = {
+  ...worldData,
+  worlds: await Promise.all(
+    worlds.map(async (world) => ({
+      ...world,
+      aspects: await Promise.all(
+        world.aspects.map(async (aspect) => ({ ...aspect, art: await faceImage(aspect.art) })),
+      ),
+    })),
+  ),
+};
+
+function briefsFor(roleId: string) {
+  const role = roles.find((item) => item.id === roleId);
+  if (!role) return [];
+  return role.projects.flatMap((project) =>
+    project.brief
+      ? [
+          {
+            title: project.title,
+            metric: project.oneLiner,
+            problem: project.brief.problem,
+            constraint: project.brief.constraint,
+            decision: project.brief.decision,
+            outcome: project.brief.outcome,
+            stack: project.stack ?? [],
+          },
+        ]
+      : [],
+  );
+}
+
+const payload: TownPayload = {
+  worlds: client,
+  hire: { role: hire.role, lede: hire.lede, kicker: hire.kicker, proof: hire.proof },
+  briefs: {
+    goldman: briefsFor('goldman'),
+    stealth: briefsFor('stealth'),
+    onedave: briefsFor('onedave'),
+    hait: briefsFor('hait'),
+  },
+  links: {
+    email: site.email,
+    mail: `mailto:${site.email}`,
+    hireMail,
+    github: site.github,
+    linkedin: site.linkedin,
+  },
+};
+const json = JSON.stringify(payload).replace(/</g, '\\u003c');
+---
+
+<main id="main" class="town" data-town>
+  <canvas class="town-canvas" data-town-canvas aria-hidden="true"></canvas>
+
+  <div class="town-hud">
+    <div class="town-plaque">
+      <small>{townName.owner}</small>
+      <h1>{townName.title}</h1>
+    </div>
+    <button type="button" class="town-btn town-text" data-town-flat="on">Text version</button>
+    <button type="button" class="town-btn is-primary town-hire" data-town-resume-toggle>
+      <span class="town-hire-long">The resume</span><span class="town-hire-short">Resume</span>
+    </button>
+  </div>
+
+  <aside class="town-resume" data-town-resume aria-labelledby="town-resume-title">
+    <p class="town-kicker">{hire.kicker}</p>
+    <p class="town-resume-name" id="town-resume-title" tabindex="-1">{site.name}</p>
+    <p class="town-role">{hire.role}</p>
+    <p>{hire.lede}</p>
+    <dl class="town-proof">
+      {
+        hire.proof.map((item) => (
+          <div>
+            <dt>{item.value}</dt>
+            <dd>
+              {item.label}
+              <small>{item.source}</small>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+    <div class="town-links">
+      <button type="button" class="town-btn is-primary" data-town-resume-close>Walk the town</button>
+      <a class="town-btn" href="/resume/">Full resume</a>
+      <a class="town-btn" href={hireMail}>Email me</a>
+      <a class="town-btn" href="/map/">System map</a>
+    </div>
+    <p class="town-kicker town-doors-kicker">Open a building</p>
+    <ul class="town-doors">
+      {
+        overview.constraints.map((item) => (
+          <li>
+            <a href={`#${item.id}`} data-town-visit={item.id}>
+              {item.text}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </aside>
+  <script is:inline>
+    (() => {
+      const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
+      if (hash && hash !== 'top' && hash !== 'work') document.documentElement.classList.add('town-resume-away');
+    })();
+  </script>
+
+  <p class="town-prompt" data-town-prompt hidden></p>
+  <p class="town-hint" aria-hidden="true">
+    <span class="town-hint-desk">WASD or arrows to walk · click a building to go in · drag to look around</span>
+    <span class="town-hint-touch">Tap to walk · tap a building to go in · drag to look around</span>
+  </p>
+
+  <nav class="town-travel" data-town-travel aria-label="Go to a building"></nav>
+
+  <div class="town-dialog" data-town-dialog role="dialog" aria-modal="true" aria-labelledby="town-dialog-title" hidden>
+    <div class="town-card">
+      <button type="button" class="town-x" data-close-x aria-label="Leave the building">✕</button>
+      <div data-town-dialog-body></div>
+    </div>
+  </div>
+
+  <div class="town-fade" data-town-fade aria-hidden="true"></div>
+  <p class="visually-hidden" data-town-status aria-live="polite"></p>
+
+  <!-- Without JavaScript (or for anyone who prefers it), the whole town as a plain page. -->
+  <div class="town-archive wrap">
+    <header>
+      <p class="kicker">{townName.owner}</p>
+      <h1 tabindex="-1">{townName.title}</h1>
+      <p>{overview.lede}</p>
+      <p class="town-archive-actions">
+        <a class="btn btn-solid" href="/map/">System map</a>
+        <button type="button" class="btn town-back" data-town-flat="off">Back to the town</button>
+      </p>
+    </header>
+    {
+      worlds.map((world) => (
+        <article id={`plain-${world.id}`}>
+          <p class="kicker">{world.kicker}</p>
+          <h2>{world.name}</h2>
+          <p>
+            {world.when} · {world.place}
+          </p>
+          {world.summary && <p>{world.summary}</p>}
+          {world.aspects.map((aspect) => (
+            <section>
+              <Image
+                src={aspect.art.image}
+                alt={aspect.art.alt}
+                widths={[480, 800]}
+                sizes="(max-width: 720px) calc(100vw - 2.4rem), 640px"
+                format="webp"
+                quality={76}
+                loading="lazy"
+                decoding="async"
+              />
+              <h3>{aspect.title}</h3>
+              <p>{aspect.line}</p>
+              {aspect.points.length > 0 && (
+                <ul>
+                  {aspect.points.map((point) => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+              )}
+              {aspect.links.length > 0 && (
+                <p>
+                  {aspect.links.map((l) => (
+                    <a href={l.href}>{l.label} </a>
+                  ))}
+                </p>
+              )}
+            </section>
+          ))}
+        </article>
+      ))
+    }
+    <article>
+      <p class="kicker">{record.kicker}</p>
+      <h2>{record.title}</h2>
+      {
+        record.items.map((item) => (
+          <section>
+            <h3>
+              {item.place} · {item.when}
+            </h3>
+            <p>{item.claim}</p>
+            <p>{item.proof}</p>
+          </section>
+        ))
+      }
+    </article>
+  </div>
+
+  <script id="town-payload" type="application/json" set:html={json} />
+  <noscript>
+    <style>
+      html,
+      body.is-world {
+        height: auto !important;
+        overflow: auto !important;
+      }
+      body.is-world .footer {
+        display: flex !important;
+      }
+      .town-canvas,
+      .town-hud,
+      .town-hint,
+      .town-travel,
+      .town-prompt,
+      .town-resume {
+        display: none !important;
+      }
+      .town {
+        position: static !important;
+        height: auto !important;
+      }
+      .town-archive {
+        display: block !important;
+      }
+    </style>
+  </noscript>
+</main>
+
+<script>
+  import { mountTown, type TownPayload } from '../scripts/town';
+
+  const node = document.getElementById('town-payload');
+  const root = document.querySelector<HTMLElement>('[data-town]');
+  try {
+    if (!node?.textContent || !root) throw new Error('Town payload missing');
+    mountTown(root, JSON.parse(node.textContent) as TownPayload);
+  } catch (error) {
+    console.error(error);
+    document.documentElement.classList.add('town-flat');
+  }
+</script>

@@ -1,13 +1,18 @@
 ---
 import { nav } from '../data/site';
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => !href.includes('#') && path.startsWith(href);
 ---
 
 <header class="nav">
   <div class="wrap nav-inner">
     <a class="brand" href="/">Chris <em>Swim</em> Lee</a>
     <nav class="nav-links" id="nav-menu" aria-label="Primary">
-      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-      <a class="nav-resume" href="/resume/">Resume</a>
+      {nav.map((item) => (
+        <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+      ))}
+      <a class="nav-resume" href="/resume/" aria-current={isCurrent('/resume/') ? 'page' : undefined}>Resume</a>
     </nav>
     <div class="nav-tools">
       <button class="nav-theme" type="button" aria-label="Switch to light mode">
@@ -79,25 +84,24 @@ import { nav } from '../data/site';
       if (!nav.contains(e.target as Node)) setOpen(false);
     });
     addEventListener('resize', () => {
-      if (window.innerWidth > 980) setOpen(false);
+      if (window.innerWidth > 860) setOpen(false);
     }, { passive: true });
   }
 
   brand?.addEventListener('click', (e) => {
-    if (location.pathname !== '/') return;
+    if (location.pathname !== '/' && !document.querySelector('[data-town], [data-sys]')) return;
     e.preventDefault();
     setOpen(false);
-    const mobile = matchMedia('(pointer: coarse)').matches || window.innerWidth <= 860;
-    if (mobile && window.scrollY > 48) {
-      if (location.hash) history.replaceState(null, '', '/');
-      window.scrollTo({ top: 0, behavior: 'auto' });
+    if (document.querySelector('[data-world]')) {
+      window.dispatchEvent(new CustomEvent('world:home'));
       return;
     }
-    try {
-      sessionStorage.removeItem('sky-seen');
-      sessionStorage.setItem('sky-replay', '1');
-    } catch (_) {}
-    if (location.hash) location.assign('/');
-    else location.reload();
+    if (document.querySelector('[data-town]')) {
+      window.dispatchEvent(new CustomEvent('town:home'));
+      return;
+    }
+    if (location.hash) history.replaceState(null, '', location.pathname);
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
   });
 </script>

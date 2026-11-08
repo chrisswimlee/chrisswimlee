@@ -1,43 +1,58 @@
+import type { ImageMetadata } from 'astro';
+import chrisPhoto from '../assets/chris.jpg';
+import connectingCaptionsShot from '../assets/work/connectingCaptions.jpg';
+import connectingCaptionsHomeShot from '../assets/work/connectingCaptions-home.jpg';
+import connectingCaptionsSiteShot from '../assets/work/connectingCaptions-site.jpg';
+import d22sosoShot from '../assets/work/d22soso.jpg';
+import deskbreakShot from '../assets/work/deskbreak.jpg';
+import haiteduShot from '../assets/work/haitedu.jpg';
+import localHostShot from '../assets/work/local-host.jpg';
+import localHostSiteShot from '../assets/work/local-host-site.jpg';
+import phonecodingShot from '../assets/work/phonecoding.jpg';
+import twoHandShot from '../assets/work/2handholdem.jpg';
+
 export const site = {
   name: 'Chris Swim Lee',
   legalName: 'Chris SuYoung Lee',
-  title: 'Chris Swim Lee, New York',
+  title: 'Chris Swim Lee — Software engineer, local AI and data systems',
   description:
-    'Forward-deployed data systems, local software for work that cannot leave the machine, and a college course in AI. local-host.ai and Connecting Captions.',
+    'I build data systems and local software for work that can’t leave the machine, and I teach AI at a college in Thailand. I make local-host.ai and Connecting Captions.',
   url: 'https://chrisswimlee.com',
   location: 'New York · remote',
   email: 'suyoung.lee99@gmail.com',
   github: 'https://github.com/chrisswimlee',
   linkedin: 'https://www.linkedin.com/in/chris-suyoung-lee',
-  photo: '/images/chris.jpg',
+  photo: chrisPhoto,
   ogImage: '/images/chris-og.jpg',
   jobTitle: 'College Professor',
-  built: 'Astro. Printable CV.',
+  built: 'Data systems and local tools.',
 };
 
 export const nav = [
+  { href: '/hire/', label: 'Hire me' },
   { href: '/#localhost', label: 'local-host.ai' },
-  { href: '/#work', label: 'Work' },
-  { href: '/#achievements', label: 'Record' },
+  { href: '/connectingCaptions/', label: 'Captions' },
   { href: '/experience/', label: 'Experience' },
+  { href: '/map/', label: 'System map' },
+  { href: '/', label: 'Home' },
 ];
 
 export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Pricing — Chris Swim Lee')}&body=${encodeURIComponent('Which tier: scoping call, architecture audit, custom build, or complete works\n\nWhat you need:\n\nConstraint:\n')}`;
 
-export const commercialMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent(
+export const commercialMail = `mailto:support@local-host.ai?subject=${encodeURIComponent(
   'Connecting Captions commercial license',
 )}&body=${encodeURIComponent(
-  'Organization:\n\nMac count (5 minimum):\n\nNamed license $60/Mac/year. Add written SLA +$90/Mac/year? (yes/no)\n\nMDM / Jamf pkg $1,500 once? (yes/no)\n\nAnything else IT or legal needs:\n',
+  'Organization:\n\nMac count (5 minimum):\n\nWork license $240/Mac/year (schools $120). Add written SLA $3,000/org/year? (yes/no)\n\nMDM / Jamf pkg $2,500 once? (yes/no)\n\nAnything else IT or legal needs:\n',
 )}`;
 
 export const hero = {
   kicker: 'New York · remote',
-  lede: 'Forward-deployed data engineering, local execution where a vendor API is not allowed, and a college course in AI.',
+  lede: 'I’m a software engineer. I build data systems, and local tools for work that can’t go through a vendor API. These days I also teach an AI course.',
   constraints: [
-    'One reporting path that developers, traders, and lawyers would sign.',
-    'A live futures book, under 100ms from feed to book.',
-    'Defense systems and a nuclear contractor, reviewed from the first ticket.',
-    'A college course in AI, and the school’s IT, in the same term.',
+    'At Goldman, one reporting path that developers, traders, and lawyers all signed off on.',
+    'A live crypto futures engine that gets a tick onto the book in under 100ms.',
+    'Web apps for defense clients and a nuclear contractor, with security review from the first ticket.',
+    'A first AI course at a college, plus the school’s IT, in the same term.',
   ],
   actions: [
     { label: 'local-host.ai', href: '/#localhost' },
@@ -46,59 +61,29 @@ export const hero = {
   ],
 };
 
-export const experienceIntro = 'College professor and IT at HAIT. Contracts start with an email.';
+// The /hire/ page: the recruiter-facing dossier. No pricing on this one.
+export const hireMail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Role — Chris Swim Lee')}`;
 
-export const achievementsNote = 'The constraint on each job. The writeups are in Experience.';
-
-type Spike = {
-  id: 'theory' | 'build' | 'strategy';
-  label: string;
-  domain: string;
-  trains: string;
-  proof: string[];
+export const hire = {
+  path: '/hire/',
+  title: 'Hire me',
+  kicker: 'Open to AI roles · US',
+  role: 'Software engineer for AI and data systems.',
+  lede: 'Three years at Goldman Sachs, then founding CTO of a fintech. Now I build local AI tools and teach a college AI course.',
+  // Single source for the proof stats: HireHero and SystemMap both render this.
+  proof: [
+    { value: '80%', label: 'less processing time on a 10,000-account system', source: 'Goldman Sachs' },
+    { value: '<100ms', label: 'from market feed to order book', source: 'Founding CTO' },
+    { value: '90%', label: 'less morning analysis with a daily pre-market brief', source: 'Founding CTO' },
+    { value: '50+', label: 'internal teams on my Kafka and REST pipelines', source: 'Goldman Sachs' },
+  ],
+  recordNote: 'What each job was really about. The longer versions are under Experience.',
+  workNote: 'Things I built and shipped on my own, with the source.',
+  contactHeading: 'Hiring for AI or data systems?',
+  contactLede: 'Send me the role and the team. I reply within a day, and I can talk through any project here in depth.',
 };
 
-export const range = {
-  lede: 'A math degree, engineering jobs, and a long stretch on a game ladder.',
-  thread: 'People ask about the degree, Goldman, and Hearthstone. Those are the three things.',
-  meet: 'Click a peak.',
-  spikes: [
-    {
-      id: 'theory',
-      label: 'Pure theory',
-      domain: 'Formal mathematics',
-      trains: 'The proof comes before the code.',
-      proof: [
-        'B.S. in Computer Science and Mathematics, Trinity College.',
-        '1823 Scholar — full-ride scholarship.',
-      ],
-    },
-    {
-      id: 'build',
-      label: 'Implementation',
-      domain: 'Enterprise and AI engineering',
-      trains: 'The work ships when there’s a date.',
-      proof: [
-        'Three years at Goldman Sachs — 10,000+ accounts, 50+ internal teams on the APIs.',
-        'Founding CTO on a Kraken futures trading engine.',
-        'local-host.ai, a local AI framework.',
-        'Connecting Captions, live Korean, English, Thai, and Japanese captions on macOS.',
-        'Local Lattice, an OpenAI-compatible gateway on PyPI.',
-      ],
-    },
-    {
-      id: 'strategy',
-      label: 'Strategic execution',
-      domain: 'Competitive play',
-      trains: 'Same Hearthstone ladder in 2016, 2019, and 2025.',
-      proof: [
-        '#1 on the Hearthstone Americas Wild ladder — October 2016, January 2019, and November 2025.',
-        '#1 seed for the 2019 Wild Open.',
-        'Two-time Americas Continental Qualifier — 2016 and 2017, top ~75 across the Americas.',
-      ],
-    },
-  ] as Spike[],
-};
+export const achievementsNote = 'What each job was really about. The longer versions are under Experience.';
 
 export type TechnicalAchievement = {
   id: string;
@@ -113,62 +98,51 @@ export const technicalAchievements: TechnicalAchievement[] = [
     id: 'hait',
     place: 'HAIT',
     when: '2026 — present',
-    claim: 'Taught the first AI course while running the school’s IT.',
-    proof: 'Wrote the curriculum, checked the lab machines, and taught the cohort. OpenClaw and OpenAgent for students and staff. Hosting and security included.',
+    claim: 'Wrote and taught the school’s first AI course, and ran its IT.',
+    proof: 'I wrote the curriculum, checked the lab machines, and taught the first cohort. I also set up OpenClaw and OpenAgent for students and staff, and handle the school’s hosting and security.',
   },
   {
     id: 'stealth',
     place: 'Stealth fintech',
-    when: 'Sep 2025 – Aug 2026',
-    claim: 'A live Kraken futures engine, from an empty pipeline to orders going out.',
-    proof: 'Founding CTO. Python and Kafka, under 100ms from feed to book. Models that retrain all day, and a morning brief that took about 90% of the analysis off the desk.',
+    when: 'Sep 2025 — Aug 2026',
+    claim: 'Took a Kraken futures engine from nothing to live orders.',
+    proof: 'As founding CTO I built it on Python and Kafka, with under 100ms from feed to book. The models retrain through the day, and a morning brief cut the desk’s analysis work by about 90%.',
   },
   {
     id: 'goldman',
     place: 'Goldman Sachs',
-    when: 'May 2022 – Jul 2025',
-    claim: 'One reporting path that developers, traders, and lawyers would sign.',
-    proof: 'Forward-deployed on the beneficiary system behind 10,000+ accounts. That path ran 80% faster than the one it replaced. More than 50 teams on the APIs.',
+    when: 'May 2022 — Jul 2025',
+    claim: 'One reporting path that developers, traders, and lawyers all signed off on.',
+    proof: 'I was embedded with the team on the beneficiary system behind 10,000+ accounts. The new path ran 80% faster than the old one, and more than 50 teams used the APIs.',
   },
   {
     id: 'onedave',
     place: 'One Dave',
-    when: 'Oct 2020 – May 2022',
-    claim: 'Systems for a government nuclear contractor and national defense clients.',
-    proof: 'Inventory pipelines for Curtis, inside the systems they already had. Defense web apps with security review from the first ticket.',
+    when: 'Oct 2020 — May 2022',
+    claim: 'Built systems for a government nuclear contractor and for national defense clients.',
+    proof: 'I built inventory pipelines for Curtis that worked inside the systems they already had, and defense web apps that went through security review from the first ticket.',
   },
 ];
 
-export const trading = {
-  kicker: 'Stealth fintech · founding CTO',
-  title: 'Trading engine',
-  metric: '0 → 1',
-  metricLabel: 'from market data to live signals',
-  problem: 'They wanted live Kraken futures in, and executions out.',
-  constraint: 'Kraken crypto futures, and a SQL ledger that was already there.',
-  decision: 'Python and Kafka on the Kraken feed. Models for the morning brief. Agents to check the SQL.',
-  outcome: 'They still run it.',
-};
-
 export const work = {
-  lede: 'Connecting Captions is the install. The other cards are the rest of the software.',
+  lede: 'Connecting Captions is the one most people install. The rest are other things I’ve built.',
 };
 
 export const localHost = {
-  kicker: 'Product · 2026',
+  kicker: 'Product, 2026',
   title: 'local-host.ai',
   url: 'local-host.ai',
   pitch:
-    'A local-first agent for private work. It thinks on the Mac, keeps memory on disk, and runs skills you can open.',
+    'Software that stays on the Mac. Connecting Captions is the release you can install. A local agent, with memory on disk and skills you can open, is still coming.',
   points: [
-    'Execution stays on the machine. A vendor API is not part of the design.',
-    'Memory stays on disk. Skills are files you can open and change.',
-    'For work that is not allowed to leave the building.',
+    'The site leads with Connecting Captions. Speech and translation run on the machine.',
+    'The agent is listed as still coming. It is meant to think on the device and keep its memory on disk.',
+    'The rule for both: it runs on your computer, and you own it.',
   ],
-  image: '/images/work/local-host.jpg',
+  image: localHostShot,
   links: [
-    { label: 'The site', href: 'https://local-host.ai' },
-    { label: 'Repository', href: 'https://github.com/chrisswimlee/local-host.ai' },
+    { label: 'Visit local-host.ai', href: 'https://local-host.ai' },
+    { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-host.ai' },
   ],
 };
 
@@ -179,7 +153,7 @@ type Project = {
   url: string;
   year: string;
   summary: string;
-  image?: string;
+  image?: ImageMetadata;
   points: string[];
   command?: string;
   commandNote?: string;
@@ -195,11 +169,12 @@ export const projects: Project[] = [
     url: 'chrisswimlee.com/connectingCaptions',
     year: '2026',
     summary:
-      'Live subtitles on a Mac. Translation stays on the machine. Each sentence appears when it is ready.',
-    image: '/images/work/connectingCaptions.jpg',
+      'Live subtitles for your Mac. Translation happens on the machine, and each sentence shows up as soon as it’s ready.',
+    image: connectingCaptionsSiteShot,
+    featured: true,
     points: [
-      'Set I speak and Show as. A Theater window sits over the slides.',
-      'Share the slides window when the room should not see the captions.',
+      'Pick the language you speak and the one to show. A Theater window sits over your slides.',
+      'Share just the slides window if the room shouldn’t see the captions.',
     ],
     links: [
       { label: 'Get it', href: '/connectingCaptions/' },
@@ -214,11 +189,11 @@ export const projects: Project[] = [
     url: 'github.com/chrisswimlee/deskbreak',
     year: '2026',
     summary:
-      'A menu-bar timer for people who sit too long. After 40 minutes a little character shows up and tells you to stand.',
-    image: '/images/work/deskbreak.jpg',
+      'A menu-bar timer for people who sit too long. After 40 minutes, a little character pops up and tells you to stand.',
+    image: deskbreakShot,
     points: [
-      'Walk away and the timer resets. It runs on the Mac by itself.',
-      'Twenty characters, five moods, or your own image. It leaves the keyboard alone.',
+      'Walk away and the timer resets by itself. Nothing leaves your Mac.',
+      'Choose from twenty characters and five moods, or use your own image. It never touches your keyboard.',
     ],
     links: [{ label: 'GitHub', href: 'https://github.com/chrisswimlee/deskbreak' }],
   },
@@ -228,13 +203,42 @@ export const projects: Project[] = [
     title: 'HAIT',
     url: 'haitedu.com',
     year: '2026',
-    summary: 'Public site and hosting for an AI institute in Chiang Rai.',
-    image: '/images/work/haitedu.jpg',
+    summary: 'The public site and hosting for an AI institute in Chiang Rai.',
+    image: haiteduShot,
     points: [
-      'Rebuilt the front-end and brought the PHP up to date.',
-      'Runs the school’s IT.',
+      'I rebuilt the front end and brought the PHP up to date.',
+      'I also run the school’s IT.',
     ],
     links: [{ label: 'Live site', href: 'https://haitedu.com' }],
+  },
+  {
+    id: 'local-host-site',
+    kind: 'Site',
+    title: 'local-host.ai',
+    url: 'local-host.ai',
+    year: '2026',
+    summary: 'The home for my software that stays on the Mac. Right now it leads with Connecting Captions.',
+    image: localHostSiteShot,
+    points: [
+      'Download Connecting Captions, read the product page, or get a license for work.',
+      'Speech and translation run on the device. The local agent is listed as still coming.',
+    ],
+    links: [{ label: 'Live site', href: 'https://local-host.ai' }],
+  },
+  {
+    id: 'phonecoding',
+    kind: 'Site',
+    title: 'PhoneCoding',
+    url: 'phonecoding.ai',
+    year: '2026',
+    summary:
+      'PhoneCoding Studio builds SwiftUI apps from the iPhone you’re holding. You speak the change and review the diff with one thumb.',
+    image: phonecodingShot,
+    points: [
+      'Learn teaches SwiftUI on the phone, using the same iOS diff you just shipped.',
+      'Studio for iOS is in early build. The Android studio is under development.',
+    ],
+    links: [{ label: 'Live site', href: 'https://phonecoding.ai' }],
   },
   {
     id: 'd22soso',
@@ -243,13 +247,34 @@ export const projects: Project[] = [
     url: 'd22soso.com',
     year: '2025',
     summary:
-      'Site for Wayne “D22-soso” Chiang — 1999 Brood War World Champion, WSOP talent manager, and inventor of 2 Hand Hold’em.',
-    image: '/images/work/d22soso.jpg',
+      'A site for Wayne “D22-soso” Chiang: 1999 Brood War World Champion, WSOP talent manager, and inventor of 2 Hand Hold’em.',
+    image: d22sosoShot,
     points: [
-      'Championship record, WSOP clips, and the two-hand game, on one site.',
-      'A random race roll and a 2HH table you can play in the browser.',
+      'The homepage is a 3D archive of his career. Drag to turn it, and click a sign to go in.',
+      'The older page, with the poker work and 2 Hand Hold’em, is still up as the classic site.',
     ],
-    links: [{ label: 'Live site', href: 'https://d22soso.com' }],
+    links: [
+      { label: 'Live site', href: 'https://d22soso.com' },
+      { label: 'Classic site', href: 'https://d22soso.com/classic.html' },
+    ],
+  },
+  {
+    id: '2handholdem',
+    kind: 'Site',
+    title: '2 Hand Hold’em',
+    url: '2handholdem.com',
+    year: '2026',
+    summary:
+      'The site for D22-soso’s patented table game. You split four hole cards into two Hold’em hands and play both against one dealer.',
+    image: twoHandShot,
+    points: [
+      'Play free in the browser or on iPhone, find a live table, or license it for a casino.',
+      'Three U.S. patents, WSGC certified, and dealt in four live casinos.',
+    ],
+    links: [
+      { label: 'Live site', href: 'https://2handholdem.com' },
+      { label: 'Play in the browser', href: 'https://2handholdem.com/play/' },
+    ],
   },
   {
     id: 'lattice',
@@ -258,10 +283,10 @@ export const projects: Project[] = [
     url: 'pypi.org/project/local-lattice',
     year: '2026',
     summary:
-      'A local gateway that speaks the OpenAI API. You ask for a role like coder or reasoner, and it picks a model.',
+      'A local gateway that speaks the OpenAI API. You ask for a role like coder or reasoner, and it chooses the model.',
     points: [
       'Works with MLX, LM Studio, or a cloud key.',
-      'Can send one question to several models and vote, pipeline, or debate the answers.',
+      'It can send one question to several models and have them vote, chain, or debate the answers.',
     ],
     command: 'pip install local-lattice',
     commandNote: 'role:coder · role:reasoner · role:fast',
@@ -275,13 +300,13 @@ export const projects: Project[] = [
 export const connectingCaptions = {
   path: '/connectingCaptions/',
   title: 'Connecting Captions',
-  kicker: 'Open source · 2026',
-  lede: 'Live subtitles on a Mac. Translation stays on the machine. Each sentence appears when it is ready.',
+  kicker: 'Open source, 2026',
+  lede: 'Live subtitles for your Mac. Translation happens on the machine, and each sentence shows up as soon as it’s ready.',
   description:
-    'Live subtitles for macOS, with translation on the machine. Download the latest release.',
+    'Live subtitles for macOS, translated on your machine. Download the latest release.',
   repo: 'https://github.com/chrisswimlee/connectingCaptions',
-  image: '/images/work/connectingCaptions.jpg',
-  homeImage: '/images/work/connectingCaptions-home.jpg',
+  image: connectingCaptionsShot,
+  homeImage: connectingCaptionsHomeShot,
   langs: ['Korean', 'English', 'Thai', 'Japanese'],
   brew: [
     'brew tap chrisswimlee/connectingcaptions',
@@ -289,19 +314,19 @@ export const connectingCaptions = {
     'brew install --cask connectingcaptions',
   ],
   about: [
-    'Set I speak and Show as. Translate follows one into the other. The same language needs no download.',
-    'Open Theater and press Listen. A new Listen starts with an empty board. A sentence appears when it is ready.',
-    'A whole-screen share includes Theater. Share the slides window when viewers should not see the captions.',
-    'Translation uses Apple’s on-device Translation. Voice stays on the Mac unless a cloud model is turned on.',
+    'Choose the language you speak (“I speak”) and the language to display (“Show as”). Translation runs from one to the other, and if they match, there’s nothing to download.',
+    'Open Theater and press Listen. Each Listen starts with a blank board, and every sentence appears once it’s ready.',
+    'If you share your whole screen, viewers will see Theater too. Share only the slides window if they shouldn’t.',
+    'Translation uses Apple’s on-device Translation. Your voice stays on the Mac unless you turn on a cloud model.',
   ],
   needs: [
     'macOS 15 or later. Theater streaming needs Apple Silicon.',
-    'Microphone for Listen. Accessibility only if a translation is typed into another app.',
-    'A language pack downloads once when I speak and Show as differ.',
+    'Microphone access for Listen. Accessibility access only if you want translations typed into another app.',
+    'A one-time language pack download when the two languages differ.',
   ],
   open: [
-    'Download the latest zip and drag Connecting Captions to Applications.',
-    'A notarized zip should open without an extra prompt.',
+    'Download the latest zip and drag Connecting Captions into Applications.',
+    'The zip is notarized, so it should open without an extra security prompt.',
     'Open Theater, allow the microphone, and press Listen.',
   ],
 };
@@ -313,129 +338,85 @@ export const releaseDownload = {
   page: 'https://github.com/chrisswimlee/connectingCaptions/releases/latest',
 };
 
+/**
+ * Connecting Captions prices — the single source of truth.
+ * pricing.astro, license.astro, the estimator, and every mailto derive from
+ * here. Change a number once, here. (Supersedes the $60/Mac rates briefly
+ * published on origin/main in c7c47c0.)
+ */
+export const captionsPricing = {
+  personal: { launch: 29, regular: 49, trialDays: 14, maxMacs: 2 },
+  appStore: { ios: 9.99, mac: 19.99, macUpgrade: 9.99 },
+  work: { perMac: 240, schoolPerMac: 120, minimumMacs: 5, slaPerOrg: 3000, mdmOnce: 2500 },
+} as const;
+
+const usd = (n: number) => `$${n.toLocaleString('en-US')}`;
+
 export const commercialLicense = {
   path: '/connectingCaptions/license/',
   title: 'Commercial license',
   kicker: 'For work',
   heading: 'Commercial license',
-  lede: 'Personal, student, and evaluation use is free under GPLv3. A named license is $60 per Mac per year, five Macs minimum. Email the organization and Mac count. A key goes out the same day.',
+  lede: `Any Mac an organization owns needs a work license: ${usd(captionsPricing.work.perMac)} per Mac per year (${usd(captionsPricing.work.schoolPerMac)} for schools), ${captionsPricing.work.minimumMacs} Macs minimum. Personal Macs use the personal key — ${captionsPricing.personal.trialDays}-day trial, then ${usd(captionsPricing.personal.regular)} once.`,
   cta: 'For work: prices',
   emailCta: 'Email to buy',
   href: commercialMail,
   workTitle: 'For work',
-  workLede:
-    'The free zip is for people. Firms that need Licensed to on the Mac, a security contact, or an SLA buy a commercial license at the prices on this page.',
+  workLede: `Personal Macs: ${captionsPricing.personal.trialDays}-day trial, then a ${usd(captionsPricing.personal.regular)} key. Organization Macs: a named work license at ${usd(captionsPricing.work.perMac)} per Mac per year.`,
   rates: [
     {
-      name: 'Named license',
-      price: '$60',
+      name: 'Work license',
+      price: usd(captionsPricing.work.perMac),
       unit: 'Mac / year',
-      detail: 'Five Macs minimum. Air-gapped key. Licensed to the organization.',
+      detail: `${captionsPricing.work.minimumMacs} Macs minimum. Offline key. Licensed to the organization.`,
+    },
+    {
+      name: 'Work license — schools',
+      price: usd(captionsPricing.work.schoolPerMac),
+      unit: 'Mac / year',
+      detail: `${captionsPricing.work.minimumMacs} Macs minimum, so from ${usd(captionsPricing.work.schoolPerMac * captionsPricing.work.minimumMacs)} a year.`,
     },
     {
       name: 'Written SLA',
-      price: '+$90',
-      unit: 'Mac / year',
+      price: usd(captionsPricing.work.slaPerOrg),
+      unit: 'organization / year',
       detail: 'Security reply in 7 days, plus a weekday window if Listen breaks.',
     },
     {
       name: 'MDM / Jamf pkg',
-      price: '$1,500',
+      price: usd(captionsPricing.work.mdmOnce),
       unit: 'once',
       detail: 'App, key, seat list, and caption policy. IT signs the pkg.',
     },
   ],
-  buyCopy:
-    'Email the organization and how many Macs. Use these prices. A key goes out the same day. Custom overlay, glossary, or fleet work is Engage, not this license.',
-  eitherWay:
-    'Apple Speech is the default for one speaker. Either way downloads Whisper Small once if the room talks both languages of the pair.',
+  buyCopy: `Email the organization and how many Macs (${captionsPricing.work.minimumMacs} minimum). A key goes out the same day. Custom overlay, glossary, or fleet work is Engage, not this license.`,
   answers: [
     {
       question: 'How does this monetize?',
-      answer:
-        'Named license $60 per Mac per year, five Macs minimum. Written SLA +$90 per Mac per year. MDM pkg $1,500 once. Transcripts, voiceprints, and training data are not part of the sale.',
+      answer: `Personal keys are ${usd(captionsPricing.personal.regular)} once. Work licenses are ${usd(captionsPricing.work.perMac)} per Mac per year (${usd(captionsPricing.work.schoolPerMac)} for schools), SLA ${usd(captionsPricing.work.slaPerOrg)} per organization per year, MDM pkg ${usd(captionsPricing.work.mdmOnce)} once. Transcripts, voiceprints, and training data are not part of the sale.`,
     },
     {
       question: 'Does voice leave this Mac?',
       answer:
-        'It stays on the Mac unless someone turns on a cloud speech model. Theater doesn’t send anything home.',
+        'No, unless someone turns on a cloud speech model. Theater doesn’t send anything back to me.',
     },
     {
       question: 'Who fixes a break?',
       answer:
-        'Security reports get a reply within 7 days. A paid license can add a written SLA.',
+        'I reply to security reports within 7 days, and a paid license can include a written SLA.',
     },
   ],
   points: [
-    'Personal and evaluation: the GPLv3 zip. Theater Listen stays unlocked.',
-    'Work: a named organization license if IT or legal need a vendor, a signed license on the Mac, or an SLA.',
-    'Activation is an offline signed key. It doesn’t call home.',
+    `Personal: ${captionsPricing.personal.trialDays}-day trial, then a ${usd(captionsPricing.personal.regular)} key for one person on up to ${captionsPricing.personal.maxMacs} of their own Macs. The source stays GPLv3.`,
+    'Work: a named organization license for any Mac the organization owns, with a signed license on the Mac and an optional SLA.',
+    'Activation is an offline signed key, and it never phones home.',
   ],
   includes: [
     'A named organization license and an air-gapped activation key.',
-    'The same security mailbox, with an optional written SLA.',
-    'A Licensed to {org} line in the app so procurement can see the Mac is covered.',
+    'The same security contact, with an optional written SLA.',
+    'A “Licensed to {org}” line in the app, so procurement can see the Mac is covered.',
   ],
 };
-
-export type PreviewZip = {
-  href: string;
-  name: string;
-  tag: string;
-  command: string;
-};
-
-const fallbackZip = (name: string, tag: string): PreviewZip => {
-  const href = `https://github.com/chrisswimlee/connectingCaptions/releases/download/${tag}/${name}`;
-  return {
-    href,
-    name,
-    tag,
-    command: `curl -L -O ${href}`,
-  };
-};
-
-const fallbackPreview = fallbackZip(
-  'fluidsubtitles-1.6.11-preview-unsigned.zip',
-  'preview-1.6.11-1',
-);
-
-type GithubRelease = {
-  tag_name?: string;
-  assets?: { name?: string; browser_download_url?: string }[];
-};
-
-export async function latestPreviewZip(): Promise<PreviewZip> {
-  try {
-    const res = await fetch('https://api.github.com/repos/chrisswimlee/connectingCaptions/releases', {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'User-Agent': 'chrisswimlee.com',
-      },
-    });
-    if (!res.ok) return fallbackPreview;
-    const releases = (await res.json()) as GithubRelease[];
-    const zips: PreviewZip[] = [];
-    for (const release of releases) {
-      for (const asset of release.assets ?? []) {
-        if (asset.browser_download_url && asset.name?.endsWith('.zip') && release.tag_name) {
-          zips.push({
-            href: asset.browser_download_url,
-            name: asset.name,
-            tag: release.tag_name,
-            command: `curl -L -O ${asset.browser_download_url}`,
-          });
-        }
-      }
-    }
-    const signed = zips.find((item) => !item.name.includes('unsigned'));
-    if (signed) return signed;
-    if (zips[0]) return zips[0];
-  } catch {
-    return fallbackPreview;
-  }
-  return fallbackPreview;
-}
 
 export type RoleProject = {
   id: string;
@@ -467,66 +448,66 @@ export const roles: Role[] = [
     dates: '2026 — present',
     location: 'Chiang Rai, remote',
     note: 'IT systems and AI curriculum',
-    scan: 'The IT, the public site, and the first AI class.',
+    scan: 'IT, the public site, and the first AI class.',
     bullets: [
-      'Runs hosting and security for the school.',
-      'Rebuilt the public site and the PHP under it.',
-      'Wrote the first AI curriculum and taught the first cohort.',
-      'Set up OpenClaw and OpenAgent workflows, and a data-recollection project with someone at Korea University.',
+      'Run hosting and security for the school.',
+      'Rebuilt the public site and the PHP underneath it.',
+      'Wrote the school’s first AI curriculum and taught the first cohort.',
+      'Set up OpenClaw and OpenAgent workflows, and started a data-recollection project with a collaborator at Korea University.',
     ],
     projects: [
       {
         id: 'hait-site',
         title: 'Public site',
-        oneLiner: 'The public site is up.',
+        oneLiner: 'A rebuilt public site that loads cleanly.',
         stack: ['PHP', 'Hosting'],
         points: [
-          'Rebuilt the front-end and upgraded PHP.',
-          'Fixed the hosting so the pages load.',
+          'Rebuilt the front end and upgraded PHP.',
+          'Fixed the hosting config so pages load reliably.',
         ],
         brief: {
           problem: 'The school needed a public site that loaded cleanly.',
-          constraint: 'We kept the host they already had.',
-          decision: 'Redesigned the front-end, upgraded PHP, and fixed the hosting config.',
-          outcome: 'The site is live.',
+          constraint: 'They wanted to keep their existing host.',
+          decision: 'I redesigned the front end, upgraded PHP, and fixed the hosting config.',
+          outcome: 'The site is live at haitedu.com.',
         },
         links: [{ label: 'haitedu.com', href: 'https://haitedu.com' }],
       },
       {
         id: 'hait-it',
         title: 'Institutional IT',
-        oneLiner: 'Runs hosting and security for the school.',
+        oneLiner: 'Hosting and security for the school.',
         stack: ['Hosting', 'Security'],
         points: [
-          'Runs hosting and security.',
-          'The site is up.',
+          'I handle hosting and security day to day.',
+          'The public site stays up.',
         ],
         brief: {
           problem: 'The school needed someone on hosting and security.',
           constraint: 'The public site was going live at the same time.',
-          decision: 'Took hosting and security.',
-          outcome: 'Hosting and security are still covered.',
+          decision: 'I took over hosting and security.',
+          outcome: 'Both are still covered.',
         },
       },
       {
         id: 'hait-curriculum',
         title: 'AI curriculum',
-        oneLiner: 'Wrote the first course and taught it.',
+        oneLiner: 'Wrote the first AI course and taught it.',
         points: [
-          'Wrote the first AI course.',
+          'Wrote the school’s first AI course.',
           'Checked the lab machines, then taught the class.',
         ],
         brief: {
           problem: 'They needed a first AI course and someone to teach it.',
-          constraint: 'First cohort. The lab machines were checked first.',
-          decision: 'Wrote the course, checked the machines, and taught the class.',
+          constraint: 'It was the first cohort, and the lab machines needed checking first.',
+          decision: 'I wrote the course, checked the machines, and taught the class.',
           outcome: 'The first students finished the course.',
         },
       },
       {
         id: 'hait-agents',
         title: 'Multi-agent orchestration',
-        oneLiner: 'OpenClaw and OpenAgent for the school, plus a recollection project with Korea University.',
+        oneLiner: 'OpenClaw and OpenAgent for the school, plus a recollection project with a Korea University collaborator.',
         stack: ['OpenClaw', 'OpenAgent'],
         points: [
           'OpenClaw and OpenAgent, set up so students and staff can run them.',
@@ -535,8 +516,8 @@ export const roles: Role[] = [
         brief: {
           problem: 'The school wanted agents students and staff could run, plus a data project with someone at Korea University.',
           constraint: 'Everything had to run on the lab machines.',
-          decision: 'OpenClaw and OpenAgent on the teaching side. A separate recollection workflow with that collaborator.',
-          outcome: 'Students and staff use the teaching agents. The recollection project is drawn up.',
+          decision: 'OpenClaw and OpenAgent for teaching, and a separate recollection workflow with that collaborator.',
+          outcome: 'Students and staff use the teaching agents. The recollection project is planned.',
         },
       },
     ],
@@ -548,11 +529,11 @@ export const roles: Role[] = [
     dates: 'Sep 2025 — Aug 2026',
     location: 'New York',
     note: 'Kraken futures engine',
-    scan: 'Kraken futures. Ingest under 100ms.',
+    scan: 'Kraken futures, ingest under 100ms.',
     bullets: [
-      'Built a trading engine on Kraken crypto futures. Python and Kafka, under 100ms from feed to book.',
-      'Agents that check portfolios against the SQL ledger.',
-      'Owned the models: PyTorch time-series, retraining around the clock, news processors for sudden moves, and a daily pre-market brief that cut the morning analysis by 90%.',
+      'Built a trading engine on Kraken crypto futures in Python and Kafka, with under 100ms from feed to book.',
+      'Wrote agents that check portfolios against the SQL ledger.',
+      'Owned the models: PyTorch time-series models that retrain around the clock, news processors that catch sudden moves, and a daily pre-market brief that cut morning analysis by 90%.',
     ],
     projects: [
       {
@@ -561,14 +542,14 @@ export const roles: Role[] = [
         oneLiner: 'Python and Kafka on the Kraken feed, under 100ms.',
         stack: ['Python', 'Kafka'],
         points: [
-          'Millions of ticks. Under 100ms end to end.',
+          'Millions of ticks, under 100ms end to end.',
           'Python and Kafka on the official feed.',
         ],
         brief: {
-          problem: 'A live feed into the trading book.',
-          constraint: 'Kraken crypto futures, under 100ms.',
-          decision: 'Python and Kafka on the official feed, then agents on top of that book.',
-          outcome: 'Ticks come in. Orders go out.',
+          problem: 'They needed a live feed going into the trading book.',
+          constraint: 'Kraken crypto futures, and under 100ms.',
+          decision: 'Python and Kafka on the official feed, with agents on top of the book.',
+          outcome: 'Ticks come in and orders go out.',
         },
       },
       {
@@ -582,9 +563,9 @@ export const roles: Role[] = [
         ],
         brief: {
           problem: 'They wanted signals that kept up with the market.',
-          constraint: 'Training had to keep going through the day.',
-          decision: 'PyTorch time-series models, retraining all day.',
-          outcome: 'Live signals and backtests. The models retrain on their own.',
+          constraint: 'Training had to continue throughout the day.',
+          decision: 'PyTorch time-series models that retrain all day.',
+          outcome: 'Live signals and backtests, with models that retrain on their own.',
         },
       },
       {
@@ -592,29 +573,29 @@ export const roles: Role[] = [
         title: 'News processors',
         oneLiner: 'News text in, pivot flags out.',
         points: [
-          'Same schedule as the models.',
+          'It runs on the same schedule as the models.',
           'It reads live headlines and flags pivots.',
         ],
         brief: {
           problem: 'Some moves show up in the news before they show up in prices.',
           constraint: 'The input is live headlines.',
-          decision: 'A news processor on the same clock as the forecasting job.',
-          outcome: 'Pivot flags from headlines, next to the time-series path.',
+          decision: 'A news processor running on the same schedule as the forecasting job.',
+          outcome: 'Pivot flags from headlines, alongside the time-series signals.',
         },
       },
       {
         id: 'stealth-agents',
         title: 'Portfolio audit and pre-market brief',
-        oneLiner: 'Agents on the SQL ledger, and a morning brief that took about 90% of the analysis off the desk.',
+        oneLiner: 'Agents on the SQL ledger, and a morning brief that cut the desk’s analysis work by about 90%.',
         stack: ['Python', 'SQL', 'LLMs'],
         points: [
           'Agents that query the SQL and check portfolios.',
-          'A daily pre-market brief that cut the morning analysis pass by 90%.',
+          'A daily pre-market brief that cut the morning analysis by 90%.',
         ],
         brief: {
-          problem: 'The morning portfolio check lived in SQL.',
+          problem: 'The morning portfolio check was all manual SQL.',
           constraint: 'The models had to work with the ledger they already used.',
-          decision: 'Agents that query the SQL, plus a PyTorch brief before the open.',
+          decision: 'Agents that query the SQL, plus a PyTorch-based brief before the open.',
           outcome: 'They run the brief every morning.',
         },
       },
@@ -627,44 +608,44 @@ export const roles: Role[] = [
     dates: 'May 2022 — Jul 2025',
     location: 'New York',
     note: 'Forward deployment and automation',
-    scan: '80% faster processing. Forward-deployed. 50+ internal teams.',
+    scan: '80% faster processing, embedded with the team, 50+ internal teams.',
     bullets: [
-      'Forward-deployment engineer — developers, traders, and lawyers on one reporting path, so the numbers stayed auditable and legally compliant.',
-      'Designed and shipped a beneficiary management system serving 10,000+ client accounts and cut data processing time by 80%.',
+      'Embedded engineer between developers, traders, and lawyers, building one reporting path so the numbers stayed auditable and compliant.',
+      'Designed and shipped a beneficiary management system for 10,000+ client accounts and cut data processing time by 80%.',
       'Scaled Java and Kafka pipelines and REST APIs used by 50+ internal teams, cutting data-access latency by 15%.',
       'Built a Selenium and TestNG suite that raised test accuracy 22% across hundreds of financial and compliance scenarios.',
-      'Stayed on trading, compliance, and market-data APIs after they shipped.',
+      'Kept supporting the trading, compliance, and market-data APIs after they shipped.',
     ],
     projects: [
       {
         id: 'gs-beneficiary',
         title: 'Beneficiary management',
-        oneLiner: '10,000+ accounts. Processing time down 80%.',
+        oneLiner: '10,000+ accounts, with processing time down 80%.',
         stack: ['Java', 'Kafka'],
         points: [
           'Designed and shipped the beneficiary system behind 10,000+ client accounts.',
-          'Cut data processing time by 80%. Stayed on it after launch.',
+          'Cut data processing time by 80%, and stayed on it after launch.',
         ],
         brief: {
-          problem: 'More than 10,000 accounts needed a beneficiary system people could use.',
-          constraint: 'Compliance, and more than 50 teams reading the same data.',
-          decision: 'Java and Kafka, plus a REST API for accounts.',
+          problem: 'More than 10,000 accounts needed a beneficiary system that people could actually use.',
+          constraint: 'Compliance requirements, and more than 50 teams reading the same data.',
+          decision: 'Java and Kafka, with a REST API for accounts.',
           outcome: 'Processing time dropped 80%.',
         },
       },
       {
         id: 'gs-apis',
         title: 'Java, Kafka, and REST',
-        oneLiner: 'Pipelines and APIs used by 50+ internal teams. Latency down 15%.',
+        oneLiner: 'Pipelines and APIs used by 50+ internal teams, with latency down 15%.',
         stack: ['Java', 'Kafka', 'REST'],
         points: [
           'Scaled Java and Kafka pipelines and REST APIs used by 50+ internal teams.',
           'Cut data-access latency by 15%.',
         ],
         brief: {
-          problem: 'Internal teams needed account data they could share over an API.',
-          constraint: 'More than 50 teams were on it, and the APIs had to stay up.',
-          decision: 'Same Java and Kafka pipelines, REST on /v1/accounts.',
+          problem: 'Internal teams needed to share account data over an API.',
+          constraint: 'More than 50 teams depended on it, so the APIs had to stay up.',
+          decision: 'The same Java and Kafka pipelines, exposed over REST at /v1/accounts.',
           outcome: 'Access latency dropped about 15%.',
         },
       },
@@ -673,14 +654,14 @@ export const roles: Role[] = [
         title: 'Forward deployment',
         oneLiner: 'Developers, traders, and lawyers on one reporting path.',
         points: [
-          'Sat between downstream developers, traders, and lawyers on the same reporting path.',
-          'The job was one set of numbers all three sides would sign.',
+          'I sat between the developers, traders, and lawyers who all used the same reporting path.',
+          'The goal was one set of numbers all three groups would sign off on.',
         ],
         brief: {
-          problem: 'Developers, traders, and lawyers all had to sign the same numbers.',
+          problem: 'Developers, traders, and lawyers all had to sign off on the same numbers.',
           constraint: 'Three groups, one report.',
-          decision: 'Sat between the three groups and made one path.',
-          outcome: 'One set of numbers all three would sign.',
+          decision: 'I worked between the three groups and built one path.',
+          outcome: 'One set of numbers all three groups signed off on.',
         },
       },
       {
@@ -693,10 +674,10 @@ export const roles: Role[] = [
           'Raised test accuracy 22%.',
         ],
         brief: {
-          problem: 'KYC and compliance checks needed a real test suite.',
-          constraint: 'Hundreds of cases. The APIs were already in production.',
-          decision: 'Selenium and TestNG on those cases.',
-          outcome: 'Accuracy up 22%.',
+          problem: 'KYC and compliance checks needed a proper test suite.',
+          constraint: 'Hundreds of cases, and the APIs were already in production.',
+          decision: 'Selenium and TestNG across those cases.',
+          outcome: 'Test accuracy went up 22%.',
         },
       },
     ],
@@ -708,7 +689,7 @@ export const roles: Role[] = [
     dates: 'Oct 2020 — May 2022',
     location: 'La Brea, CA',
     note: 'Curtis, defense, and email systems',
-    scan: 'Curtis inventory. Defense apps. Email 70% faster.',
+    scan: 'Curtis inventory, defense apps, email 70% faster.',
     bullets: [
       'Built inventory pipelines and frontends for Curtis, a government nuclear pipeline contractor.',
       'Led a system-wide upgrade that cut email-server response time by 70%.',
@@ -718,45 +699,45 @@ export const roles: Role[] = [
       {
         id: 'od-curtis',
         title: 'Curtis inventory',
-        oneLiner: 'Inventory for Curtis, a government nuclear contractor.',
+        oneLiner: 'Inventory tracking for Curtis, a government nuclear contractor.',
         points: [
-          'Pipelines and the screens on top of them.',
-          'Built inside their contractor systems.',
+          'The pipelines, and the screens on top of them.',
+          'Built inside their existing contractor systems.',
         ],
         brief: {
           problem: 'Curtis needed inventory tracking for a government nuclear contract.',
-          constraint: 'We were working inside their existing systems.',
-          decision: 'Built the pipelines and the frontends.',
-          outcome: 'They use it for inventory.',
+          constraint: 'We had to work inside their existing systems.',
+          decision: 'I built the pipelines and the frontends.',
+          outcome: 'They use it to track inventory.',
         },
       },
       {
         id: 'od-email',
         title: 'Email systems',
-        oneLiner: 'System-wide upgrade. Response time down 70%.',
+        oneLiner: 'A system-wide upgrade that cut response time by 70%.',
         points: [
           'Managed email for the same clients.',
-          'A full-path upgrade that cut server response time by 70%.',
+          'Upgraded the whole mail path, which cut server response time by 70%.',
         ],
         brief: {
           problem: 'The same clients needed faster email.',
-          constraint: 'The upgrade covered the whole mail path.',
-          decision: 'Upgraded the mail servers.',
+          constraint: 'The upgrade had to cover the whole mail path.',
+          decision: 'I upgraded the mail servers.',
           outcome: 'Response time dropped 70%.',
         },
       },
       {
         id: 'od-defense',
         title: 'National Defense apps',
-        oneLiner: 'Web apps for national defense clients, with security as the starting point.',
+        oneLiner: 'Web apps for national defense clients, with security built in from the start.',
         points: [
-          'Built and kept full-stack apps for national defense clients.',
-          'Security review from the first ticket.',
+          'Built and maintained full-stack apps for national defense clients.',
+          'Security review started with the first ticket.',
         ],
         brief: {
           problem: 'Defense clients needed web apps that stayed up and stayed locked down.',
           constraint: 'Security review from the first ticket.',
-          decision: 'Built those apps and kept them running.',
+          decision: 'I built the apps and kept them running.',
           outcome: 'They stayed in service.',
         },
       },
@@ -773,42 +754,74 @@ export const education = [
   },
   {
     school: 'Trinity College, Hartford',
-    degree: 'B.S. Computer Science and Mathematics',
+    degree: 'B.S. Computer Science and Mathematics, minor in Philosophy',
     dates: 'May 2020',
     note: '1823 Scholar — full-ride scholarship',
   },
 ];
 
-export const record = [
+type RecordItem = {
+  label: string;
+  line?: string;
+  points: string[];
+  href: string;
+  source: string;
+  more: { label: string; href: string }[];
+};
+
+export const record: RecordItem[] = [
   {
-    label: '2016 · HCT Spring Preliminary',
+    label: '2016 · HCT Spring World Championship',
+    line: 'Qualified for the world championship qualifier — Blizzard’s regional tournament for the top Americas players, where I beat Flamekilla 3–2 in losers’ bracket #3 before losing 0–3 to Coglorin.',
+    points: [],
     href: 'https://liquipedia.net/hearthstone/2016_Hearthstone_Championship_Tour/Spring/Americas/Preliminary',
+    source: 'Liquipedia',
+    more: [
+      {
+        label: 'Bracket',
+        href: 'https://liquipedia.net/hearthstone/2016_Hearthstone_Championship_Tour/Spring/Americas/Preliminary/LB3',
+      },
+    ],
   },
   {
     label: 'Oct 2016 · #1 Americas Hearthstone',
+    line: 'Finished the October season at #1 Legend in Wild — the single top spot on the Americas server at the end of the monthly ranked season, playing Aggro Beast Druid.',
+    points: [],
     href: 'https://www.hearthpwn.com/decks/661171-1-wild-aggro-beast-druid',
+    source: 'Deck',
+    more: [{ label: 'Screenshot', href: 'https://imgur.com/a/Hm2QD' }],
   },
   {
-    label: '2017 · HCT Summer Preliminary',
+    label: '2017 · HCT Summer World Championship',
+    line: 'Qualified for the world championship qualifier — earning a spot in Blizzard’s Americas Summer Preliminary, the regional tournament that fed the 2017 World Championship.',
+    points: [],
     href: 'https://liquipedia.net/hearthstone/2017_Hearthstone_Championship_Tour/Summer/Preliminary/Americas',
+    source: 'Liquipedia',
+    more: [],
   },
   {
-    label: 'Jan 2019 · Wild Open Qualifier Rank #1',
+    label: '2019 · #1 Wild Open',
+    line: 'I was the #1 ranked for the Wild Open in 2019 — finishing January at #1 on the Americas Wild ladder to take the #1 seed into Blizzard’s Wild Open qualifier.',
+    points: [],
     href: 'https://liquipedia.net/hearthstone/Ladder_Ranking/2019/Americas/Wild/January',
+    source: 'Ladder',
+    more: [{ label: 'Wild Open', href: 'https://liquipedia.net/hearthstone/Hearthstone_Wild_Open/2019/Americas' }],
   },
   {
     label: 'Nov 2025 · Rank 1 Hearthstone Americas',
+    line: 'Hit rank 1 Legend again during the season, after years away — reaching #1 on Blizzard’s official Americas Wild leaderboard in Season 145.',
+    points: [],
     href: 'https://x.com/chrisswimlee/status/1994461923346452901',
+    source: 'Post',
+    more: [{ label: '@chrisswimlee', href: 'https://x.com/chrisswimlee' }],
   },
 ];
-
-export const recordProof = record.filter((item) => /#1|Rank 1/.test(item.label));
 
 export const competitive = [
   {
     title: 'Professional Hearthstone, Americas',
     detail:
-      '#1 on the Americas Wild ladder three times — October 2016, January 2019, and November 2025. #1 seed for the 2019 Wild Open. Two-time Americas Continental Qualifier in 2016 and 2017.',
+      '#1 to finish the Americas Wild season in October 2016 and January 2019. That January finish is what put me first for the Wild Open. In November 2025 I hit rank 1 Legend again during the season. Qualified for the world championship qualifier in 2016 and 2017.',
     links: record,
   },
 ];
@@ -824,55 +837,57 @@ export const skills = {
 };
 
 export const about = {
-  lede: 'Chris SuYoung Lee. Suyoung means swim.',
-  line: 'Trinity was proofs. Goldman was one reporting path. The work now is local software and a college course.',
+  lede: 'My name is Chris SuYoung Lee. “Suyoung” means swim, which is where Swim comes from.',
+  line: 'I studied proofs at Trinity and spent three years at Goldman building one reporting path. Now I build local software and teach.',
 };
 
 export const engage = {
   heading: 'Pricing',
-  lede: 'Four fixed prices. A scoping call first, then an audit, a custom build, or a complete works.',
-  promise: 'Name the tier, what you need, and the constraint.',
-  paths: [
+  lede: 'Four fixed prices. Most projects start with a scoping call, then move to an audit, a custom build, or a complete works.',
+  promise: 'Tell me which tier, what you need, and what the constraint is.',
+  tiers: [
     {
       name: 'Scoping & call',
-      detail: 'Name the system and the constraint. What ships next comes from that call.',
+      price: '$1,000',
+      unit: 'call',
+      detail: 'Tell me about the system and its constraints. What we build next comes out of that call.',
     },
     {
       name: 'Architecture audit',
-      detail: 'A written boundary, the data path, and what is not allowed to leave.',
+      price: '$5,000',
+      unit: 'written audit',
+      detail: 'A written report covering the boundary, the data path, and what isn’t allowed to leave.',
     },
     {
       name: 'Custom build',
-      detail: 'One scoped local system or product install.',
+      price: '$10,000',
+      unit: 'scoped build',
+      detail: 'One scoped local system, or one product install.',
     },
     {
       name: 'Complete works',
-      detail: 'Site, product pages, install, and the systems work to put it live.',
+      price: 'From $20,000',
+      unit: 'full build',
+      detail: 'The site, product pages, install, and all the systems work to put it live.',
     },
-  ],
-  rates: [
-    { name: 'Scoping & call', price: '$1,000', unit: 'call' },
-    { name: 'Architecture audit', price: '$5,000', unit: 'written audit' },
-    { name: 'Custom build', price: '$10,000', unit: 'scoped build' },
-    { name: 'Complete works', price: 'From $20,000', unit: 'full build' },
   ],
   notes: [
     'New York or remote.',
-    'The email should name the tier and the constraint.',
+    'In your email, include the tier and the constraint.',
   ],
   cta: 'Request a scope',
   href: mail,
 };
 
 export const contact = {
-  heading: 'Pricing',
-  lede: 'Inbound is a scoping call, an architecture audit, a custom build, or a complete works.',
+  heading: 'Work with me',
+  lede: 'Scoping calls, architecture audits, custom builds, and complete works, all at fixed prices. Email me with what you need and the constraint.',
   projectCta: 'Pricing',
   href: '/engage/',
 };
 
 export const built = {
-  lede: 'This site.',
-  detail: 'Astro, and a CV you can print. The source is on GitHub.',
+  lede: 'About this site',
+  detail: 'Built with Astro, with a CV you can print. The source is on GitHub.',
   href: 'https://github.com/chrisswimlee/chrisswimlee',
 };

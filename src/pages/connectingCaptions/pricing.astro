@@ -1,0 +1,727 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { captionsPricing, commercialLicense, connectingCaptions, releaseDownload } from '../../data/site';
+
+const P = captionsPricing;
+const money = (n: number) => `$${n.toLocaleString('en-US')}`;
+// Paddle checkout for the personal key. The token is a public client-side token.
+const paddleToken = 'live_619235d740d7c6a15b1fd7df8ed';
+const personalPriceId = 'pri_01m5vhcet3gp2wxbdz61p4awm4';
+// During Show HN week set this to the Paddle discount code (e.g. 'SHOWHN'); leave '' after.
+const launchDiscountCode = '';
+const keyMail = `mailto:support@local-host.ai?subject=${encodeURIComponent(
+  'Connecting Captions personal key',
+)}&body=${encodeURIComponent('Name:\n\nHow many Macs (up to 2):\n')}`;
+
+const columns = [
+  { name: 'iPhone and iPad', price: `${money(P.appStore.ios)} once` },
+  { name: 'Mac, App Store', price: `${money(P.appStore.mac)} once` },
+  { name: 'Direct download', price: `${money(P.personal.launch)} launch week, then ${money(P.personal.regular)}` },
+  { name: 'Work license', price: `${money(P.work.perMac)} per Mac per year` },
+];
+
+const Y = true;
+const N = false;
+const rows: Array<{ group?: string; label?: string; status?: boolean; cells?: Array<boolean | string> }> = [
+  { label: 'Availability', status: true, cells: ['Coming soon', 'Coming soon', 'Available now', 'Available now'] },
+  { group: 'Captions' },
+  { label: 'Captions on iPhone and iPad', cells: [Y, Y, N, N] },
+  { label: 'Keyboard that types the latest line', cells: [Y, Y, N, N] },
+  { label: 'Theater on the Mac', cells: [N, Y, Y, Y] },
+  { label: 'Overlay on top of other apps', cells: [N, N, Y, Y] },
+  { label: 'Types the translation into another app', cells: [N, N, Y, Y] },
+  { group: 'Audio and speech' },
+  { label: 'Microphone', cells: [Y, Y, Y, Y] },
+  { label: 'Any input, including loopback', cells: [N, N, Y, Y] },
+  { label: 'Apple Speech and Apple Translation', cells: [Y, Y, Y, Y] },
+  { label: 'Whisper', cells: [N, N, Y, Y] },
+  { group: 'License' },
+  { label: 'Devices', cells: ['iPhone and iPad', 'Mac, iPhone and iPad', 'Up to 2 of your Macs', 'Per Mac, 5 minimum'] },
+  { label: 'Schools', cells: [N, N, N, `${money(P.work.schoolPerMac)} per Mac per year`] },
+  { label: 'Try before you buy', cells: [`${P.personal.trialDays} days, then 15 min a day`, `${P.personal.trialDays} days, then 15 min a day`, `${P.personal.trialDays}-day trial`, `${P.personal.trialDays}-day trial`] },
+  { label: 'You pay', cells: ['Once', 'Once', 'Once', 'Every year'] },
+  { label: 'Licensed to your organization', cells: [N, N, N, Y] },
+  { label: 'Written SLA', cells: [N, N, N, `${money(P.work.slaPerOrg)} per organization per year`] },
+  { label: 'MDM / Jamf pkg', cells: [N, N, N, `${money(P.work.mdmOnce)} once`] },
+];
+
+const questions = [
+  {
+    q: 'Which license do I need?',
+    a: 'A personal key covers Macs you own. Any Mac a school, company or other organization owns needs a work license. A teacher can use a personal key on their own Mac in class.',
+  },
+  {
+    q: 'How many Macs does a personal key cover?',
+    a: 'One person, on up to two of their own Macs. Work licenses are counted per Mac.',
+  },
+  {
+    q: 'What does paying once include?',
+    a: 'The direct download is yours to keep, with free updates for all of version 1. App Store unlocks stay unlocked on the devices that use your Apple Account.',
+  },
+  {
+    q: 'How does the trial work?',
+    a: `Download the zip and use everything for ${P.personal.trialDays} days. After that, paste a key under Settings → General. The key is an offline signed key and never phones home.`,
+  },
+  {
+    q: 'Does my voice leave the Mac?',
+    a: 'No, unless someone turns on a cloud speech model. Speech and translation run on the device.',
+  },
+  {
+    q: 'How long is the launch price?',
+    a: `The direct download is ${money(P.personal.launch)} during launch week. After that it is ${money(P.personal.regular)}.`,
+  },
+];
+---
+
+<Layout
+  title={`Pricing — ${connectingCaptions.title}`}
+  description="Connecting Captions pricing: the App Store app for iPhone, iPad and Mac, the direct Mac download with a 14-day trial, and the work license."
+>
+  <main id="main" class="resume-page wrap">
+    <div class="resume-top">
+      <div>
+        <p class="kicker">{connectingCaptions.title}</p>
+        <h1>Pricing</h1>
+      </div>
+      <div class="resume-meta">
+        <p>
+          Live captions and translation on your Mac, iPhone or iPad. Personal
+          editions are a one-time purchase. Organizations add a named work
+          license.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-solid" href={releaseDownload.href}>Download the zip</a>
+          <a class="btn" href="#compare">Compare editions</a>
+          <a class="btn" href={commercialLicense.path}>For work</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="resume-block" aria-labelledby="cc-editions">
+      <h2 id="cc-editions">Editions</h2>
+      <div class="cc-cards">
+        <article class="cc-card glass">
+          <div class="cc-head">
+            <p class="kicker">App Store</p>
+            <p class="cc-status">Coming soon</p>
+          </div>
+          <h3 class="cc-name">iPhone, iPad and Mac</h3>
+          <p class="cc-price"><span class="cc-amt">Free</span><span class="cc-unit">to download</span></p>
+          <p class="cc-desc">Use everything for 14 days, then 15 minutes a day until you unlock it.</p>
+          <ul class="cc-rows">
+            <li><span>iPhone and iPad unlock</span><b>{money(P.appStore.ios)}</b></li>
+            <li><span>Mac unlock, with iPhone and iPad</span><b>{money(P.appStore.mac)}</b></li>
+            <li><span>Add the Mac if you own the iPhone unlock</span><b>{money(P.appStore.macUpgrade)}</b></li>
+          </ul>
+          <ul class="points cc-points">
+            <li>Live captions on iPhone and iPad</li>
+            <li>A keyboard that types the latest caption line where you’re writing</li>
+            <li>Theater on the Mac, from the microphone</li>
+            <li>Apple Speech and Apple Translation</li>
+          </ul>
+          <p class="cc-foot-note">Not on the App Store yet. The direct download works on Mac today.</p>
+        </article>
+
+        <article class="cc-card glass cc-featured">
+          <div class="cc-head">
+            <p class="kicker">Direct download</p>
+            <p class="cc-status is-now">Available now</p>
+          </div>
+          <h3 class="cc-name">Connecting Captions for Mac</h3>
+          <p class="cc-price">
+            <s class="cc-was"><span class="visually-hidden">Regular price </span>{money(P.personal.regular)}</s>
+            <span class="cc-amt"><span class="visually-hidden">Launch price </span>{money(P.personal.launch)}</span>
+            <span class="cc-unit">once</span>
+          </p>
+          <p class="cc-launch">Launch week price. {money(P.personal.regular)} after launch.</p>
+          <p class="cc-desc">The full app. Try it free for {P.personal.trialDays} days, then buy a key.</p>
+          <ul class="points cc-points">
+            <li>Theater, and captions in an overlay on top of any app</li>
+            <li>Any input, including a loopback device for system audio</li>
+            <li>Whisper, plus Apple Speech and Apple Translation</li>
+            <li>Types the translation into another app</li>
+            <li>One person, on up to two of their own Macs</li>
+            <li>Free updates for all of version 1</li>
+          </ul>
+          <div class="hero-actions cc-actions">
+            <a class="btn btn-solid" href={releaseDownload.href}>Download free trial</a>
+            <a class="btn" href={keyMail} data-paddle-buy>Buy a key</a>
+          </div>
+        </article>
+
+        <article class="cc-card glass">
+          <div class="cc-head">
+            <p class="kicker">Work license</p>
+            <p class="cc-status is-now">Available now</p>
+          </div>
+          <h3 class="cc-name">For schools and companies</h3>
+          <p class="cc-price"><span class="cc-amt">{money(P.work.perMac)}</span><span class="cc-unit">per Mac per year</span></p>
+          <p class="cc-desc">{money(P.work.schoolPerMac)} per Mac for schools. {P.work.minimumMacs} Macs minimum, so from {money(P.work.perMac * P.work.minimumMacs)} a year, or {money(P.work.schoolPerMac * P.work.minimumMacs)} for a school. Needed for any Mac an organization owns.</p>
+          <ul class="cc-rows">
+            <li><span>Written SLA</span><b>{money(P.work.slaPerOrg)} per organization per year</b></li>
+            <li><span>MDM / Jamf pkg</span><b>{money(P.work.mdmOnce)} once</b></li>
+          </ul>
+          <ul class="points cc-points">
+            <li>Everything in the direct download</li>
+            <li><strong>Licensed to</strong> your organization, shown in the app</li>
+            <li>An offline signed key that never phones home</li>
+            <li>Security reports answered within 7 days</li>
+          </ul>
+          <div class="hero-actions cc-actions">
+            <a class="btn btn-solid" href={commercialLicense.href}>Email to buy</a>
+            <a class="btn" href={commercialLicense.path}>License details</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="resume-block" id="compare" aria-labelledby="cc-compare">
+      <h2 id="cc-compare">Compare editions</h2>
+      <div class="cc-table-scroll">
+        <table class="cc-table">
+          <thead>
+            <tr>
+              <th scope="col"><span class="visually-hidden">Feature</span></th>
+              {columns.map((col, i) => (
+                <th scope="col" class:list={[{ 'cc-hl': i === 2 }]}>
+                  {col.name}
+                  <small>{col.price}</small>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) =>
+              row.group ? (
+                <tr class="cc-group">
+                  <th scope="rowgroup" colspan="5">{row.group}</th>
+                </tr>
+              ) : (
+                <tr>
+                  <th scope="row">{row.label}</th>
+                  {(row.cells ?? []).map((cell, i) => (
+                    <td class:list={[{ 'cc-hl': i === 2 }]}>
+                      {row.status ? (
+                        <span class:list={['cc-status', { 'is-now': cell === 'Available now' }]}>{cell}</span>
+                      ) : cell === true ? (
+                        <><span class="cc-yes" aria-hidden="true">✓</span><span class="visually-hidden">Included</span></>
+                      ) : cell === false ? (
+                        <><span class="cc-no" aria-hidden="true">–</span><span class="visually-hidden">Not included</span></>
+                      ) : (
+                        <span class="cc-cell">{cell}</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+      <p class="resume-copy resume-copy-gap">macOS 15 or later on Apple Silicon. The zip is notarized.</p>
+    </section>
+
+    <section class="resume-block" aria-labelledby="cc-estimate">
+      <h2 id="cc-estimate">Work license estimate</h2>
+      <div class="cc-estimate glass">
+        <form class="cc-form" id="cc-est">
+          <label class="kicker" for="cc-macs">Number of Macs</label>
+          <div class="cc-stepper">
+            <button type="button" id="cc-minus" aria-label="One fewer Mac">−</button>
+            <input id="cc-macs" type="number" min="1" max="10000" step="1" value="12" inputmode="numeric" />
+            <button type="button" id="cc-plus" aria-label="One more Mac">+</button>
+          </div>
+          <label class="cc-check" for="cc-school">
+            <input type="checkbox" id="cc-school" />
+            <span>School</span>
+            <small>{money(P.work.schoolPerMac)} per Mac per year instead of {money(P.work.perMac)}</small>
+          </label>
+          <label class="cc-check" for="cc-sla">
+            <input type="checkbox" id="cc-sla" />
+            <span>Written SLA</span>
+            <small>{money(P.work.slaPerOrg)} per organization per year</small>
+          </label>
+          <label class="cc-check" for="cc-pkg">
+            <input type="checkbox" id="cc-pkg" />
+            <span>MDM / Jamf pkg</span>
+            <small>{money(P.work.mdmOnce)} once</small>
+          </label>
+        </form>
+        <div class="cc-out" aria-live="polite">
+          <div class="cc-line"><span>Each year</span><b id="cc-yearly">$2,880</b></div>
+          <div class="cc-line"><span>One time</span><b id="cc-once">$0</b></div>
+          <div class="cc-line cc-total"><span>First year</span><b id="cc-first">$2,880</b></div>
+          <p class="cc-min" id="cc-minnote" hidden>Billed for 5 Macs, the minimum.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="resume-block" aria-labelledby="cc-questions">
+      <h2 id="cc-questions">Licensing questions</h2>
+      <dl class="cc-faq">
+        {questions.map((item) => (
+          <div>
+            <dt>{item.q}</dt>
+            <dd>{item.a}</dd>
+          </div>
+        ))}
+      </dl>
+      <p class="resume-copy resume-copy-gap">
+        Prices in US dollars, before tax. Custom overlay, glossary, or fleet work is
+        <a href="/engage/">Engage</a>, not this license.
+      </p>
+      <p class="resume-copy resume-copy-gap">
+        <a href="/connectingCaptions/terms/">Terms</a> · <a href="/connectingCaptions/privacy/">Privacy</a> · <a href="/connectingCaptions/refunds/">Refunds</a> · Orders are processed by Paddle, our Merchant of Record. Questions: <a href="mailto:support@local-host.ai">support@local-host.ai</a>
+      </p>
+    </section>
+  </main>
+</Layout>
+
+<script is:inline src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script is:inline define:vars={{ paddleToken, personalPriceId, launchDiscountCode }}>
+  // Opens Paddle's checkout over the page. Without Paddle.js the link falls back to email.
+  try {
+    if (window.Paddle) window.Paddle.Initialize({ token: paddleToken });
+  } catch (_) {}
+  document.querySelectorAll('[data-paddle-buy]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      if (!window.Paddle || !window.Paddle.Checkout) return;
+      event.preventDefault();
+      const options = { items: [{ priceId: personalPriceId, quantity: 1 }] };
+      if (launchDiscountCode) options.discountCode = launchDiscountCode;
+      window.Paddle.Checkout.open(options);
+    });
+  });
+</script>
+
+<style>
+  .cc-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.1rem;
+  }
+
+  .cc-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1.4rem;
+  }
+
+  .cc-featured {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+
+  .cc-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .cc-head .kicker,
+  .cc-desc,
+  .cc-launch,
+  .cc-foot-note,
+  .cc-price {
+    margin: 0;
+  }
+
+  .cc-status {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .cc-status.is-now {
+    color: var(--accent);
+  }
+
+  .cc-status.is-now::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+    vertical-align: 0.1em;
+  }
+
+  .cc-card .cc-name {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 1.55rem;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    text-transform: none;
+    color: var(--ink);
+  }
+
+  .cc-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.6rem;
+  }
+
+  .cc-amt {
+    font-family: var(--display);
+    font-size: 2.6rem;
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--warm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cc-was {
+    font-family: var(--display);
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .cc-unit {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .cc-launch {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--warm);
+  }
+
+  .cc-desc,
+  .cc-foot-note {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .cc-foot-note {
+    margin-top: auto;
+  }
+
+  .cc-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .cc-rows li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.92rem;
+  }
+
+  .cc-rows span {
+    flex: 1 1 50%;
+    min-width: 0;
+    color: var(--muted);
+  }
+
+  .cc-rows b {
+    font-weight: 500;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cc-points {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .cc-actions {
+    margin-top: auto;
+    padding-top: 0.4rem;
+  }
+
+  .cc-table-scroll {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+  }
+
+  .cc-table {
+    width: 100%;
+    min-width: 780px;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+
+  .cc-table th,
+  .cc-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  .cc-table thead th {
+    text-align: center;
+    font-weight: 500;
+    line-height: 1.3;
+    vertical-align: bottom;
+  }
+
+  .cc-table thead th small {
+    display: block;
+    margin-top: 0.2rem;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    color: var(--warm);
+  }
+
+  .cc-table tbody th {
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .cc-table td {
+    text-align: center;
+  }
+
+  .cc-table tbody tr:last-child th,
+  .cc-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .cc-group th {
+    padding-top: 1.1rem;
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .cc-hl {
+    background: var(--accent-dim);
+  }
+
+  .cc-yes {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .cc-no,
+  .cc-cell {
+    color: var(--muted);
+  }
+
+  .cc-cell {
+    font-size: 0.86rem;
+  }
+
+  .cc-estimate {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.6rem 2.4rem;
+    padding: 1.4rem;
+  }
+
+  .cc-form {
+    display: grid;
+    gap: 0.9rem;
+    margin: 0;
+  }
+
+  .cc-stepper {
+    display: flex;
+    width: max-content;
+    max-width: 100%;
+    border: 1px solid var(--line-strong);
+  }
+
+  .cc-stepper button {
+    width: 46px;
+    min-height: 46px;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  .cc-stepper button:hover {
+    background: var(--accent-dim);
+  }
+
+  .cc-stepper input {
+    width: 84px;
+    border: 0;
+    border-inline: 1px solid var(--line-strong);
+    background: transparent;
+    color: var(--ink);
+    text-align: center;
+    font: 500 1rem var(--mono);
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .cc-stepper input::-webkit-outer-spin-button,
+  .cc-stepper input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .cc-check {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 0.1rem 0.6rem;
+    align-items: start;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+
+  .cc-check input {
+    width: 18px;
+    height: 18px;
+    margin: 0.2rem 0 0;
+    accent-color: var(--accent);
+  }
+
+  .cc-check small {
+    grid-column: 2;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .cc-out {
+    border-top: 1px solid var(--line);
+    align-self: start;
+  }
+
+  .cc-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .cc-line b {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .cc-total b {
+    font-family: var(--display);
+    font-size: 1.7rem;
+    font-style: italic;
+    line-height: 1.1;
+    color: var(--warm);
+  }
+
+  .cc-min {
+    margin: 0.6rem 0 0;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .cc-faq {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.4rem 2.6rem;
+    margin: 0;
+  }
+
+  .cc-faq div {
+    min-width: 0;
+  }
+
+  .cc-faq dt {
+    font-family: var(--display);
+    font-size: 1.2rem;
+    font-style: italic;
+    letter-spacing: -0.02em;
+  }
+
+  .cc-faq dd {
+    margin: 0.3rem 0 0;
+    max-width: 60ch;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 980px) {
+    .cc-cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cc-estimate,
+    .cc-faq {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cc-card,
+    .cc-estimate {
+      padding: 1.1rem;
+    }
+  }
+</style>
+
+<script define:vars={{ WORK_RATE: P.work.perMac, SCHOOL_RATE: P.work.schoolPerMac, SLA_RATE: P.work.slaPerOrg, MDM_RATE: P.work.mdmOnce, MIN_MACS: P.work.minimumMacs }}>
+  const byId = (id) => document.getElementById(id);
+  const macs = byId('cc-macs');
+  const sla = byId('cc-sla');
+  const pkg = byId('cc-pkg');
+  const school = byId('cc-school');
+  const fmt = (n) => '$' + n.toLocaleString('en-US');
+
+  const read = () => {
+    const v = parseInt(macs.value, 10);
+    return Number.isFinite(v) && v > 0 ? Math.min(v, 10000) : 0;
+  };
+
+  const calc = () => {
+    const n = read();
+    const billed = Math.max(MIN_MACS, n);
+    const rate = school && school.checked ? SCHOOL_RATE : WORK_RATE;
+    const yearly = billed * rate + (sla.checked ? SLA_RATE : 0);
+    const once = pkg.checked ? MDM_RATE : 0;
+    byId('cc-yearly').textContent = fmt(yearly);
+    byId('cc-once').textContent = fmt(once);
+    byId('cc-first').textContent = fmt(yearly + once);
+    byId('cc-minnote').hidden = n >= MIN_MACS;
+  };
+
+  if (macs && sla && pkg) {
+    macs.addEventListener('input', calc);
+    sla.addEventListener('change', calc);
+    pkg.addEventListener('change', calc);
+    school?.addEventListener('change', calc);
+    byId('cc-minus')?.addEventListener('click', () => {
+      macs.value = String(Math.max(1, (read() || 5) - 1));
+      calc();
+    });
+    byId('cc-plus')?.addEventListener('click', () => {
+      macs.value = String(Math.min(10000, (read() || 4) + 1));
+      calc();
+    });
+    byId('cc-est')?.addEventListener('submit', (e) => e.preventDefault());
+    calc();
+  }
+</script>

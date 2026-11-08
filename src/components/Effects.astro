@@ -31,35 +31,6 @@
     paint();
   }
 
-  if (motion) {
-    const counters = [...document.querySelectorAll<HTMLElement>('[data-count-to]')];
-    if (counters.length) {
-      const ease = (t: number) => 1 - Math.pow(1 - t, 3);
-      const io = new IntersectionObserver(
-        (entries, obs) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-            const el = entry.target as HTMLElement;
-            obs.unobserve(el);
-            const target = Number(el.dataset.countTo);
-            if (!Number.isFinite(target)) continue;
-            const prefix = el.dataset.prefix ?? '';
-            const suffix = el.dataset.suffix ?? '';
-            const start = performance.now();
-            const tick = (now: number) => {
-              const t = Math.min(1, (now - start) / 1200);
-              el.textContent = `${prefix}${Math.round(target * ease(t)).toLocaleString('en-US')}${suffix}`;
-              if (t < 1) requestAnimationFrame(tick);
-            };
-            requestAnimationFrame(tick);
-          }
-        },
-        { threshold: 0.4 },
-      );
-      counters.forEach((c) => io.observe(c));
-    }
-  }
-
   if (motion && !coarse) {
     const playables = [...document.querySelectorAll<HTMLElement>('[data-play]')];
     for (const card of playables) {

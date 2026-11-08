@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://chrisswimlee.com/sitemap.xml
+Sitemap: https://chrisswimlee.com/sitemap-index.xml

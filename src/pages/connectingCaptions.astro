@@ -1,11 +1,39 @@
 ---
+import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
+import VantaFog from '../components/VantaFog.astro';
+import theaterShot from '../assets/work/connectingCaptions-theater.jpg';
+import languagesShot from '../assets/work/connectingCaptions-languages.jpg';
 import { commercialLicense, connectingCaptions, releaseDownload, site } from '../data/site';
 
 const brew = connectingCaptions.brew.join('\n');
+
+const appJsonLd = {
+  '@type': 'SoftwareApplication',
+  name: connectingCaptions.title,
+  description: connectingCaptions.description,
+  url: new URL(connectingCaptions.path, site.url).href,
+  applicationCategory: 'UtilitiesApplication',
+  operatingSystem: 'macOS 15 or later',
+  downloadUrl: releaseDownload.href,
+  installUrl: releaseDownload.page,
+  softwareRequirements: 'Microphone access. Theater streaming needs Apple Silicon.',
+  license: 'https://www.gnu.org/licenses/gpl-3.0.html',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  image: new URL(connectingCaptions.image.src, site.url).href,
+  codeRepository: connectingCaptions.repo,
+  author: { '@type': 'Person', name: site.legalName, url: site.url },
+  inLanguage: ['ko', 'en', 'th', 'ja'],
+};
 ---
 
-<Layout title={`${connectingCaptions.title} — ${site.name}`} description={connectingCaptions.description}>
+<Layout
+  title={`${connectingCaptions.title} — ${site.name}`}
+  description={connectingCaptions.description}
+  jsonLd={appJsonLd}
+>
+  <VantaFog />
   <main id="main" class="resume-page wrap">
     <div class="resume-top">
       <div>
@@ -17,28 +45,34 @@ const brew = connectingCaptions.brew.join('\n');
         <p class="project-langs">{connectingCaptions.langs.join(' · ')}</p>
         <div class="hero-actions">
           <a class="btn btn-solid" href={releaseDownload.href}>Download Connecting Captions</a>
-          <a class="btn btn-solid" href={commercialLicense.path}>{commercialLicense.cta}</a>
-          <a class="btn" href={connectingCaptions.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a class="btn" href="/#work">The work</a>
+          <a class="btn" href={commercialLicense.path}>{commercialLicense.cta}</a>
+          <a class="btn btn-text" href={connectingCaptions.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
         </div>
       </div>
     </div>
 
     <div class="project-shots">
       <figure class="project-shot">
-        <img
-          src={connectingCaptions.image}
+        <Image
+          src={theaterShot}
           alt="Theater captions: Hello. and 안녕."
-          width="1200"
-          height="750"
+          widths={[600, 900, 1200]}
+          sizes="(max-width: 860px) calc(100vw - 2.4rem), 600px"
+          format="webp"
+          quality={80}
+          loading="eager"
+          fetchpriority="high"
         />
       </figure>
       <figure class="project-shot">
-        <img
-          src={connectingCaptions.homeImage}
+        <Image
+          src={languagesShot}
           alt="Theater Home: English to Korean, on this Mac."
-          width="1200"
-          height="750"
+          widths={[600, 900, 1200]}
+          sizes="(max-width: 860px) calc(100vw - 2.4rem), 600px"
+          format="webp"
+          quality={80}
+          loading="eager"
         />
       </figure>
     </div>
@@ -48,16 +82,13 @@ const brew = connectingCaptions.brew.join('\n');
       <p class="resume-copy">
         Unzip <strong>{releaseDownload.name}</strong> and drag Connecting Captions to Applications. No Xcode.
       </p>
-      <div class="hero-actions">
-        <a class="btn btn-solid" href={releaseDownload.href}>Download Connecting Captions</a>
-        <a class="btn" href={releaseDownload.page} target="_blank" rel="noopener noreferrer">Release notes</a>
-      </div>
       <p class="resume-copy resume-copy-gap">
+        <a href={releaseDownload.page} target="_blank" rel="noopener noreferrer">Release notes</a> are on GitHub.
         Or install Connecting Captions with Homebrew. Trust the tap when asked.
       </p>
       <div class="get-cmd">
-        <code>{brew}</code>
         <button id="brew-copy" class="cmd-copy" type="button">Copy</button>
+        <code>{brew}</code>
       </div>
       <ol class="points project-steps">
         {connectingCaptions.open.map((step) => (

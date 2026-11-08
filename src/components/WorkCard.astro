@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import type { projects } from '../data/site';
+
+interface Props {
+  project: (typeof projects)[number];
+}
+
+const { project } = Astro.props;
+const live = project.links[0];
+const offsite = live ? /^https?:\/\//.test(live.href) : false;
+---
+
+<article class:list={['work-piece', project.featured && 'work-feature']} data-reveal>
+  {
+    project.command ? (
+      <div class="polaroid polaroid-cmd">
+        <code>{project.command}</code>
+        {project.commandNote && <p class="cmd-roles">{project.commandNote}</p>}
+        <button class="cmd-copy" type="button" data-copy={project.command}>
+          Copy
+        </button>
+      </div>
+    ) : (
+      project.image &&
+      live && (
+        <a
+          class="polaroid"
+          href={live.href}
+          aria-label={project.title}
+          target={offsite ? '_blank' : undefined}
+          rel={offsite ? 'noopener noreferrer' : undefined}
+        >
+        <Image
+          src={project.image}
+          alt={`${project.title} — ${project.url}`}
+          widths={[480, 760, 1140]}
+          sizes={
+            project.featured
+              ? '(max-width: 980px) calc(100vw - 2.4rem), 640px'
+              : '(max-width: 640px) 80vw, (max-width: 980px) calc(100vw - 2.4rem), 540px'
+          }
+          format="webp"
+          quality={78}
+          loading="lazy"
+          decoding="async"
+        />
+        </a>
+      )
+    )
+  }
+  <div class="work-copy">
+    <p class="kicker">
+      {project.kind} · {project.year}
+    </p>
+    <h3>{project.title}</h3>
+    {project.url && <p class="case-url">{project.url}</p>}
+    <p>{project.summary}</p>
+    {
+      project.points.length > 0 && (
+        <ul class="points">
+          {project.points.map((point) => (
+            <li>{point}</li>
+          ))}
+        </ul>
+      )
+    }
+    <div class="card-links">
+      {project.links.map((link) => {
+        const offsite = /^https?:\/\//.test(link.href);
+        const primary = link === live;
+        return (
+          <a
+            class:list={['btn', primary && 'btn-solid']}
+            href={link.href}
+            target={offsite ? '_blank' : undefined}
+            rel={offsite ? 'noopener noreferrer' : undefined}
+          >
+            {link.label}
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</article>

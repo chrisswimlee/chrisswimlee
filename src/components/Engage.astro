@@ -4,27 +4,18 @@ import { engage } from '../data/site';
 
 <div class="engage-block">
   <p>{engage.promise}</p>
-  <ul class="engage-paths">
+  <ol class="engage-tiers">
     {
-      engage.paths.map((item) => (
+      engage.tiers.map((tier) => (
         <li>
-          <strong>{item.name}</strong>
-          <p>{item.detail}</p>
+          <p class="kicker">{tier.unit}</p>
+          <strong>{tier.name}</strong>
+          <p class="engage-price">{tier.price}</p>
+          <p class="engage-detail">{tier.detail}</p>
         </li>
       ))
     }
-  </ul>
-  <ul class="engage-rates">
-    {
-      engage.rates.map((item) => (
-        <li>
-          <p class="kicker">{item.unit}</p>
-          <strong>{item.name}</strong>
-          <p class="engage-price">{item.price}</p>
-        </li>
-      ))
-    }
-  </ul>
+  </ol>
   <ul class="services-notes">
     {engage.notes.map((note) => <li>{note}</li>)}
   </ul>

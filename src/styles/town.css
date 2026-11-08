@@ -1,0 +1,886 @@
+/* Chrisswimlee: The Developer World — the home page town. */
+
+.town {
+  --wood: #5a3418;
+  --wood-dark: #3a2412;
+  --wood-mid: #9a6234;
+  --parch: #fbefd2;
+  --parch-deep: #f3dcae;
+  --parch-edge: #d9bd84;
+  --leaf: #3f8a4c;
+  --leaf-dark: #2a5f33;
+  --ink-warm: #3a2412;
+  --pixel: 'Pixelify Sans', 'IBM Plex Mono', monospace;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: #2f5a2a;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.town-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  touch-action: none;
+  cursor: default;
+}
+
+.town.is-pointing .town-canvas {
+  cursor: pointer;
+}
+
+.town.is-panning .town-canvas,
+.town.is-carrying .town-canvas {
+  cursor: grabbing;
+}
+
+/* --------------------------------------------------------------- wood UI */
+
+.town-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.5rem 0.9rem;
+  border: 3px solid var(--wood);
+  background: var(--parch-deep);
+  color: var(--ink-warm);
+  font: 600 0.95rem/1 var(--pixel);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    inset 0 -3px 0 var(--parch-edge),
+    0 3px 0 var(--wood-dark);
+  transition: transform 80ms ease, filter 120ms ease;
+  touch-action: manipulation;
+}
+
+.town-btn:hover {
+  filter: brightness(1.06);
+}
+
+.town-btn:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 -1px 0 var(--parch-edge),
+    0 1px 0 var(--wood-dark);
+}
+
+.town-btn:focus-visible,
+.town-travel button:focus-visible,
+.town-tabs button:focus-visible,
+.town-x:focus-visible {
+  outline: 3px solid #ffd24a;
+  outline-offset: 2px;
+}
+
+.town-btn.is-primary {
+  background: var(--leaf);
+  border-color: var(--leaf-dark);
+  color: #fff8e6;
+  box-shadow:
+    inset 0 -3px 0 #2f7040,
+    0 3px 0 #1d3f23;
+}
+
+/* --------------------------------------------------------------- HUD */
+
+.town-hud {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--nav-offset, var(--nav-h, 68px)) + 12px);
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.town-hud > * {
+  pointer-events: auto;
+}
+
+.town-plaque {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.85rem 0.6rem;
+  border: 3px solid var(--wood);
+  background: var(--parch);
+  box-shadow:
+    inset 0 0 0 2px #e9cf98,
+    0 4px 0 var(--wood-dark);
+  color: var(--ink-warm);
+  font-family: var(--pixel);
+}
+
+.town-plaque small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #8a5a30;
+  letter-spacing: 0.04em;
+}
+
+.town-plaque h1 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.town-prompt {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 118px;
+  margin: 0;
+  padding: 0.4rem 0.75rem;
+  transform: translateX(-50%);
+  border: 3px solid var(--wood);
+  background: var(--parch);
+  color: var(--ink-warm);
+  font: 600 0.9rem/1.2 var(--pixel);
+  white-space: nowrap;
+  box-shadow: 0 3px 0 var(--wood-dark);
+  pointer-events: none;
+}
+
+.town-hint {
+  position: absolute;
+  z-index: 2;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: 88px;
+  margin: 0;
+  padding: 0.3rem 0.55rem;
+  background: rgba(30, 18, 8, 0.62);
+  color: #fff3c4;
+  font: 500 0.78rem/1.2 var(--pixel);
+  pointer-events: none;
+}
+
+.town-hint-touch {
+  display: none;
+}
+
+.town-hint {
+  transition: opacity 600ms ease;
+}
+
+.town.has-walked .town-hint {
+  opacity: 0;
+}
+
+.town-text {
+  margin-left: auto;
+  background: var(--parch);
+}
+
+.town-travel .town-travel-text {
+  background: #e9dcc0;
+}
+
+.town-small {
+  margin-top: 0.9rem !important;
+  font-size: 0.9rem;
+  color: #6a4a2a;
+}
+
+.town-linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #2f5bb0;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .town-text {
+    display: none;
+  }
+}
+
+.town-archive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+.town-back {
+  display: none;
+}
+
+html.town-flat .town-back {
+  display: inline-flex;
+}
+
+html.town-flat body.is-world .footer {
+  display: flex;
+}
+
+html.town-flat .town-dialog,
+html.town-flat .town-fade {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .town-hint-desk {
+    display: none;
+  }
+
+  .town-hint-touch {
+    display: inline;
+  }
+}
+
+.town-travel {
+  position: absolute;
+  z-index: 3;
+  left: max(10px, env(safe-area-inset-left));
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  overflow-x: auto;
+  border: 3px solid var(--wood);
+  background: #7a4a28;
+  box-shadow:
+    inset 0 0 0 2px #9a6234,
+    0 4px 0 var(--wood-dark);
+  scrollbar-width: none;
+}
+
+.town-travel::-webkit-scrollbar {
+  display: none;
+}
+
+.town-travel button {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 48px;
+  padding: 0.35rem 0.6rem;
+  border: 2px solid var(--wood-dark);
+  background: var(--parch-deep);
+  color: var(--ink-warm);
+  font-family: var(--pixel);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 -2px 0 var(--parch-edge);
+  touch-action: manipulation;
+}
+
+.town-travel button span {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.town-travel button small {
+  font-size: 0.72rem;
+  color: #8a5a30;
+  white-space: nowrap;
+}
+
+.town-travel button:hover,
+.town-travel button[aria-current] {
+  background: #ffe7a0;
+}
+
+.town-travel button[aria-current] {
+  border-color: #e7b74a;
+}
+
+/* --------------------------------------------------------------- resume in the square */
+
+.town-resume {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: calc(var(--nav-offset, 68px) + 78px);
+  width: min(460px, calc(100% - 28px));
+  max-height: calc(100dvh - var(--nav-offset, 68px) - 176px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 1rem 1.05rem 1.1rem;
+  border: 4px solid var(--wood);
+  background: var(--parch);
+  color: var(--ink-warm);
+  box-shadow:
+    inset 0 0 0 3px #e9cf98,
+    0 6px 0 var(--wood-dark),
+    0 24px 60px -24px rgba(0, 0, 0, 0.55);
+  font-family: var(--sans, 'IBM Plex Sans', system-ui, sans-serif);
+  user-select: text;
+  -webkit-user-select: text;
+  pointer-events: auto;
+}
+
+html.town-resume-away .town-resume,
+.town.resume-away .town-resume {
+  display: none;
+}
+
+.town-resume p {
+  margin: 0.4rem 0 0;
+  line-height: 1.45;
+}
+
+.town-resume-name {
+  margin: 0;
+  font: 700 clamp(1.7rem, 4.4vw, 2.15rem) / 1.05 var(--pixel);
+  color: var(--ink-warm);
+}
+
+.town-resume-name:focus {
+  outline: 3px solid #ffd24a;
+  outline-offset: 2px;
+}
+
+.town-role {
+  font-weight: 600;
+}
+
+.town-doors-kicker {
+  margin-top: 0.95rem;
+}
+
+.town-doors {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.town-doors a {
+  display: block;
+  padding: 0.5rem 0.65rem;
+  border: 2px solid var(--parch-edge);
+  background: #fff7e2;
+  color: var(--ink-warm);
+  text-decoration: none;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.town-doors a:hover,
+.town-doors a:focus-visible {
+  border-color: var(--wood);
+  background: #fff;
+}
+
+.town-briefs {
+  margin-top: 1rem;
+}
+
+.town-brief + .town-brief {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--parch-edge);
+}
+
+.town-brief h4 {
+  margin: 0;
+  font: 700 1.05rem/1.2 var(--pixel);
+  color: var(--ink-warm);
+}
+
+.town-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.35rem 0 0;
+}
+
+.town-stack span {
+  padding: 0.08rem 0.35rem;
+  border: 1px solid var(--parch-edge);
+  background: #fff7e2;
+  font: 500 0.72rem/1.3 var(--pixel);
+}
+
+.town-beats {
+  margin: 0.35rem 0 0;
+}
+
+.town-beats div + div {
+  margin-top: 0.28rem;
+}
+
+.town-beats dt,
+.town-beats dd {
+  display: inline;
+  margin: 0;
+}
+
+.town-beats dt {
+  font-weight: 700;
+}
+
+.town-beats dt::after {
+  content: ' · ';
+  font-weight: 500;
+  color: #8a5a30;
+}
+
+/* --------------------------------------------------------------- inside a building */
+
+.town-dialog {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--nav-offset, var(--nav-h, 68px)) + 12px) 16px 96px;
+  background: rgba(20, 12, 6, 0.42);
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.town-dialog[hidden] {
+  display: none;
+}
+
+.town-card {
+  position: relative;
+  width: min(640px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 1.25rem 1.35rem 1.35rem;
+  border: 4px solid var(--wood);
+  background: var(--parch);
+  color: var(--ink-warm);
+  box-shadow:
+    inset 0 0 0 3px #e9cf98,
+    0 6px 0 var(--wood-dark),
+    0 24px 60px -20px rgba(0, 0, 0, 0.6);
+  font-family: var(--sans, 'IBM Plex Sans', system-ui, sans-serif);
+  animation: town-pop 220ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes town-pop {
+  from {
+    transform: translateY(14px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .town-card {
+    animation: none;
+  }
+}
+
+.town-x {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--wood);
+  background: var(--parch-deep);
+  color: var(--ink-warm);
+  font: 700 1rem/1 var(--pixel);
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--wood-dark);
+}
+
+.town-head {
+  padding-right: 44px;
+}
+
+.town-kicker {
+  margin: 0 0 0.3rem;
+  font: 600 0.8rem/1.2 var(--pixel);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a5a30;
+}
+
+.town-card h2 {
+  margin: 0 0 0.35rem;
+  font: 700 clamp(1.6rem, 4vw, 2.1rem) / 1.05 var(--pixel);
+  color: var(--ink-warm);
+}
+
+.town-card h3 {
+  margin: 0.9rem 0 0.3rem;
+  font: 700 1.25rem/1.15 var(--pixel);
+  color: var(--ink-warm);
+}
+
+.town-meta {
+  margin: 0 0 0.6rem;
+  font: 500 0.82rem/1.3 var(--pixel);
+  color: #7a5a3a;
+}
+
+.town-summary,
+.town-card p {
+  margin: 0.4rem 0 0;
+  line-height: 1.5;
+}
+
+.town-line {
+  font-weight: 500;
+}
+
+.town-card ul {
+  margin: 0.55rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.town-card li + li {
+  margin-top: 0.3rem;
+}
+
+.town-card li::marker {
+  color: #c98a2a;
+}
+
+.town-body {
+  margin-top: 0.6rem;
+}
+
+.town-art {
+  margin: 0.8rem 0 0;
+  border: 3px solid var(--wood);
+  background: #1d1410;
+  box-shadow: 0 3px 0 var(--wood-dark);
+}
+
+.town-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+  object-fit: cover;
+}
+
+.town-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0.5rem;
+}
+
+.town-tabs button {
+  min-height: 44px;
+  padding: 0.3rem 0.6rem;
+  border: 2px solid var(--wood);
+  background: var(--parch-deep);
+  color: var(--ink-warm);
+  font: 600 0.82rem/1 var(--pixel);
+  cursor: pointer;
+}
+
+.town-tabs button[aria-selected='true'] {
+  background: #e7b74a;
+  border-color: var(--wood-dark);
+}
+
+.town-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  font: 600 0.85rem/1 var(--pixel);
+}
+
+.town-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.town-proof {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0.8rem 0 0;
+}
+
+.town-proof div {
+  padding: 0.6rem 0.7rem;
+  border: 2px solid var(--parch-edge);
+  background: #fff7e2;
+}
+
+.town-proof dt {
+  font: 700 1.6rem/1 var(--pixel);
+  color: var(--leaf-dark);
+}
+
+.town-proof dd {
+  margin: 0.3rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.town-proof small {
+  display: block;
+  margin-top: 0.25rem;
+  font: 600 0.72rem/1 var(--pixel);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8a5a30;
+}
+
+.town-notes {
+  list-style: none;
+  padding: 0 !important;
+}
+
+.town-notes li {
+  padding: 0.65rem 0.8rem;
+  border: 2px solid var(--parch-edge);
+  background: #fff7e2;
+  transform: rotate(-0.4deg);
+}
+
+.town-notes li:nth-child(even) {
+  transform: rotate(0.5deg);
+}
+
+.town-notes h3 {
+  margin-top: 0.1rem !important;
+  font-size: 1.05rem !important;
+}
+
+.town-mail a {
+  font: 700 1.2rem/1.2 var(--pixel);
+  color: #2f5bb0;
+  word-break: break-all;
+}
+
+.town-how {
+  list-style: none;
+  padding: 0 !important;
+}
+
+.town-how li {
+  padding-left: 1.4rem;
+  position: relative;
+}
+
+.town-how li::before {
+  content: '';
+  position: absolute;
+  left: 0.2rem;
+  top: 0.5em;
+  width: 8px;
+  height: 8px;
+  background: #e7b74a;
+  box-shadow: 0 0 0 2px var(--wood);
+}
+
+.town-card a:not(.town-btn) {
+  color: #2f5bb0;
+}
+
+.town-fade {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  background: #120a04;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 170ms ease;
+}
+
+.town-fade.is-on {
+  opacity: 1;
+}
+
+/* Fallback: the whole town as a plain page. */
+.town-archive {
+  display: none;
+  padding: 6rem 0 4rem;
+  color: var(--ink);
+  user-select: text;
+}
+
+.town-archive h1:focus {
+  outline: 3px solid #ffd24a;
+  outline-offset: 2px;
+}
+
+.town-archive h1 {
+  font: 700 clamp(2.4rem, 7vw, 4rem) / 1 var(--pixel);
+}
+
+.town-archive article {
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.town-archive img {
+  max-width: 640px;
+  height: auto;
+  margin-top: 1rem;
+}
+
+html.town-flat:has(body.is-world),
+html.town-flat body.is-world {
+  height: auto;
+  overflow: auto;
+}
+
+html.town-flat .town {
+  position: static;
+  height: auto;
+  background: var(--bg);
+}
+
+html.town-flat .town-canvas,
+html.town-flat .town-hud,
+html.town-flat .town-hint,
+html.town-flat .town-travel,
+html.town-flat .town-prompt,
+html.town-flat .town-resume {
+  display: none;
+}
+
+html:not(.town-resume-away) .town:not(.resume-away) .town-hint {
+  opacity: 0;
+}
+
+html.town-flat .town-archive {
+  display: block;
+}
+
+/* --------------------------------------------------------------- phones */
+
+.town-hire-short {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .town-hud {
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .town-hire-long {
+    display: none;
+  }
+
+  .town-hire-short {
+    display: inline;
+  }
+
+  .town-plaque {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.45rem;
+    padding: 0.4rem 0.65rem 0.45rem;
+  }
+
+  .town-plaque {
+    min-width: 0;
+    flex: 1;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+
+  .town-plaque small {
+    font-size: 0.72rem;
+  }
+
+  .town-hud {
+    flex-wrap: wrap;
+  }
+
+  .town-plaque {
+    flex: 1 1 100%;
+  }
+
+  .town-plaque h1 {
+    font-size: 1.15rem;
+    white-space: normal;
+  }
+
+  .town-resume {
+    top: calc(var(--nav-offset, 68px) + 112px);
+    max-height: calc(100dvh - var(--nav-offset, 68px) - 200px);
+  }
+
+  .town-hire {
+    min-height: 38px;
+    font-size: 0.85rem;
+  }
+
+  .town-hint {
+    bottom: 80px;
+    font-size: 0.72rem;
+  }
+
+  .town-prompt {
+    bottom: 108px;
+    font-size: 0.8rem;
+  }
+
+  .town-travel button {
+    min-height: 44px;
+  }
+
+  .town-dialog {
+    place-items: end center;
+    padding: calc(var(--nav-offset, 52px) + 8px) 0 0;
+  }
+
+  .town-card {
+    width: 100%;
+    max-height: 82dvh;
+    padding: 1rem 1rem calc(1.2rem + env(safe-area-inset-bottom));
+    border-bottom: 0;
+    animation-name: town-sheet;
+  }
+
+  @keyframes town-sheet {
+    from {
+      transform: translateY(40px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  .town-proof dt {
+    font-size: 1.35rem;
+  }
+}

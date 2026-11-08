@@ -1,0 +1,79 @@
+---
+/**
+ * Vanta FOG behind the top of a page. Loads three.js + Vanta lazily, only on
+ * desktop with motion allowed (html.has-desktop-motion) and Save-Data off, and only
+ * while the layer is on screen.
+ */
+---
+
+<div class="vanta-fog" data-vanta aria-hidden="true"></div>
+
+<script>
+  const el = document.querySelector<HTMLElement>('[data-vanta]');
+  const root = document.documentElement;
+  const saveData = Boolean(navigator.connection?.saveData);
+
+  if (el && root.classList.contains('has-desktop-motion') && !saveData) {
+    type Effect = { destroy: () => void };
+    let effect: Effect | null = null;
+    let loading = false;
+    let visible = false;
+
+    const palette = () =>
+      root.dataset.theme === 'light'
+        ? { baseColor: 0xeceae4, lowlightColor: 0xc4d2ea, midtoneColor: 0xe9dcc0, highlightColor: 0xf6f4ee }
+        : { baseColor: 0x000000, lowlightColor: 0x07132e, midtoneColor: 0x1b3570, highlightColor: 0x5a3f12 };
+
+    const start = async () => {
+      if (effect || loading) return;
+      loading = true;
+      try {
+        const THREE = await import('three');
+        (window as unknown as { THREE: unknown }).THREE = THREE;
+        const mod: any = await import('vanta/dist/vanta.fog.min');
+        const FOG =
+          (typeof mod?.default === 'function' && mod.default) ||
+          (typeof mod?.default?.default === 'function' && mod.default.default) ||
+          (typeof mod === 'function' && mod) ||
+          (window as any).VANTA?.FOG;
+        if (!FOG || !visible) return;
+        effect = FOG({
+          el,
+          THREE,
+          mouseControls: true,
+          touchControls: false,
+          gyroControls: false,
+          minHeight: 200,
+          minWidth: 200,
+          blurFactor: 0.6,
+          speed: 0.8,
+          zoom: 0.75,
+          ...palette(),
+        });
+        el.classList.add('is-on');
+      } catch (err) {
+        console.warn('[vanta] skipped:', err);
+      } finally {
+        loading = false;
+      }
+    };
+
+    const stop = () => {
+      effect?.destroy();
+      effect = null;
+      el.classList.remove('is-on');
+    };
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) void start();
+      else stop();
+    }).observe(el);
+
+    root.addEventListener('themechange', () => {
+      if (!effect) return;
+      stop();
+      if (visible) void start();
+    });
+  }
+</script>

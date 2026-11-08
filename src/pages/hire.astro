@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HireHero from '../components/HireHero.astro';
+import Achievements from '../components/Achievements.astro';
+import Work from '../components/Work.astro';
+import { about, hire, hireMail, site } from '../data/site';
+---
+
+<Layout
+  title={`Hire me — ${site.name}`}
+  description={`${site.legalName}. ${hire.role} ${hire.lede}`}
+>
+  <main id="main" class="desk hire-page">
+    <HireHero />
+    <div class="paper">
+      <Achievements note={hire.recordNote} />
+      <Work note={hire.workNote} />
+      <section class="section contact-section" id="contact">
+        <div class="contact-about">
+          <p class="note" data-reveal>{about.lede}</p>
+          <p data-reveal>{about.line}</p>
+        </div>
+        <div class="contact-box">
+          <div>
+            <h2>{hire.contactHeading}</h2>
+            <p data-reveal>{hire.contactLede}</p>
+          </div>
+          <div class="contact-actions" data-reveal>
+            <a class="mail" href={hireMail}>{site.email}</a>
+            <div class="card-links">
+              <a class="btn btn-solid" href="/resume/">Resume</a>
+              <a class="btn" href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              <a class="btn" href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</Layout>

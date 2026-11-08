@@ -1,6 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { roles, site } from '../data/site';
+
+// Two highlights per job up front; the rest open with the writeups.
+const SHOWN = 2;
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const moreLine = (role: (typeof roles)[number]) => {
+  const extra = role.bullets.length - SHOWN;
+  const parts = [];
+  if (extra > 0) parts.push(plural(extra, 'more highlight'));
+  parts.push(plural(role.projects.length, 'writeup'));
+  return parts.join(' · ');
+};
 ---
 
 <Layout
@@ -14,7 +25,7 @@ import { roles, site } from '../data/site';
         <h1>Experience</h1>
       </div>
       <div class="resume-meta">
-        <p>Four jobs. Highlights first. Open a role for the writeup.</p>
+        <p>Four jobs, two highlights each. Open More for the rest and the writeups.</p>
         <div class="hero-actions">
           <a class="btn" href="/#work">Back to site</a>
           <a class="btn" href="/resume/">Resume</a>
@@ -38,15 +49,22 @@ import { roles, site } from '../data/site';
               </div>
             </div>
             <ul class="role-highlights">
-              {role.bullets.map((bullet) => (
+              {role.bullets.slice(0, SHOWN).map((bullet) => (
                 <li>{bullet}</li>
               ))}
             </ul>
             <details class="role-fold" id={role.id}>
               <summary class="project-summary">
-                <span class="project-title">Writeups</span>
-                <span class="project-line">{role.projects.length} projects</span>
+                <span class="project-title">More</span>
+                <span class="project-line">{moreLine(role)}</span>
               </summary>
+              {role.bullets.length > SHOWN && (
+                <ul class="role-highlights role-more">
+                  {role.bullets.slice(SHOWN).map((bullet) => (
+                    <li>{bullet}</li>
+                  ))}
+                </ul>
+              )}
               <div class="role-projects">
                 {role.projects.map((project) => (
                   <details class="project-fold" id={project.id}>

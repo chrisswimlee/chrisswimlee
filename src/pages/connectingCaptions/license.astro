@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { commercialLicense, connectingCaptions, site } from '../../data/site';
+import { commercialLicense, connectingCaptions } from '../../data/site';
 ---
 
 <Layout
@@ -24,9 +24,8 @@ import { commercialLicense, connectingCaptions, site } from '../../data/site';
     </div>
 
     <section class="resume-block" id="prices">
-      <h2>Price</h2>
-      <p class="resume-copy">{commercialLicense.eitherWay}</p>
-      <ul class="engage-rates">
+      <h2>Prices</h2>
+      <ol class="engage-tiers">
         {commercialLicense.rates.map((item) => (
           <li>
             <p class="kicker">{item.unit}</p>
@@ -35,15 +34,19 @@ import { commercialLicense, connectingCaptions, site } from '../../data/site';
             <p>{item.detail}</p>
           </li>
         ))}
-      </ul>
+      </ol>
+      <p class="resume-copy resume-copy-gap">
+        Full comparison, App Store editions, and an estimator are on the
+        <a href="/connectingCaptions/pricing/">pricing page</a>.
+      </p>
     </section>
 
     <section class="resume-block">
       <h2>What you are buying</h2>
       <p class="resume-copy">
-        GPLv3 still lets a firm run the free zip. A commercial license is the
-        paper IT can file: a named organization, an offline activation key, and
-        a person who answers when something breaks.
+        The source is GPLv3; what a work license adds is something IT can file:
+        a named organization, an offline activation key, and a person who
+        answers when something breaks.
       </p>
       <ul class="points resume-list">
         {commercialLicense.includes.map((point) => (
@@ -73,17 +76,16 @@ import { commercialLicense, connectingCaptions, site } from '../../data/site';
         ))}
       </ul>
       <p class="resume-copy resume-copy-gap">
-        Paste the key under Settings → General. Listen does not
-        lock. The key only replaces the work notice with
-        <strong>Licensed to</strong> your organization.
+        Paste the key under Settings → General. After the trial, Listen needs a
+        key; a work key also shows <strong>Licensed to</strong> your organization.
       </p>
     </section>
 
     <section class="resume-block">
       <h2>Buy a license</h2>
       <p class="resume-copy">
-        Email {site.email}. {commercialLicense.buyCopy} Consulting rates stay on
-        <a href="/engage/">Engage</a>.
+        Email support@local-host.ai. {commercialLicense.buyCopy} If you want a
+        system built, see <a href="/engage/">Engage</a>.
       </p>
       <div class="hero-actions">
         <a class="btn btn-solid" href={commercialLicense.href}>{commercialLicense.emailCta}</a>

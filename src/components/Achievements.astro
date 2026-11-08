@@ -1,11 +1,13 @@
 ---
 import { achievementsNote, technicalAchievements } from '../data/site';
+
+const note = Astro.props.note ?? achievementsNote;
 ---
 
 <section class="section" id="achievements">
   <div class="section-head">
     <h2>Record</h2>
-    <p class="note" data-reveal>{achievementsNote}</p>
+    <p class="note" data-reveal>{note}</p>
   </div>
   <ul class="achieve-grid">
     {

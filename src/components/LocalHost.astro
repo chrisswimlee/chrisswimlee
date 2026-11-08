@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { localHost } from '../data/site';
 ---
 
@@ -30,12 +31,14 @@ import { localHost } from '../data/site';
         }
       </div>
     </div>
-    <a class="polaroid" href={localHost.links[0].href} target="_blank" rel="noopener noreferrer">
-      <img
+    <a class="polaroid" href={localHost.links[0].href} target="_blank" rel="noopener noreferrer" aria-label="Visit local-host.ai">
+      <Image
         src={localHost.image}
-        alt="local-host.ai"
-        width="1200"
-        height="750"
+        alt="The local-host.ai homepage"
+        widths={[480, 760, 1140]}
+        sizes="(max-width: 980px) calc(100vw - 2.4rem), 500px"
+        format="webp"
+        quality={78}
         loading="lazy"
         decoding="async"
       />

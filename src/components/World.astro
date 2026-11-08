@@ -1,0 +1,118 @@
+---
+import { getImage } from 'astro:assets';
+import '../styles/world.css';
+import { worldData } from '../data/worlds';
+import type { FloatWorld } from '../scripts/float';
+
+const { worlds, overview } = worldData;
+const nameAt = overview.title.indexOf(overview.accent);
+const nameLead = nameAt >= 0 ? overview.title.slice(0, nameAt) : overview.title;
+const nameTail = nameAt >= 0 ? overview.title.slice(nameAt + overview.accent.length) : '';
+
+const payload: FloatWorld[] = await Promise.all(
+  worlds.map(async (world) => ({
+    id: world.id,
+    name: world.name,
+    rail: world.rail,
+    kicker: world.kicker,
+    when: world.when,
+    place: world.place,
+    summary: world.summary,
+    accent: world.accent,
+    position: [world.position[0] * 0.86, world.position[1] * 0.8],
+    scale: world.radius * 0.74,
+    aspects: await Promise.all(
+      world.aspects.map(async (aspect) => {
+        const width = Math.min(760, aspect.art.image.width);
+        const out = await getImage({ src: aspect.art.image, width, format: 'webp', quality: 76 });
+        return {
+          id: aspect.id,
+          title: aspect.title,
+          line: aspect.line,
+          points: aspect.points,
+          links: aspect.links,
+          art: { src: out.src, alt: aspect.art.alt },
+        };
+      }),
+    ),
+  })),
+);
+const json = JSON.stringify(payload).replace(/</g, '\\u003c');
+---
+
+<main id="main" class="world" data-world>
+  <canvas class="world-canvas" data-world-canvas aria-hidden="true"></canvas>
+
+  <div class="world-intro" data-world-intro>
+    <p class="kicker">{overview.kicker}</p>
+    <h1>{nameLead}<em>{overview.accent}</em>{nameTail}</h1>
+    <p class="world-intro-note">“Suyoung” means swim.</p>
+    <p class="world-intro-lede">{overview.lede}</p>
+    <a class="btn btn-solid world-intro-hire" href="/hire/">Hiring? See my technical work</a>
+  </div>
+
+  <p class="world-intro-hint">Drag a world — or the dragon — to move it · Click to open it · Drag space to turn the galaxy</p>
+  <div class="world-labels" data-world-labels></div>
+
+  <aside class="world-panel" data-world-panel aria-label="World" hidden>
+    <div data-world-panel-body></div>
+  </aside>
+
+  <nav class="world-rail" data-world-rail aria-label="Worlds"></nav>
+  <p class="visually-hidden" data-world-status aria-live="polite"></p>
+
+  <div class="world-archive wrap">
+    <header>
+      <p class="kicker">Chrisswimlee</p>
+      <h1>The Galaxy</h1>
+      <p>The work, floating around the name. Open a world to read it.</p>
+    </header>
+    {
+      worlds.map((world) => (
+        <article>
+          <p class="kicker">{world.kicker}</p>
+          <h2>{world.name}</h2>
+          <p>
+            {world.when} · {world.place}
+          </p>
+          {world.summary && <p>{world.summary}</p>}
+          {world.aspects.map((aspect) => (
+            <section>
+              <h3>{aspect.title}</h3>
+              <p>{aspect.line}</p>
+              {aspect.points.length > 0 && (
+                <ul>
+                  {aspect.points.map((point) => (
+                    <li>{point}</li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
+        </article>
+      ))
+    }
+  </div>
+  <script id="world-payload" type="application/json" set:html={json} />
+  <noscript>
+    <style>
+      .world-canvas, .world-intro, .world-intro-hint, .world-labels, .world-panel, .world-rail { display: none !important; }
+      .world { position: static !important; height: auto !important; overflow: visible !important; }
+      .world-archive { display: block !important; }
+    </style>
+  </noscript>
+</main>
+
+<script>
+  import { mountFloat, type FloatWorld } from '../scripts/float';
+
+  const node = document.getElementById('world-payload');
+  const root = document.querySelector<HTMLElement>('[data-world]');
+  try {
+    if (!node?.textContent || !root) throw new Error('World payload missing');
+    mountFloat(root, JSON.parse(node.textContent) as FloatWorld[]);
+  } catch (error) {
+    console.error(error);
+    document.documentElement.classList.add('world-flat');
+  }
+</script>
