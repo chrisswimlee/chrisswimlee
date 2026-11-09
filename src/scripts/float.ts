@@ -92,10 +92,6 @@ function artOf(world: FloatWorld, i = 0) {
   return world.aspects[i]?.art ?? world.aspects[0]?.art;
 }
 
-function artById(world: FloatWorld, id: string) {
-  return world.aspects.find((aspect) => aspect.id === id)?.art ?? artOf(world);
-}
-
 function canvasTex(key: string, w: number, h: number, draw: (ctx: CanvasRenderingContext2D, w: number, h: number) => void) {
   const hit = texCache.get(key);
   if (hit) return hit;
@@ -793,7 +789,11 @@ type Floater = {
   phase: number;
   span: number;
   homeScale: number;
+  /** Desktop resting place and size; phones recompute home/homeScale on resize. */
+  deskHome: THREE.Vector3;
+  deskScale: number;
   label: [number, number];
+  deskLabel: [number, number];
   world: FloatWorld;
   mats: { mat: THREE.Material; base: number }[];
 };
@@ -936,22 +936,22 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     play: 0.05,
   };
   const nudge: Record<string, [number, number]> = {
-    work: [0, -0.22],
-    projects: [1.38, 0.12],
-    hait: [0.55, 0.16],
+    work: [0, -0.06],
+    projects: [0.35, 0.35],
+    hait: [0.45, 0.16],
     localhost: [-0.28, 0.38],
-    phonecoding: [-2.05, -0.08],
-    d22soso: [0.05, -0.42],
+    phonecoding: [-1.3, -0.3],
+    d22soso: [0.05, -0.52],
     study: [0.05, -0.28],
-    play: [-0.55, -0.08],
+    play: [0.05, -0.08],
   };
   const labelOff: Record<string, [number, number]> = {
     work: [0, 0.38],
     hait: [0, 0.78],
-    projects: [-0.95, 0.22],
+    projects: [0, 0.62],
     study: [0, 0.62],
     localhost: [0, 0.48],
-    phonecoding: [0.2, 0.85],
+    phonecoding: [0, 0.72],
     d22soso: [0, 0.42],
     play: [0, 0.34],
   };
@@ -985,8 +985,11 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       phase: i * 1.37,
       span,
       homeScale,
+      deskHome: anchor.clone(),
+      deskScale: homeScale,
       world,
       label: labelOff[world.id] ?? [0, 0.6],
+      deskLabel: labelOff[world.id] ?? [0, 0.6],
       mats: collectMats(group),
     });
   });
@@ -1241,6 +1244,65 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   }, { signal });
   addEventListener('world:home', () => unfocus(), { signal });
 
+  // Phones: the name sits at the top, so the worlds go in a 3-column grid
+  // in the band between the intro and the rail instead of a ring around it.
+  const phoneOrder = ['work', 'localhost', 'projects', 'hait', 'phonecoding', 'study', 'd22soso', 'play'];
+  function layoutHomes(width: number, height: number) {
+    if (camera.aspect >= 1) {
+      for (const floater of floaters) {
+        floater.home.copy(floater.deskHome);
+        floater.homeScale = floater.deskScale;
+        floater.label = floater.deskLabel;
+      }
+      return;
+    }
+    const rootTop = root.getBoundingClientRect().top;
+    const introBottom = intro ? intro.getBoundingClientRect().bottom - rootTop : height * 0.4;
+    const railEl = root.querySelector<HTMLElement>('.world-intro-hint') ?? rail;
+    const railTop = railEl ? railEl.getBoundingClientRect().top - rootTop : height * 0.85;
+    const top = Math.min(height * 0.6, introBottom + 12);
+    const bottom = Math.max(top + 160, railTop - 8);
+    const rows = Math.ceil(phoneOrder.length / 3);
+    const rowH = (bottom - top) / rows;
+    const vFov = (camera.fov * Math.PI) / 180;
+    const dist = idleDist();
+    phoneOrder.forEach((id, i) => {
+      const floater = floaters.find((item) => item.id === id);
+      if (!floater) return;
+      const row = Math.floor(i / 3);
+      const inRow = Math.min(3, phoneOrder.length - row * 3);
+      const col = i % 3;
+      const px = width * ((col + 0.5 + (3 - inRow) / 2) / 3);
+      // Leave the upper part of each cell for the label.
+      const py = top + rowH * (row + 0.64);
+      const z = 0;
+      const halfH = Math.tan(vFov / 2) * (dist - z);
+      const halfW = halfH * camera.aspect;
+      floater.home.set(((px / width) * 2 - 1) * halfW, (1 - (py / height) * 2) * halfH, z);
+      const unit = (2 * halfH) / height; // world units per CSS pixel
+      const fit = Math.min((width / 3) * 0.62, rowH * 0.58) * unit;
+      floater.homeScale = Math.min(floater.deskScale, fit / floater.span);
+      floater.label = [0, rowH * 0.27 * unit];
+    });
+  }
+
+  // Labels must never sit on the name, photo, or hiring button.
+  let keepouts: DOMRect[] = [];
+  let keepoutAt = 0;
+  const labelSize = new Map<string, { w: number; h: number }>();
+  function refreshKeepouts(now: number) {
+    if (now - keepoutAt < 500) return;
+    keepoutAt = now;
+    const rootRect = root.getBoundingClientRect();
+    keepouts = [...root.querySelectorAll<HTMLElement>('.world-intro > *')]
+      .map((el) => el.getBoundingClientRect())
+      .filter((r) => r.width > 0 && r.height > 0)
+      .map((r) => new DOMRect(r.left - rootRect.left - 6, r.top - rootRect.top - 6, r.width + 12, r.height + 12));
+    labelSize.clear();
+  }
+  const overlaps = (a: DOMRect, b: DOMRect) =>
+    a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+
   function resize() {
     const width = root.clientWidth || 1;
     const height = root.clientHeight || 1;
@@ -1249,7 +1311,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
     renderer.setSize(width, height, false);
+    layoutHomes(width, height);
+    keepoutAt = 0;
   }
+
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(root);
   resize();
@@ -1288,6 +1353,9 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   function placeLabels() {
     const width = root.clientWidth;
     const height = root.clientHeight;
+    const now = performance.now();
+    refreshKeepouts(now);
+    const placed: { button: HTMLButtonElement; rect: DOMRect }[] = [];
     for (const floater of floaters) {
       const button = labels.get(floater.id);
       if (!button) continue;
@@ -1304,9 +1372,27 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         continue;
       }
       button.hidden = false;
-      const k = arrive(performance.now(), enterAt.get(floater.id) ?? 0);
-      const x = Math.min(width - 64, Math.max(64, (projected.x * 0.5 + 0.5) * width));
-      const y = Math.min(height - 88, Math.max(76, (-projected.y * 0.5 + 0.5) * height));
+      const k = arrive(now, enterAt.get(floater.id) ?? 0);
+      let size = labelSize.get(floater.id);
+      if (!size || !size.w) {
+        size = { w: button.offsetWidth, h: button.offsetHeight };
+        labelSize.set(floater.id, size);
+      }
+      const half = Math.max(64, size.w / 2 + 6);
+      let x = Math.min(width - half, Math.max(half, (projected.x * 0.5 + 0.5) * width));
+      let y = Math.min(height - 88, Math.max(76, (-projected.y * 0.5 + 0.5) * height));
+      // (x, y) is the label's bottom centre. Slide it off the intro, then off
+      // any label already placed, by the shortest vertical move.
+      const rectAt = () => new DOMRect(x - size.w / 2, y - size.h, size.w, size.h);
+      for (let pass = 0; pass < 3; pass++) {
+        const rect = rectAt();
+        const hit = keepouts.find((r) => overlaps(rect, r)) ?? placed.find((p) => overlaps(rect, p.rect))?.rect;
+        if (!hit) break;
+        const up = hit.top - 2;
+        const down = hit.bottom + size.h + 2;
+        y = Math.abs(up - y) <= Math.abs(down - y) ? up : down;
+      }
+      placed.push({ button, rect: rectAt() });
       button.style.opacity = k < 1 ? String(Math.max(0, (k - 0.45) / 0.55)) : '';
       button.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
       button.classList.toggle('is-on', focusId === floater.id);

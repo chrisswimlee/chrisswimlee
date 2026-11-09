@@ -24,7 +24,7 @@ export const site = {
   linkedin: 'https://www.linkedin.com/in/chris-suyoung-lee',
   photo: chrisPhoto,
   ogImage: '/images/chris-og.jpg',
-  jobTitle: 'College Professor',
+  jobTitle: 'Software Engineer',
   built: 'Data systems and local tools.',
 };
 

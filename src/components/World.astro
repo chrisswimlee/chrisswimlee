@@ -67,7 +67,7 @@ const json = JSON.stringify(payload).replace(/</g, '\\u003c');
     <a class="btn btn-solid world-intro-hire" href="/hire/">Hiring? See my technical work</a>
   </div>
 
-  <p class="world-intro-hint">Click a world · It holds on the left · Esc to return</p>
+  <p class="world-intro-hint"><span class="hint-fine">Click a world · It holds on the left · Esc to return</span><span class="hint-touch">Tap a world to open it</span></p>
   <div class="world-labels" data-world-labels></div>
 
   <aside class="world-panel" data-world-panel aria-label="World" hidden>
@@ -120,15 +120,24 @@ const json = JSON.stringify(payload).replace(/</g, '\\u003c');
 </main>
 
 <script>
-  import { mountFloat, type FloatWorld } from '../scripts/float';
+  import type { FloatWorld } from '../scripts/float';
 
   const node = document.getElementById('world-payload');
   const root = document.querySelector<HTMLElement>('[data-world]');
-  try {
-    if (!node?.textContent || !root) throw new Error('World payload missing');
-    mountFloat(root, JSON.parse(node.textContent) as FloatWorld[]);
-  } catch (error) {
-    console.error(error);
-    document.documentElement.classList.add('world-flat');
+  const flat = () => document.documentElement.classList.add('world-flat');
+  // three.js is ~150 KB gzipped, so Save-Data visitors get the text archive instead.
+  const saveData =
+    Boolean(navigator.connection?.saveData) || matchMedia('(prefers-reduced-data: reduce)').matches;
+  if (saveData) flat();
+  else {
+    import('../scripts/float')
+      .then(({ mountFloat }) => {
+        if (!node?.textContent || !root) throw new Error('World payload missing');
+        mountFloat(root, JSON.parse(node.textContent) as FloatWorld[]);
+      })
+      .catch((error) => {
+        console.error(error);
+        flat();
+      });
   }
 </script>

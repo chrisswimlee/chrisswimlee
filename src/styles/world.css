@@ -108,6 +108,20 @@
   transition: opacity 640ms ease 520ms;
 }
 
+.world-intro-hint .hint-touch {
+  display: none;
+}
+
+@media (max-width: 800px), (pointer: coarse) {
+  .world-intro-hint .hint-fine {
+    display: none;
+  }
+
+  .world-intro-hint .hint-touch {
+    display: inline;
+  }
+}
+
 .world:not(.is-ready) .world-intro,
 .world:not(.is-ready) .world-intro-hint,
 .world:not(.is-ready) .world-labels,
@@ -398,6 +412,8 @@ html[data-theme='light'] .world-label {
 
 html.world-flat .world-canvas,
 html.world-flat .world-intro,
+html.world-flat .world-intro-hint,
+html.world-flat .world-labels,
 html.world-flat .world-panel,
 html.world-flat .world-rail {
   display: none !important;
