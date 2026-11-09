@@ -9,6 +9,7 @@ import type { TownPayload } from '../scripts/town';
 const { overview, record, worlds } = worldData;
 
 async function cardSrc(card: FaceCard) {
+  if (typeof card.image === 'string') return card.image;
   if (card.image.format === 'svg') return card.image.src;
   const out = await getImage({ src: card.image, width: Math.min(1024, card.image.width), format: 'webp', quality: 80 });
   return out.src;

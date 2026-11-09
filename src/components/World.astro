@@ -1,7 +1,8 @@
 ---
-import { getImage } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import '../styles/world.css';
 import { worldData } from '../data/worlds';
+import { site } from '../data/site';
 import type { FloatWorld } from '../scripts/float';
 
 const { worlds, overview } = worldData;
@@ -22,8 +23,12 @@ const payload: FloatWorld[] = await Promise.all(
     position: [world.position[0] * 0.86, world.position[1] * 0.8],
     scale: world.radius * 0.74,
     aspects: await Promise.all(
-      world.aspects.map(async (aspect) => {
-        const width = Math.min(760, aspect.art.image.width);
+      world.aspects.map(async (aspect, aspectIndex) => {
+        // The first aspect doubles as the 3D station face (shown large);
+        // the rest only ever appear in the 380px panel, so ship them
+        // smaller. Panel <img> tags load lazily on open regardless.
+        const target = aspectIndex === 0 ? 760 : 480;
+        const width = Math.min(target, aspect.art.image.width);
         const out = await getImage({ src: aspect.art.image, width, format: 'webp', quality: 76 });
         return {
           id: aspect.id,
@@ -45,13 +50,24 @@ const json = JSON.stringify(payload).replace(/</g, '\\u003c');
 
   <div class="world-intro" data-world-intro>
     <p class="kicker">{overview.kicker}</p>
+    <figure class="world-portrait">
+      <Image
+        src={site.photo}
+        alt=""
+        width={184}
+        height={184}
+        densities={[1, 2]}
+        format="webp"
+        quality={82}
+        loading="eager"
+      />
+    </figure>
     <h1>{nameLead}<em>{overview.accent}</em>{nameTail}</h1>
-    <p class="world-intro-note">“Suyoung” means swim.</p>
     <p class="world-intro-lede">{overview.lede}</p>
     <a class="btn btn-solid world-intro-hire" href="/hire/">Hiring? See my technical work</a>
   </div>
 
-  <p class="world-intro-hint">Drag a world — or the dragon — to move it · Click to open it · Drag space to turn the galaxy</p>
+  <p class="world-intro-hint">Click a world · It holds on the left · Esc to return</p>
   <div class="world-labels" data-world-labels></div>
 
   <aside class="world-panel" data-world-panel aria-label="World" hidden>
@@ -64,7 +80,7 @@ const json = JSON.stringify(payload).replace(/</g, '\\u003c');
   <div class="world-archive wrap">
     <header>
       <p class="kicker">Chrisswimlee</p>
-      <h1>The Galaxy</h1>
+      <h1 class="world-archive-title">The Galaxy</h1>
       <p>The work, floating around the name. Open a world to read it.</p>
     </header>
     {

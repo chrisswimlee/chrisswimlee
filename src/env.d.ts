@@ -1,5 +1,10 @@
 /// <reference path="../.astro/types.d.ts" />
 
+declare module '*.svg?url' {
+  const src: string;
+  export default src;
+}
+
 interface Navigator {
   connection?: { saveData?: boolean };
 }

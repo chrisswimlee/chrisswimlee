@@ -1,4 +1,4 @@
-/* The Galaxy: worlds and a dragon floating free around the name. */
+/* The Galaxy: worlds floating free around the name. */
 
 .world {
   position: fixed;
@@ -17,8 +17,8 @@
   width: 100%;
   height: 100%;
   display: block;
-  touch-action: none;
-  cursor: grab;
+  touch-action: manipulation;
+  cursor: default;
 }
 
 .world-intro {
@@ -30,7 +30,9 @@
   transform: translate(-50%, -54%);
   text-align: center;
   pointer-events: none;
-  transition: opacity 500ms linear;
+  transition:
+    opacity 780ms var(--ease-buoy, ease),
+    transform 920ms var(--ease-buoy, ease);
 }
 
 .world-intro .kicker {
@@ -42,6 +44,7 @@
   inset: 0;
   z-index: 3;
   pointer-events: none;
+  transition: opacity 560ms ease 420ms;
 }
 
 .world-label {
@@ -54,14 +57,16 @@
   gap: 0.1rem;
   min-height: 44px;
   justify-content: center;
-  padding: 0.4rem 0.55rem;
+  padding: 0.35rem 0.65rem;
   border: 0;
-  background: transparent;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
   color: var(--ink);
   cursor: pointer;
   pointer-events: auto;
+  touch-action: manipulation;
   font: inherit;
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.55);
 }
 
 .world-label[hidden] {
@@ -100,6 +105,32 @@
   text-transform: uppercase;
   color: var(--muted);
   pointer-events: none;
+  transition: opacity 640ms ease 520ms;
+}
+
+.world:not(.is-ready) .world-intro,
+.world:not(.is-ready) .world-intro-hint,
+.world:not(.is-ready) .world-labels,
+.world:not(.is-ready) .world-rail {
+  opacity: 0;
+}
+
+.world:not(.is-ready) .world-intro-hire,
+.world:not(.is-ready) .world-rail,
+.world:not(.is-ready) .world-label {
+  pointer-events: none;
+}
+
+@media (min-width: 801px) {
+  .world:not(.is-ready) .world-intro {
+    transform: translate(-50%, -46%);
+  }
+}
+
+.world.is-ready .world-rail {
+  transition:
+    opacity 560ms ease 240ms,
+    transform 680ms var(--ease-buoy, ease) 240ms;
 }
 
 .world-panel[hidden] {
@@ -107,7 +138,7 @@
 }
 
 .world-intro h1 {
-  margin: 0.3rem 0 0.6rem;
+  margin: 0.15rem 0 0.55rem;
   font-family: var(--display);
   font-weight: 500;
   font-size: clamp(2.6rem, 5.5vw, 4.2rem);
@@ -120,31 +151,62 @@
   color: var(--warm);
 }
 
-.world-intro-note {
-  font-family: var(--display);
-  font-style: italic;
-  color: var(--warm);
-  margin-bottom: 0.6rem;
+.world-portrait {
+  width: 148px;
+  height: 148px;
+  margin: 0.2rem auto 0.35rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--warm) 50%, transparent);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.world-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
 }
 
 .world-intro-lede {
-  max-width: 40ch;
-  margin-inline: auto;
-  line-height: 1.55;
-  color: var(--muted);
-}
-
-.world-intro-hint {
-  margin: 1rem 0;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
+  /* The bio lives on /hire/ and in the text archive. The galaxy only
+     keeps the name, the note, and the hire door — otherwise the centre
+     reads as a résumé pasted over the stations. */
+  display: none;
 }
 
 .world-intro-hire {
   pointer-events: auto;
+}
+
+/* While a world is open the intro is faded out; its CTA must not stay
+   clickable (or tabbable — JS also sets `inert`) over the galaxy. */
+.world.is-in .world-intro,
+.world.is-in .world-intro-hint {
+  opacity: 0;
+  transition-delay: 0ms;
+}
+
+.world.is-in .world-intro-hire {
+  pointer-events: none;
+}
+
+.world.is-in .world-labels {
+  pointer-events: none;
+}
+
+html[data-theme='light'] .world-label {
+  text-shadow: 0 1px 10px rgba(255, 255, 255, 0.95);
+}
+
+.world-archive-title {
+  margin: 0.3rem 0 0.6rem;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  letter-spacing: -0.045em;
+  line-height: 0.95;
 }
 
 .world-panel {
@@ -153,7 +215,7 @@
   top: calc(var(--nav-offset, 68px) + 12px);
   right: max(12px, env(safe-area-inset-right));
   bottom: 76px;
-  width: min(380px, calc(100vw - 24px));
+  width: min(400px, calc(42vw - 18px), calc(100vw - 24px));
   overflow: auto;
   overscroll-behavior: contain;
   padding: 1rem 1.05rem 1.2rem;
@@ -195,14 +257,12 @@
 .world-art img {
   display: block;
   width: 100%;
+  max-height: 11rem;
   height: auto;
+  object-fit: contain;
+  object-position: left top;
   border-radius: 4px;
-}
-
-@media (min-width: 801px) {
-  .world-art {
-    display: none; /* the photograph is already on the station beside the lane */
-  }
+  background: color-mix(in srgb, var(--bg) 70%, #000);
 }
 
 .world-line {
@@ -228,6 +288,7 @@
 }
 
 .world-links a,
+.world-links button,
 .world-step button,
 .world-step a {
   display: inline-flex;
@@ -246,6 +307,7 @@
 }
 
 .world-links a:hover,
+.world-links button:hover,
 .world-step button:hover,
 .world-step a:hover {
   color: var(--bg);
@@ -281,6 +343,13 @@
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
   scrollbar-width: none;
+  transition:
+    opacity 560ms ease 240ms,
+    transform 680ms var(--ease-buoy, ease) 240ms;
+}
+
+.world:not(.is-ready) .world-rail {
+  transform: translateY(12px);
 }
 
 .world-rail::-webkit-scrollbar {
@@ -293,14 +362,15 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0.2rem;
+  min-width: max-content;
   min-height: 48px;
-  padding: 0.5rem 0.7rem;
+  padding: 0.45rem 0.5rem;
   border: 0;
   border-top: 3px solid var(--line-strong);
   border-radius: 2px;
   background: transparent;
   color: var(--muted);
-  font: 500 0.78rem/1.1 var(--sans);
+  font: 500 0.74rem/1.1 var(--sans);
   white-space: nowrap;
   cursor: pointer;
 }
@@ -353,6 +423,20 @@ html.world-flat .world-archive {
   .world-intro {
     top: calc(var(--nav-offset, 68px) + 0.8rem);
     transform: translateX(-50%);
+  }
+
+  .world-intro h1 {
+    font-size: clamp(1.85rem, 9vw, 2.5rem);
+  }
+
+  .world-portrait {
+    width: 104px;
+    height: 104px;
+  }
+
+  /* Hire me is already in the nav; the overlay CTA covers the Work station. */
+  .world-intro-hire {
+    display: none;
   }
 
   .world-label strong {

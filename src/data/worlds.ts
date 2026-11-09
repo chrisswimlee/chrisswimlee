@@ -1,8 +1,11 @@
 import type { ImageMetadata } from 'astro';
 import localLatticeShot from '../assets/work/local-lattice.jpg';
 import d22ArchiveShot from '../assets/work/d22soso-archive.jpg';
-import goldmanMark from '../assets/marks/goldman.svg';
-import trinityMark from '../assets/marks/trinity.svg';
+// `?url` keeps Astro 7 from compiling these as SVG components — we only
+// need a src string for the 2D town cards, and the component path crashed
+// the homepage (`styles.length` of undefined).
+import goldmanMark from '../assets/marks/goldman.svg?url';
+import trinityMark from '../assets/marks/trinity.svg?url';
 import trineMark from '../assets/marks/trine.png';
 import haitWork from '../assets/worlds/work-hait.jpg';
 import stealthWork from '../assets/worlds/work-stealth.jpg';
@@ -33,7 +36,7 @@ export type WorldLink = { label: string; href: string };
 export type CardFit = 'cover' | 'contain';
 
 /** The view that faces the camera on the 3D object. Without one, the face art is used. */
-export type FaceCard = { image: ImageMetadata; fit: CardFit; background: string };
+export type FaceCard = { image: ImageMetadata | string; fit: CardFit; background: string };
 
 export type FaceArt = { image: ImageMetadata; alt: string; card?: FaceCard };
 
@@ -498,13 +501,17 @@ const worlds: WorldSpec[] = [
       place: 'Americas',
       summary: '',
     },
-    record.map((item, index) => ({
-      id: playIds[index] ?? `play-${index}`,
-      title: item.label,
-      line: item.line ?? 'A public mark on the Americas ladder.',
-      points: item.points,
-      links: [{ label: item.source, href: item.href }, ...item.more],
-    })),
+    (() => {
+      const aspects = record.map((item, index) => ({
+        id: playIds[index] ?? `play-${index}`,
+        title: item.label,
+        line: item.line ?? 'A public mark on the Americas ladder.',
+        points: item.points,
+        links: [{ label: item.source, href: item.href }, ...item.more],
+      }));
+      const latest = aspects.find((aspect) => aspect.id === 'americas-2025');
+      return latest ? [latest, ...aspects.filter((aspect) => aspect.id !== 'americas-2025')] : aspects;
+    })(),
   ),
 ];
 

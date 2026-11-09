@@ -8,7 +8,7 @@ import { education, site } from '../data/site';
 
 const isResume = Astro.url.pathname.startsWith('/resume');
 const path = Astro.url.pathname;
-// The homepage is the 3D Journey. The walkable town lives at /town/.
+// The homepage is the 3D galaxy. The walkable town lives at /town/.
 const isTown = path.startsWith('/town');
 const isJourney = path === '/';
 const isScene = isTown || isJourney;
