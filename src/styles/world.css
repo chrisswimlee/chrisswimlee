@@ -565,3 +565,160 @@ html[data-theme='light'] .world-label {
     background: color-mix(in srgb, var(--bg) 96%, transparent);
   }
 }
+
+/* --- Motion polish ------------------------------------------------------ */
+
+/* Names underline when you point at them or at their world. */
+.world-label strong {
+  position: relative;
+  transition:
+    color 220ms var(--ease-buoy, ease),
+    transform 160ms var(--ease-buoy, ease);
+}
+
+.world-label strong::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 380ms var(--ease-buoy, ease);
+}
+
+.world-label.is-hover strong,
+.world-label:hover strong {
+  color: var(--accent);
+}
+
+.world-label.is-hover strong::after,
+.world-label:hover strong::after {
+  transform: scaleX(1);
+}
+
+.world-rail button {
+  transition:
+    color 200ms ease,
+    border-top-color 260ms ease,
+    background-color 260ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The panel slides in from its edge, then its lines follow one by one. */
+  .world-panel:not([hidden]) {
+    animation: world-panel-in 560ms var(--ease-buoy, ease) both;
+  }
+
+  .world-panel.is-leaving {
+    animation: world-panel-out 240ms cubic-bezier(0.4, 0, 1, 1) both;
+    pointer-events: none;
+  }
+
+  [data-world-panel-body] > * {
+    animation: world-line-in 520ms var(--ease-buoy, ease) both;
+    animation-delay: calc(120ms + var(--i, 0) * 45ms);
+  }
+
+  [data-world-panel-body][data-dir='next'] > * {
+    --from-x: 18px;
+    animation-delay: calc(var(--i, 0) * 30ms);
+  }
+
+  [data-world-panel-body][data-dir='prev'] > * {
+    --from-x: -18px;
+    animation-delay: calc(var(--i, 0) * 30ms);
+  }
+
+  .world-art img {
+    animation: world-art-in 900ms var(--ease-buoy, ease) both;
+    animation-delay: 160ms;
+  }
+
+  .world-links a,
+  .world-links button,
+  .world-step button,
+  .world-step a {
+    transition:
+      color 180ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      transform 180ms var(--ease-buoy, ease);
+  }
+
+  .world-links a:active,
+  .world-links button:active,
+  .world-step button:active,
+  .world-rail button:active {
+    transform: scale(0.96);
+  }
+
+  /* Labels are positioned with an inline transform, so press the text instead. */
+  .world-label:active strong {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes world-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes world-panel-out {
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+@keyframes world-line-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--from-x, 0), var(--from-y, 10px));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes world-art-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+    clip-path: inset(0 0 100% 0 round 4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0 0 round 4px);
+  }
+}
+
+@media (max-width: 800px) {
+  @keyframes world-panel-in {
+    from {
+      opacity: 0.4;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes world-panel-out {
+    to {
+      opacity: 0.4;
+      transform: translateY(100%);
+    }
+  }
+}

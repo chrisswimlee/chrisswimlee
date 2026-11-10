@@ -102,6 +102,47 @@ function splitTitles() {
   }
 }
 
+/** Project page titles: letters rise in on arrival, after the page cross-fade. */
+function heroTitle() {
+  const title = document.querySelector<HTMLElement>('.story-page .resume-top h1');
+  if (!title || title.children.length || !title.textContent?.trim()) return;
+  const text = title.textContent.trim();
+  title.setAttribute('aria-label', text);
+  title.textContent = '';
+  const chars: HTMLElement[] = [];
+  for (const word of text.split(/(\s+)/)) {
+    if (/^\s+$/.test(word)) {
+      title.append(word);
+      continue;
+    }
+    const w = document.createElement('span');
+    w.className = 'split-word';
+    w.setAttribute('aria-hidden', 'true');
+    for (const ch of word) {
+      const c = document.createElement('span');
+      c.className = 'split-char';
+      c.textContent = ch;
+      w.append(c);
+      chars.push(c);
+    }
+    title.append(w);
+  }
+  gsap.fromTo(
+    chars,
+    { autoAlpha: 0, yPercent: 70, rotate: 6 },
+    {
+      autoAlpha: 1,
+      yPercent: 0,
+      rotate: 0,
+      duration: 1.05,
+      delay: 0.12,
+      ease: 'expo.out',
+      stagger: Math.min(0.035, 0.6 / chars.length),
+      clearProps: 'all',
+    },
+  );
+}
+
 /** Staggered reveals for [data-reveal], consistent across browsers. */
 function reveals() {
   const items = gsap.utils.toArray<HTMLElement>('[data-reveal]').filter(belowFold);
@@ -122,7 +163,7 @@ function reveals() {
 
 /** Screenshots settle from a slight zoom as they scroll into place. */
 function imageSettle() {
-  for (const img of document.querySelectorAll<HTMLElement>('.work-piece .polaroid img, .product-dossier .polaroid img')) {
+  for (const img of document.querySelectorAll<HTMLElement>('.work-piece .polaroid img, .product-dossier .polaroid img, .project-shot img')) {
     gsap.fromTo(
       img,
       { scale: 1.08, transformOrigin: '50% 0%' },
@@ -179,6 +220,7 @@ if (root.classList.contains('has-motion')) {
   // Mobile URL bars resize the viewport while scrolling; re-measuring then makes triggers jump.
   ScrollTrigger.config({ ignoreMobileResize: true });
   if (desktop) smoothScroll();
+  heroTitle();
   splitTitles();
   reveals();
   imageSettle();

@@ -93,7 +93,7 @@ const jsonLd = {
         <dl class="case-steps">
           {
             steps.map(([label, text]) => (
-              <div>
+              <div data-reveal>
                 <dt>{label}</dt>
                 <dd>{text}</dd>
               </div>
@@ -134,7 +134,7 @@ const jsonLd = {
       </section>
     </div>
 
-    <section class="resume-block story-more">
+    <section class="resume-block story-more" data-reveal>
       <h2>More work</h2>
       <div class="hero-actions">
         {others.map((item) => <a class="btn" href={storyPath(item.id)}>{item.title}</a>)}

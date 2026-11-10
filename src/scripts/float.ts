@@ -967,6 +967,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   const galaxy = new THREE.Group();
   galaxy.rotation.order = 'YXZ';
   scene.add(galaxy);
+  // Stars and nebulae live in their own group so the sky can rush past the
+  // camera when a world opens, and fly in on arrival, for the cost of one transform.
+  const sky = new THREE.Group();
+  galaxy.add(sky);
 
   // Starfields: square points in a big box of space. Nebula washes off-axis.
   const laneDepth = 70;
@@ -984,7 +988,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     const pointsMat = new THREE.PointsMaterial({ color, size, sizeAttenuation: false, fog: false });
     starMats.push({ mat: pointsMat, dark: color, light: lightColor });
-    galaxy.add(new THREE.Points(geo, pointsMat));
+    sky.add(new THREE.Points(geo, pointsMat));
   }
   const nebulaTex = (rgb: string) => {
     const canvas = document.createElement('canvas');
@@ -1009,7 +1013,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     nebulaMats.push(washMat);
     const wash = new THREE.Mesh(new THREE.PlaneGeometry(s, s * 0.7), washMat);
     wash.position.set(x, y, z);
-    galaxy.add(wash);
+    sky.add(wash);
   }
   applyTheme();
 
@@ -1106,6 +1110,24 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   let pitch = 0;
   let targetDist = 9.5;
   let running = true;
+  // Desktop only: the galaxy leans a little toward the cursor.
+  const finePointer = !lowPower && matchMedia('(pointer: fine)').matches;
+  let lean = { x: 0, y: 0 };
+  if (finePointer && !reduced) {
+    addEventListener('pointermove', (e) => {
+      lean = { x: (e.clientX / innerWidth) * 2 - 1, y: (e.clientY / innerHeight) * 2 - 1 };
+    }, { passive: true, signal });
+    document.documentElement.addEventListener('pointerleave', () => (lean = { x: 0, y: 0 }), { signal });
+  }
+  // Opening a world swings it round to face you, with a small overshoot.
+  const swings = new Map<string, { at: number; from: number }>();
+  const swingMs = 1250;
+  const backOut = (u: number) => {
+    const c = 1.5;
+    return 1 + (c + 1) * (u - 1) ** 3 + c * (u - 1) ** 2;
+  };
+  // Panel exit plays before it hides.
+  let panelHideTimer = 0;
 
   const say = (text: string) => {
     status.textContent = '';
@@ -1128,7 +1150,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     }
   }
 
-  function renderPanel(world: FloatWorld, index: number) {
+  function renderPanel(world: FloatWorld, index: number, dir = 0) {
     const aspect = world.aspects[index] ?? world.aspects[0];
     if (!aspect) return;
     aspectIndex = world.aspects.indexOf(aspect);
@@ -1148,6 +1170,11 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       ${aspect.links.length ? `<p class="world-links">${aspect.links.map((link) => `<a href="${esc(link.href)}"${ext(link.href) ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(link.label)}</a>`).join('')}</p>` : ''}
       ${world.aspects.length > 1 ? `<p class="world-step"><button type="button" data-step="-1">◀ Prev</button><span>${aspectIndex + 1} / ${world.aspects.length}</span><button type="button" data-step="1">Next ▶</button></p>` : ''}
       <p class="world-links"><button type="button" data-close-panel>Back to the galaxy</button></p>`;
+    // Stagger the panel's lines in; stepping slides them in from the side you stepped toward.
+    panelBodyEl.dataset.dir = dir > 0 ? 'next' : dir < 0 ? 'prev' : '';
+    [...panelBodyEl.children].forEach((child, i) => (child as HTMLElement).style.setProperty('--i', String(i)));
+    window.clearTimeout(panelHideTimer);
+    panelEl.classList.remove('is-leaving');
     panelEl.hidden = false;
     panelEl.setAttribute('aria-labelledby', 'world-panel-title');
     railEl.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((button) => {
@@ -1165,9 +1192,13 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     if (focusId !== id && document.activeElement instanceof HTMLElement && !panelEl.contains(document.activeElement)) {
       returnFocus = document.activeElement;
     }
+    if (focusId !== id && !reduced) {
+      // Turn in from the side it was sitting on.
+      swings.set(id, { at: performance.now(), from: floater.home.x < 0 ? -0.95 : 0.95 });
+    }
     focusId = id;
     hoverId = null;
-    wake();
+    wake(swingMs + 200);
     targetYaw = 0;
     targetPitch = 0;
     const index = Math.max(
@@ -1187,7 +1218,15 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const wasFocused = focusId !== null || !panelEl.hidden;
     focusId = null;
     wake();
-    panelEl.hidden = true;
+    window.clearTimeout(panelHideTimer);
+    if (reduced || panelEl.hidden) panelEl.hidden = true;
+    else {
+      panelEl.classList.add('is-leaving');
+      panelHideTimer = window.setTimeout(() => {
+        panelEl.classList.remove('is-leaving');
+        if (!focusId) panelEl.hidden = true;
+      }, 240);
+    }
     root.classList.remove('is-in');
     intro?.toggleAttribute('inert', false);
     applyDim();
@@ -1206,7 +1245,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       const world = floaters.find((item) => item.id === focusId)?.world;
       if (world) {
         const next = (aspectIndex + Number(step.dataset.step) + world.aspects.length) % world.aspects.length;
-        renderPanel(world, next);
+        renderPanel(world, next, Number(step.dataset.step));
         // Keep the deep link pointing at the aspect on screen, without
         // adding a history entry per step.
         history.replaceState({ float: focusId }, '', `#${world.aspects[next]?.id ?? world.id}`);
@@ -1312,6 +1351,16 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     view.style.cursor = 'default';
   }, { signal });
 
+  // Pointing at a name lifts its world too, so the two read as one thing.
+  for (const [id, button] of labels) {
+    button.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse' && !focusId) hoverId = id;
+    }, { signal });
+    button.addEventListener('pointerleave', () => {
+      if (hoverId === id) hoverId = null;
+    }, { signal });
+  }
+
   addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const target = e.target as Element | null;
@@ -1323,7 +1372,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     if (!world || world.aspects.length < 2) return;
     e.preventDefault();
     const next = (aspectIndex + (e.key === 'ArrowRight' ? 1 : -1) + world.aspects.length) % world.aspects.length;
-    renderPanel(world, next);
+    renderPanel(world, next, e.key === 'ArrowRight' ? 1 : -1);
     history.replaceState({ float: focusId }, '', `#${world.aspects[next]?.id ?? world.id}`);
   }, { signal });
   addEventListener('hashchange', () => {
@@ -1429,6 +1478,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   }
   if (!skipEnter) {
     camera.position.z = 13.6;
+    sky.position.z = -9;
     yaw = -0.46;
     for (const floater of floaters) {
       floater.group.scale.setScalar(floater.homeScale * 0.62);
@@ -1491,6 +1541,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       button.style.opacity = k < 1 ? String(Math.max(0, (k - 0.45) / 0.55)) : '';
       button.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
       button.classList.toggle('is-on', focusId === floater.id);
+      button.classList.toggle('is-hover', hoverId === floater.id);
     }
   }
 
@@ -1506,8 +1557,8 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     prevFrame = now;
     const t = now * 0.001;
     if (!focusId && !reduced) {
-      targetYaw = Math.sin(t * 0.07) * 0.16;
-      targetPitch = Math.sin(t * 0.05) * 0.05;
+      targetYaw = Math.sin(t * 0.07) * 0.16 + lean.x * 0.075;
+      targetPitch = Math.sin(t * 0.05) * 0.05 + lean.y * 0.045;
     } else {
       targetYaw = 0;
       targetPitch = 0;
@@ -1520,6 +1571,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     galaxy.rotation.y = yaw;
     galaxy.rotation.x = pitch;
     camera.position.z += (targetDist - camera.position.z) * ease(0.08);
+    // The sky flies in on arrival and rushes past a little when a world opens.
+    const skyZ = focusId ? 2.6 : -(1 - introK) * 9;
+    sky.position.z += (skyZ - sky.position.z) * ease(0.05);
+    if (!reduced) sky.rotation.z = Math.sin(t * 0.021) * 0.05;
     const held = focusId ? stagePos() : null;
     // Desktop looks a little right of the object so it sits left of the panel; phones keep it centred.
     if (held) lookTo.set(held.x + (camera.aspect < 1 ? 0 : 0.85), held.y * 0.35, 0);
@@ -1567,18 +1622,25 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       if (!focusId) wantScale *= 0.62 + 0.38 * k;
       scaleTo.setScalar(wantScale);
       floater.group.scale.lerp(scaleTo, ease(k < 1 ? 0.22 : 0.14));
+      let swing = 0;
+      const sw = swings.get(floater.id);
+      if (sw) {
+        const u = (now - sw.at) / swingMs;
+        if (u >= 1) swings.delete(floater.id);
+        else swing = sw.from * (1 - backOut(Math.max(0, u)));
+      }
       const restY = (floater.group.userData.restY as number | undefined) ?? 0;
       const restZ = (floater.group.userData.restZ as number | undefined) ?? 0;
       if (inspecting && floater.group.userData.faceCam) {
         const dx = camera.position.x - floater.group.position.x;
         const dz = camera.position.z - floater.group.position.z;
-        floater.group.rotation.y = Math.atan2(dx, dz);
+        floater.group.rotation.y = Math.atan2(dx, dz) + swing;
         floater.group.rotation.z = 0;
       } else if (inspecting) {
-        floater.group.rotation.y = restY + Math.sin(t * 0.45) * 0.07;
+        floater.group.rotation.y = restY + Math.sin(t * 0.45) * 0.07 + swing;
         floater.group.rotation.z = restZ;
       } else {
-        floater.group.rotation.y = restY + Math.sin(t * 0.25 + floater.phase) * 0.08 * drift + (1 - k) * 0.4;
+        floater.group.rotation.y = restY + Math.sin(t * 0.25 + floater.phase) * 0.08 * drift + (1 - k) * 0.4 + swing;
         floater.group.rotation.z = restZ + Math.sin(t * 0.2 + floater.phase) * 0.03 * drift;
       }
       const sats = floater.group.userData.sats as THREE.Object3D[] | undefined;
