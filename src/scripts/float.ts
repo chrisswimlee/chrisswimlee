@@ -190,46 +190,103 @@ function workDeskScreen(id: string) {
 }
 
 function phoneUiTex() {
+  // Big type only: at galaxy size, anything under ~40px on this canvas is unreadable.
   return canvasTex('phone-ui', 420, 860, (ctx, w, h) => {
     ctx.fillStyle = '#0c0c0e';
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#1a1a1e';
     ctx.beginPath();
-    ctx.roundRect?.(120, 18, 180, 28, 14);
-    if (!ctx.roundRect) ctx.fillRect(120, 18, 180, 28);
+    ctx.roundRect?.(140, 18, 140, 30, 15);
+    if (!ctx.roundRect) ctx.fillRect(140, 18, 140, 30);
     else ctx.fill();
     ctx.fillStyle = '#8a8a92';
-    ctx.font = '600 18px ui-sans-serif, system-ui, sans-serif';
-    ctx.fillText('9:41', 24, 38);
-    ctx.fillStyle = '#f4f0e8';
-    ctx.font = '500 13px ui-sans-serif, system-ui, sans-serif';
-    ctx.fillText('PHONECODING  ·  iOS', 28, 88);
+    ctx.font = '600 20px ui-sans-serif, system-ui, sans-serif';
+    ctx.fillText('9:41', 28, 42);
+    ctx.fillStyle = '#9fb8ff';
+    ctx.font = '600 22px ui-sans-serif, system-ui, sans-serif';
+    ctx.fillText('PHONECODING', 32, 132);
     ctx.fillStyle = '#ffffff';
-    ctx.font = '600 28px ui-serif, Georgia, serif';
-    ctx.fillText('Studio', 28, 128);
-    ctx.fillStyle = '#1c1c22';
-    ctx.fillRect(24, 160, w - 48, 220);
-    ctx.fillStyle = '#8a8a92';
-    ctx.font = '500 13px ui-sans-serif, system-ui, sans-serif';
-    ctx.fillText('VOICE PROMPT  ·  0:05', 40, 188);
+    ctx.font = '600 64px ui-serif, Georgia, serif';
+    ctx.fillText('Studio', 32, 206);
+    ctx.fillStyle = '#c9c6be';
+    ctx.font = '400 30px ui-sans-serif, system-ui, sans-serif';
+    ['Speak a change.', 'It writes the', 'SwiftUI.'].forEach((line, i) => ctx.fillText(line, 32, 290 + i * 42));
+    // Mic button
+    ctx.fillStyle = '#6b9fff';
+    ctx.beginPath();
+    ctx.arc(w / 2, 560, 74, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#0c0c0e';
+    ctx.beginPath();
+    ctx.roundRect?.(w / 2 - 18, 518, 36, 62, 18);
+    if (!ctx.roundRect) ctx.fillRect(w / 2 - 18, 518, 36, 62);
+    else ctx.fill();
+    ctx.fillRect(w / 2 - 3, 580, 6, 18);
+    ctx.fillRect(w / 2 - 22, 596, 44, 6);
     ctx.fillStyle = '#f4f0e8';
-    ctx.font = '400 18px ui-sans-serif, system-ui, sans-serif';
-    ctx.fillText('Add a SwiftUI screen for the', 40, 228);
-    ctx.fillText('diff, then show it in Theater.', 40, 254);
-    ctx.fillStyle = '#f4f0e8';
-    ctx.fillRect(40, 300, w - 80, 52);
-    ctx.fillStyle = '#111';
-    ctx.font = '600 16px ui-sans-serif, system-ui, sans-serif';
-    ctx.fillText('Send task', 160, 332);
-    ctx.fillStyle = '#2a2a33';
-    for (let i = 0; i < 4; i++) ctx.fillRect(24, 408 + i * 96, w - 48, 84);
-    ctx.fillStyle = '#8a8a92';
-    ctx.font = '500 12px ui-sans-serif, system-ui, sans-serif';
-    ['ContentView.swift', 'TheaterWindow', 'VoiceBuffer', 'Learn/Lesson 4'].forEach((line, i) => {
-      ctx.fillText(line, 40, 440 + i * 96);
-    });
-    ctx.fillStyle = '#f4f0e8';
-    ctx.fillRect(w / 2 - 40, h - 28, 80, 6);
+    ctx.font = '600 30px ui-sans-serif, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Tap to talk', w / 2, 700);
+    ctx.fillRect(w / 2 - 50, h - 30, 100, 7);
+  });
+}
+
+function keyboardTex(key: string, rows: number, cols: number, pad: boolean) {
+  return canvasTex(`keys:${key}`, 640, pad ? 400 : 200, (ctx, w, h) => {
+    ctx.fillStyle = '#1b1c22';
+    ctx.fillRect(0, 0, w, h);
+    const top = 18;
+    const keysH = pad ? h * 0.52 : h - 36;
+    const kw = (w - 40) / cols;
+    const kh = keysH / rows;
+    ctx.fillStyle = '#2c2e37';
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        ctx.beginPath();
+        ctx.roundRect?.(20 + c * kw + 2, top + r * kh + 2, kw - 4, kh - 4, 4);
+        if (!ctx.roundRect) ctx.fillRect(20 + c * kw + 2, top + r * kh + 2, kw - 4, kh - 4);
+        else ctx.fill();
+      }
+    }
+    // Space bar
+    ctx.fillStyle = '#34363f';
+    ctx.fillRect(20 + kw * (cols * 0.3), top + keysH - kh + 2, kw * cols * 0.4, kh - 4);
+    if (pad) {
+      ctx.fillStyle = '#25262d';
+      ctx.fillRect(w * 0.32, top + keysH + 22, w * 0.36, h - keysH - 58);
+    }
+  });
+}
+
+/** local-host.ai: the robot's face, shown on the Mac's screen. */
+function localhostScreenTex() {
+  return canvasTex('localhost-face', 640, 400, (ctx, w, h) => {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#16261c');
+    g.addColorStop(1, '#0c150f');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    // Face: two eyes and a small smile.
+    ctx.fillStyle = '#c8f5d4';
+    for (const x of [w / 2 - 90, w / 2 + 90]) {
+      ctx.beginPath();
+      ctx.roundRect?.(x - 34, 110, 68, 92, 30);
+      if (!ctx.roundRect) ctx.fillRect(x - 34, 110, 68, 92);
+      else ctx.fill();
+    }
+    ctx.strokeStyle = '#c8f5d4';
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(w / 2, 222, 46, 0.2 * Math.PI, 0.8 * Math.PI);
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#e8f3ea';
+    ctx.font = '600 30px ui-sans-serif, system-ui, sans-serif';
+    ctx.fillText('local-host.ai', w / 2, 330);
+    ctx.fillStyle = '#8fb59a';
+    ctx.font = '500 18px ui-monospace, monospace';
+    ctx.fillText('runs on this Mac  ·  nothing leaves', w / 2, 364);
   });
 }
 
@@ -251,7 +308,7 @@ function diplomaTex(school: string, honor: string, field: string, year: string, 
     ctx.font = 'italic 16px ui-serif, Georgia, serif';
     ctx.fillText('have conferred upon', w / 2, 188);
     ctx.font = '600 22px ui-serif, Georgia, serif';
-    ctx.fillText('Chris Swim Lee', w / 2, 232);
+    ctx.fillText('Chris SuYoung Lee', w / 2, 232);
     ctx.font = 'italic 15px ui-serif, Georgia, serif';
     ctx.fillText('the degree of', w / 2, 278);
     ctx.font = '600 18px ui-serif, Georgia, serif';
@@ -327,9 +384,13 @@ function buildWork(world: FloatWorld) {
   const group = new THREE.Group();
   const s = world.scale;
   put(group, box(2.55 * s, 0.09 * s, 1.05 * s, '#1a2230', 0.5), 0, -0.62 * s, 0.12);
-  put(group, box(1.6 * s, 0.04 * s, 0.55 * s, '#10141c', 0.45), 0, -0.56 * s, 0.28);
-  const led = new THREE.Mesh(new THREE.BoxGeometry(2.2 * s, 0.025 * s, 0.03 * s), glow(world.accent, 0.8));
-  put(group, led, 0, -0.57 * s, 0.62);
+  const keys = uiPlane(keyboardTex('desk', 5, 14, false), 1.05 * s, 0.32 * s);
+  keys.rotation.x = -Math.PI / 2;
+  put(group, box(1.1 * s, 0.03 * s, 0.36 * s, '#2a3140', 0.45), 0, -0.56 * s, 0.38);
+  put(group, keys, 0, -0.543 * s, 0.38);
+  const mouse = new THREE.Mesh(new THREE.SphereGeometry(0.07 * s, 16, 10), mat('#2a3140', 0.4));
+  mouse.scale.set(0.8, 0.35, 1.2);
+  put(group, mouse, 0.72 * s, -0.56 * s, 0.4);
   const stands: THREE.Object3D[] = [];
   ;[
     [-0.82 * s, 0.22, 0],
@@ -338,25 +399,27 @@ function buildWork(world: FloatWorld) {
   ].forEach(([x, yaw, idx]) => {
     const nest = new THREE.Group();
     nest.rotation.y = yaw;
-    put(nest, box(0.08 * s, 0.42 * s, 0.08 * s, '#2a3344'), 0, -0.28 * s, -0.02);
+    // Slim pole on a flat foot, like a real monitor arm.
+    put(nest, new THREE.Mesh(new THREE.CylinderGeometry(0.022 * s, 0.022 * s, 0.4 * s, 10), mat('#3a4558', 0.35, 0.5)), 0, -0.3 * s, -0.04);
+    put(nest, box(0.26 * s, 0.02 * s, 0.16 * s, '#3a4558', 0.35), 0, -0.5 * s, -0.04);
     put(nest, monitor(world, idx, 0.72 * s, 0.46 * s), 0, 0.12 * s, 0);
     put(group, nest, x, -0.08 * s, -0.12);
     stands.push(nest);
   });
-  const keys = box(1.15 * s, 0.025 * s, 0.32 * s, '#0c1016', 0.5);
-  put(group, keys, 0, -0.52 * s, 0.42);
-  bob(group, ...stands, led);
-  return finish(group, 0.04, [led.material as THREE.Material]);
+  bob(group, ...stands);
+  return finish(group, 0.04);
 }
 
-/** Software: an open laptop with two floating UI chips. */
+/** Software: an open laptop showing the Connecting Captions site. */
 function buildProjects(world: FloatWorld) {
   const group = new THREE.Group();
   const s = world.scale;
   const base = box(1.55 * s, 0.07 * s, 1.05 * s, '#1c1c22', 0.35);
   base.rotation.x = 0.08;
   put(group, base, 0, -0.42 * s, 0.22);
-  put(group, box(1.15 * s, 0.015 * s, 0.7 * s, '#2a2a33', 0.3), 0, -0.37 * s, 0.28);
+  const deck = uiPlane(keyboardTex('laptop', 5, 13, true), 1.42 * s, 0.92 * s);
+  deck.rotation.x = -Math.PI / 2 + 0.08;
+  put(group, deck, 0, -0.38 * s, 0.24);
   const lid = new THREE.Group();
   lid.rotation.x = -0.55;
   put(lid, box(1.55 * s, 0.96 * s, 0.07 * s, '#16161c', 0.32), 0, 0.48 * s, 0);
@@ -387,37 +450,52 @@ function buildHait(world: FloatWorld) {
     put(group, book, -0.42 * s, -0.58 * s + i * 0.1 * s, 0.28);
   });
   const apple = new THREE.Group();
-  put(apple, new THREE.Mesh(new THREE.SphereGeometry(0.09 * s, 16, 12), mat('#b43a32', 0.45)), 0, 0, 0);
+  const skin = new THREE.MeshStandardMaterial({ color: '#a3141a', roughness: 0.3, metalness: 0.05, emissive: '#3a0406', emissiveIntensity: 0.3 });
+  const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.09 * s, 20, 14), skin);
+  fruit.scale.set(1.05, 0.92, 1.05);
+  put(apple, fruit, 0, 0, 0);
   put(apple, box(0.025 * s, 0.08 * s, 0.025 * s, '#3a2418', 0.5), 0, 0.1 * s, 0);
   const leaf = box(0.1 * s, 0.03 * s, 0.06 * s, '#3e9a62', 0.5);
   leaf.rotation.z = 0.4;
   put(apple, leaf, 0.06 * s, 0.14 * s, 0);
-  put(group, apple, 0.52 * s, -0.52 * s, 0.28);
-  bob(group, apple, eraser);
+  // Sits on the chalk tray (top at -0.45s) instead of floating in front of it.
+  put(group, apple, 0.7 * s, -0.37 * s, 0.08);
+  bob(group, eraser);
   return finish(group, 0.08);
 }
 
-/** local-host: a small terminal with a face. It stays on the machine. */
+/** local-host: a small iMac whose screen is the robot's face. It stays on the machine. */
 function buildLocalhost(world: FloatWorld) {
   const group = new THREE.Group();
   const s = world.scale * 1.05;
-  put(group, box(0.92 * s, 0.07 * s, 0.58 * s, '#121612', 0.45), 0, -0.34 * s, 0.02);
-  put(group, box(0.62 * s, 0.035 * s, 0.06 * s, '#d4b46a', 0.32), 0, -0.29 * s, 0.28 * s);
-  put(group, box(0.7 * s, 0.42 * s, 0.4 * s, '#e4efe0', 0.55), 0, -0.04 * s, 0);
-  put(group, box(0.5 * s, 0.24 * s, 0.03 * s, '#101810', 0.4), 0, -0.02 * s, 0.21 * s);
-  const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.035 * s, 12, 10), glow('#c8f5d4', 1.15));
-  const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.035 * s, 12, 10), glow('#c8f5d4', 1.15));
-  put(group, eyeL, -0.1 * s, 0.02 * s, 0.23 * s);
-  put(group, eyeR, 0.1 * s, 0.02 * s, 0.23 * s);
-  const cable = box(0.045 * s, 0.045 * s, 0.34 * s, '#1c3a28', 0.6);
-  cable.rotation.y = 0.4;
-  put(group, cable, 0.28 * s, -0.3 * s, -0.22 * s);
-  const antenna = box(0.03 * s, 0.22 * s, 0.03 * s, '#d4b46a', 0.32);
-  put(group, antenna, 0.22 * s, 0.26 * s, 0);
-  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.045 * s, 10, 8), glow(world.accent, 1));
-  put(group, tip, 0.22 * s, 0.4 * s, 0);
+  const alu = mat('#c9ccd2', 0.32, 0.55);
+  const shell = mat('#7fb08e', 0.45, 0.2);
+  // Foot and stand
+  put(group, new THREE.Mesh(new THREE.BoxGeometry(0.42 * s, 0.025 * s, 0.3 * s), alu), 0, -0.47 * s, -0.02);
+  const stand = new THREE.Mesh(new THREE.BoxGeometry(0.2 * s, 0.32 * s, 0.03 * s), alu);
+  stand.rotation.x = -0.14;
+  put(group, stand, 0, -0.32 * s, -0.08);
+  // Body: coloured back, aluminium chin, black bezel, screen
+  put(group, new THREE.Mesh(new THREE.BoxGeometry(1.06 * s, 0.78 * s, 0.05 * s), shell), 0, 0.12 * s, -0.03);
+  put(group, new THREE.Mesh(new THREE.BoxGeometry(1.06 * s, 0.14 * s, 0.055 * s), mat('#9cc7a9', 0.4, 0.25)), 0, -0.33 * s, -0.03);
+  put(group, box(1.0 * s, 0.6 * s, 0.01 * s, '#0a0d0b', 0.3), 0, 0.17 * s, 0.0);
+  put(group, uiPlane(localhostScreenTex(), 0.96 * s, 0.56 * s), 0, 0.17 * s, 0.008);
+  // Eyes glow on top of the screen so they can pulse.
+  const eyeMat = glow('#c8f5d4', 1.1);
+  const eyeL = new THREE.Mesh(new THREE.CircleGeometry(0.035 * s, 16), eyeMat);
+  const eyeR = new THREE.Mesh(new THREE.CircleGeometry(0.035 * s, 16), eyeMat);
+  put(group, eyeL, -0.135 * s, 0.25 * s, 0.012);
+  put(group, eyeR, 0.135 * s, 0.25 * s, 0.012);
+  // The antenna stays: it's the robot's signature.
+  const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.012 * s, 0.012 * s, 0.2 * s, 8), alu);
+  put(group, antenna, 0.34 * s, 0.6 * s, -0.03);
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.04 * s, 12, 10), glow(world.accent, 1));
+  put(group, tip, 0.34 * s, 0.72 * s, -0.03);
+  // Power light on the chin
+  const power = new THREE.Mesh(new THREE.CircleGeometry(0.014 * s, 10), glow('#d4b46a', 0.9));
+  put(group, power, 0, -0.33 * s, 0.0);
   bob(group, antenna, tip);
-  return finish(group, 0.2, [eyeL.material as THREE.Material, eyeR.material as THREE.Material, tip.material as THREE.Material]);
+  return finish(group, 0.2, [eyeMat, tip.material as THREE.Material, power.material as THREE.Material]);
 }
 
 /** PhoneCoding: an iPhone running Studio. */
@@ -469,35 +547,43 @@ function trophyPlaqueTex() {
   });
 }
 
-function cast(color: string) {
-  return mat(color, 0.58, 0.12);
-}
-
 function buildMarine(s: number) {
+  // Rounded armour: big shoulder pads, a domed helmet and a rifle read as a
+  // marine at a glance, where all-box shapes read as a toy robot.
   const marine = new THREE.Group();
-  const armor = '#6a4324';
-  const dark = '#3a2412';
-  const plate = '#8a5c32';
-  const boot = (x: number) => put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.04 * s, 0.11 * s), cast(dark)), x, 0.02 * s, 0.02 * s);
-  boot(-0.055 * s);
-  boot(0.055 * s);
-  const leg = (x: number) => put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.055 * s, 0.16 * s, 0.06 * s), cast(armor)), x, 0.12 * s, 0);
-  leg(-0.05 * s);
-  leg(0.05 * s);
-  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.16 * s, 0.06 * s, 0.08 * s), cast(dark)), 0, 0.21 * s, 0);
-  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.18 * s, 0.2 * s, 0.1 * s), cast(armor)), 0, 0.34 * s, 0);
-  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.1 * s, 0.12 * s, 0.03 * s), cast(plate)), 0, 0.34 * s, 0.06 * s);
-  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.05 * s, 0.08 * s), cast(plate)), -0.12 * s, 0.42 * s, 0);
-  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.05 * s, 0.08 * s), cast(plate)), 0.12 * s, 0.42 * s, 0);
-  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.04 * s, 0.14 * s, 0.04 * s), cast(armor)), -0.13 * s, 0.3 * s, 0.02 * s);
-  const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.03 * s, 0.035 * s, 0.32 * s), cast('#2a1a0e'));
-  rifle.rotation.y = 0.35;
-  rifle.rotation.z = -0.15;
-  put(marine, rifle, 0.12 * s, 0.3 * s, 0.1 * s);
-  const helm = new THREE.Mesh(new THREE.BoxGeometry(0.11 * s, 0.1 * s, 0.11 * s), cast(armor));
-  put(marine, helm, 0, 0.5 * s, 0.01 * s);
-  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.09 * s, 0.028 * s, 0.02 * s), glow('#140e08', 0.12));
-  put(marine, visor, 0, 0.49 * s, 0.065 * s);
+  const armor = '#8a5a30';
+  const dark = '#4a2c14';
+  const lite = '#c4924e';
+  const cyl = (top: number, bottom: number, h: number, color: string) =>
+    new THREE.Mesh(new THREE.CylinderGeometry(top, bottom, h, 14), bronze(color, 0.36));
+  const ball = (r: number, color: string) => new THREE.Mesh(new THREE.SphereGeometry(r, 18, 14), bronze(color, 0.34));
+  put(marine, cyl(0.05 * s, 0.06 * s, 0.05 * s, dark), -0.07 * s, 0.03 * s, 0.02 * s);
+  put(marine, cyl(0.05 * s, 0.06 * s, 0.05 * s, dark), 0.07 * s, 0.03 * s, 0.02 * s);
+  put(marine, cyl(0.04 * s, 0.048 * s, 0.17 * s, armor), -0.065 * s, 0.14 * s, 0);
+  put(marine, cyl(0.04 * s, 0.048 * s, 0.17 * s, armor), 0.065 * s, 0.14 * s, 0);
+  const hips = ball(0.09 * s, dark);
+  hips.scale.y = 0.62;
+  put(marine, hips, 0, 0.24 * s, 0);
+  put(marine, cyl(0.11 * s, 0.125 * s, 0.21 * s, armor), 0, 0.39 * s, 0);
+  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.12 * s, 0.09 * s, 0.04 * s), bronze(lite, 0.3)), 0, 0.4 * s, 0.1 * s);
+  // Oversized shoulder pads
+  for (const x of [-0.17, 0.17]) {
+    const pad = ball(0.085 * s, lite);
+    pad.scale.set(1.1, 0.8, 1.05);
+    put(marine, pad, x * s, 0.5 * s, 0);
+  }
+  put(marine, cyl(0.03 * s, 0.036 * s, 0.16 * s, armor), -0.18 * s, 0.36 * s, 0.03 * s);
+  const gunArm = cyl(0.032 * s, 0.036 * s, 0.14 * s, armor);
+  gunArm.rotation.z = -0.55;
+  put(marine, gunArm, 0.19 * s, 0.4 * s, 0.05 * s);
+  const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.04 * s, 0.045 * s, 0.3 * s), bronze(dark, 0.4));
+  rifle.rotation.x = 0.25;
+  put(marine, rifle, 0.2 * s, 0.31 * s, 0.17 * s);
+  const helm = ball(0.09 * s, armor);
+  helm.scale.set(1, 0.95, 1.05);
+  put(marine, helm, 0, 0.59 * s, 0.02 * s);
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.11 * s, 0.03 * s, 0.02 * s), glow('#1a1208', 0.15));
+  put(marine, visor, 0, 0.58 * s, 0.1 * s);
   marine.userData.visor = visor.material;
   return marine;
 }
@@ -943,7 +1029,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     hait: [0, 0.78],
     projects: [0, 0.62],
     study: [0, 0.62],
-    localhost: [0, 0.48],
+    localhost: [0, 0.66],
     phonecoding: [0, 0.72],
     d22soso: [0, 0.6],
     play: [0, 0.34],
@@ -1028,6 +1114,8 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         mat.transparent = Boolean(mat.userData.keepTransparent) || mat.opacity < 0.99;
         mat.depthWrite = !dimmed;
       }
+      // Faint ghosts behind the open world read as clutter; hide them outright.
+      floater.group.visible = !dimmed;
     }
   }
 
@@ -1133,7 +1221,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       -((clientY - rect.top) / rect.height) * 2 + 1,
     );
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(floaters.map((item) => item.group), true)[0];
+    const hit = raycaster.intersectObjects(floaters.filter((item) => item.group.visible).map((item) => item.group), true)[0];
     const id = hit?.object.userData.floaterId as string | undefined;
     return id ? (floaters.find((item) => item.id === id) ?? null) : null;
   }
