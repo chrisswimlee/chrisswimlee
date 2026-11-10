@@ -1490,6 +1490,18 @@ html[data-theme='light'] .nav-theme .to-dark {
   background: var(--surface);
 }
 
+.story-shots-single {
+  grid-template-columns: 1fr;
+}
+
+.story-tags {
+  margin: 0.7rem 0 0.2rem;
+}
+
+.story-page .case-steps dd {
+  max-width: 62ch;
+}
+
 .project-split {
   display: grid;
   grid-template-columns: 1fr 1fr;

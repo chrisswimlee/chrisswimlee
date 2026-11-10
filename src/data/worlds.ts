@@ -24,6 +24,7 @@ import {
   education,
   hero,
   localHost,
+  projectLinks,
   projects,
   record,
   roles,
@@ -346,7 +347,7 @@ function aspectFromProject(id: string): Omit<WorldAspect, 'art'> {
     title: project.title,
     line: project.summary,
     points: project.points,
-    links: project.links,
+    links: projectLinks(project),
   };
 }
 
@@ -401,7 +402,7 @@ const worlds: WorldSpec[] = [
           ? [`${project.command}${project.commandNote ? ` — ${project.commandNote}` : ''}`]
           : []),
       ],
-      links: project.links,
+      links: projectLinks(project),
     })),
   ),
   makeWorld(

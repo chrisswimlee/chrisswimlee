@@ -8,6 +8,10 @@ import deskbreakShot from '../assets/work/deskbreak.jpg';
 import haiteduShot from '../assets/work/haitedu.jpg';
 import localHostShot from '../assets/work/local-host.jpg';
 import localHostSiteShot from '../assets/work/local-host-site.jpg';
+import localLatticeShot from '../assets/work/local-lattice.jpg';
+import d22ArchiveShot from '../assets/work/d22soso-archive.jpg';
+import connectingCaptionsTheaterShot from '../assets/work/connectingCaptions-theater.jpg';
+import connectingCaptionsLanguagesShot from '../assets/work/connectingCaptions-languages.jpg';
 import phonecodingShot from '../assets/work/phonecoding.jpg';
 import twoHandShot from '../assets/work/2handholdem.jpg';
 
@@ -159,6 +163,14 @@ type Project = {
   commandNote?: string;
   featured?: boolean;
   links: { label: string; href: string }[];
+  /** A write-up gets its own page at /work/<id>/. Projects without one stay as cards. */
+  story?: ProjectStory;
+};
+
+type ProjectStory = {
+  stack: string[];
+  shots: { image: ImageMetadata; alt: string }[];
+  brief: { problem: string; constraint: string; decision: string; outcome: string };
 };
 
 export const projects: Project[] = [
@@ -181,6 +193,23 @@ export const projects: Project[] = [
       { label: 'For work', href: '/connectingCaptions/license/' },
       { label: 'GitHub', href: 'https://github.com/chrisswimlee/connectingCaptions' },
     ],
+    story: {
+      stack: ['macOS', 'Apple Speech', 'On-device Translation', 'GPLv3'],
+      shots: [
+        { image: connectingCaptionsTheaterShot, alt: 'Theater captions: Hello. and 안녕.' },
+        { image: connectingCaptionsLanguagesShot, alt: 'Theater Home: English to Korean, on this Mac.' },
+      ],
+      brief: {
+        problem:
+          'A room rarely shares one language, and most live caption tools send the speaker’s voice to a server before anything shows up.',
+        constraint:
+          'The voice had to stay on the Mac, and the captions had to keep pace with someone talking in front of a room.',
+        decision:
+          'Apple’s on-device speech and Translation, a Theater window that shows each sentence the moment it’s ready, and a separate slides window so the room only sees what you share.',
+        outcome:
+          'A notarized Mac app and a Homebrew cask, open source under GPLv3, with a personal key and work licenses for organizations.',
+      },
+    },
   },
   {
     id: 'deskbreak',
@@ -196,6 +225,19 @@ export const projects: Project[] = [
       'Choose from twenty characters and five moods, or use your own image. It never touches your keyboard.',
     ],
     links: [{ label: 'GitHub', href: 'https://github.com/chrisswimlee/deskbreak' }],
+    story: {
+      stack: ['macOS', 'Menu bar', 'MIT'],
+      shots: [{ image: deskbreakShot, alt: 'DeskBreak on GitHub.' }],
+      brief: {
+        problem: 'Working at a desk, it’s easy to sit for hours without noticing.',
+        constraint:
+          'The reminder had to stay out of the way: no keyboard access, and nothing leaving the Mac.',
+        decision:
+          'A menu-bar timer. After 40 minutes a little character pops up and tells you to stand, and if you walk away the timer resets by itself.',
+        outcome:
+          'Open source under MIT, with twenty characters, five moods, and room for your own image.',
+      },
+    },
   },
   {
     id: 'haitedu',
@@ -239,6 +281,18 @@ export const projects: Project[] = [
       'Studio for iOS is in early build. The Android studio is under development.',
     ],
     links: [{ label: 'Live site', href: 'https://phonecoding.ai' }],
+    story: {
+      stack: ['SwiftUI', 'iOS'],
+      shots: [{ image: phonecodingShot, alt: 'phonecoding.ai' }],
+      brief: {
+        problem: 'Building an iPhone app usually means sitting at a Mac with Xcode open.',
+        constraint: 'All of it had to work on the phone, one-handed, including reviewing what changed.',
+        decision:
+          'Studio takes a spoken change and shows the diff for one-thumb review. Learn teaches SwiftUI with the same diff you just shipped.',
+        outcome:
+          'phonecoding.ai is live. Studio for iOS is in early build, and the Android studio is under development.',
+      },
+    },
   },
   {
     id: 'd22soso',
@@ -257,6 +311,20 @@ export const projects: Project[] = [
       { label: 'Live site', href: 'https://d22soso.com' },
       { label: 'Classic site', href: 'https://d22soso.com/classic.html' },
     ],
+    story: {
+      stack: ['3D', 'Web'],
+      shots: [
+        { image: d22ArchiveShot, alt: 'The Living Archive at d22soso.com, a rotatable 3D map of Wayne Chiang’s career.' },
+      ],
+      brief: {
+        problem:
+          'Wayne Chiang’s career runs from a Brood War world title to WSOP talent management to a patented table game, and a flat page buried most of it.',
+        constraint: 'The older page, with the poker work and 2 Hand Hold’em, had to stay reachable.',
+        decision:
+          'A 3D archive as the homepage. You drag to turn it and click a sign to go in, and the older page stays up as the classic site.',
+        outcome: 'd22soso.com is live, and the game now has its own site at 2handholdem.com.',
+      },
+    },
   },
   {
     id: '2handholdem',
@@ -294,8 +362,26 @@ export const projects: Project[] = [
       { label: 'GitHub', href: 'https://github.com/chrisswimlee/local-lattice' },
       { label: 'PyPI', href: 'https://pypi.org/project/local-lattice/' },
     ],
+    story: {
+      stack: ['Python', 'OpenAI API', 'PyPI'],
+      shots: [{ image: localLatticeShot, alt: 'The Local Lattice repository on GitHub.' }],
+      brief: {
+        problem:
+          'Every local model server and cloud provider names its models differently, so apps hard-code one and break when you switch.',
+        constraint: 'Apps already speak the OpenAI API, so the fix couldn’t ask them to change.',
+        decision:
+          'A gateway that speaks the OpenAI API but takes a role like coder or reasoner instead of a model name, then routes to MLX, LM Studio, or a cloud key. It can also send one question to several models and have them vote, chain, or debate.',
+        outcome: 'Published on PyPI as local-lattice, so it’s one pip install.',
+      },
+    },
   },
 ];
+
+export const storyPath = (id: string) => `/work/${id}/`;
+
+/** A project's links, plus “Read more” when it has a write-up page. */
+export const projectLinks = (project: Project) =>
+  project.story ? [...project.links, { label: 'Read more', href: storyPath(project.id) }] : project.links;
 
 export const connectingCaptions = {
   path: '/connectingCaptions/',

@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import type { projects } from '../data/site';
+import { projectLinks, type projects } from '../data/site';
 
 interface Props {
   project: (typeof projects)[number];
@@ -66,7 +66,7 @@ const offsite = live ? /^https?:\/\//.test(live.href) : false;
       )
     }
     <div class="card-links">
-      {project.links.map((link) => {
+      {projectLinks(project).map((link) => {
         const offsite = /^https?:\/\//.test(link.href);
         const primary = link === live;
         return (

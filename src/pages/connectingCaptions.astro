@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import VantaFog from '../components/VantaFog.astro';
 import theaterShot from '../assets/work/connectingCaptions-theater.jpg';
 import languagesShot from '../assets/work/connectingCaptions-languages.jpg';
-import { commercialLicense, connectingCaptions, releaseDownload, site } from '../data/site';
+import { commercialLicense, connectingCaptions, releaseDownload, site, storyPath } from '../data/site';
 
 const brew = connectingCaptions.brew.join('\n');
 
@@ -47,6 +47,7 @@ const appJsonLd = {
           <a class="btn btn-solid" href={releaseDownload.href}>Download Connecting Captions</a>
           <a class="btn" href={commercialLicense.path}>{commercialLicense.cta}</a>
           <a class="btn btn-text" href={connectingCaptions.repo} target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a class="btn btn-text" href={storyPath('connectingCaptions')}>How it was built</a>
         </div>
       </div>
     </div>
