@@ -49,7 +49,7 @@ export const commercialMail = `mailto:support@local-host.ai?subject=${encodeURIC
 )}`;
 
 export const hero = {
-  kicker: 'New York · remote',
+  kicker: 'Ex-Goldman Sachs · New York · remote',
   lede: 'I’m a software engineer. I build data systems, and local tools for work that can’t go through a vendor API. These days I also teach an AI course.',
   constraints: [
     'At Goldman, one reporting path that developers, traders, and lawyers all signed off on.',
