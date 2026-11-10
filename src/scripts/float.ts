@@ -343,6 +343,8 @@ function buildWork(world: FloatWorld) {
     put(group, nest, x, -0.08 * s, -0.12);
     stands.push(nest);
   });
+  const keys = box(1.15 * s, 0.025 * s, 0.32 * s, '#0c1016', 0.5);
+  put(group, keys, 0, -0.52 * s, 0.42);
   bob(group, ...stands, led);
   return finish(group, 0.04, [led.material as THREE.Material]);
 }
@@ -361,14 +363,9 @@ function buildProjects(world: FloatWorld) {
   const src = artOf(world, 0)?.src;
   if (src) put(lid, photo(src, 1.38 * s, 0.82 * s), 0, 0.48 * s, 0.045);
   put(group, lid, 0, -0.38 * s, -0.28);
-  const chipA = new THREE.Group();
-  put(chipA, box(0.72 * s, 0.38 * s, 0.05 * s, '#0e1a2c', 0.4), 0, 0, 0);
-  const srcB = artOf(world, 1)?.src;
-  if (srcB) put(chipA, photo(srcB, 0.62 * s, 0.28 * s), 0, 0, 0.03);
-  put(group, chipA, 0.72 * s, 0.34 * s, 0.16);
-  const chipB = box(0.36 * s, 0.16 * s, 0.04 * s, world.accent, 0.35);
-  put(group, chipB, -0.7 * s, 0.08 * s, 0.22);
-  bob(group, chipA, chipB);
+  const hinge = box(1.42 * s, 0.04 * s, 0.06 * s, '#2a2a33', 0.4);
+  put(group, hinge, 0, -0.38 * s, -0.22);
+  bob(group);
   group.userData.lid = lid;
   return finish(group, 0.22);
 }
@@ -390,8 +387,8 @@ function buildHait(world: FloatWorld) {
     put(group, book, -0.42 * s, -0.58 * s + i * 0.1 * s, 0.28);
   });
   const apple = new THREE.Group();
-  put(apple, box(0.16 * s, 0.16 * s, 0.16 * s, '#b43a32', 0.45), 0, 0, 0);
-  put(apple, box(0.03 * s, 0.1 * s, 0.03 * s, '#3a2418', 0.5), 0, 0.12 * s, 0);
+  put(apple, new THREE.Mesh(new THREE.SphereGeometry(0.09 * s, 16, 12), mat('#b43a32', 0.45)), 0, 0, 0);
+  put(apple, box(0.025 * s, 0.08 * s, 0.025 * s, '#3a2418', 0.5), 0, 0.1 * s, 0);
   const leaf = box(0.1 * s, 0.03 * s, 0.06 * s, '#3e9a62', 0.5);
   leaf.rotation.z = 0.4;
   put(apple, leaf, 0.06 * s, 0.14 * s, 0);
@@ -408,8 +405,8 @@ function buildLocalhost(world: FloatWorld) {
   put(group, box(0.62 * s, 0.035 * s, 0.06 * s, '#d4b46a', 0.32), 0, -0.29 * s, 0.28 * s);
   put(group, box(0.7 * s, 0.42 * s, 0.4 * s, '#e4efe0', 0.55), 0, -0.04 * s, 0);
   put(group, box(0.5 * s, 0.24 * s, 0.03 * s, '#101810', 0.4), 0, -0.02 * s, 0.21 * s);
-  const eyeL = new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.07 * s, 0.02 * s), glow('#c8f5d4', 1.15));
-  const eyeR = new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.07 * s, 0.02 * s), glow('#c8f5d4', 1.15));
+  const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.035 * s, 12, 10), glow('#c8f5d4', 1.15));
+  const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.035 * s, 12, 10), glow('#c8f5d4', 1.15));
   put(group, eyeL, -0.1 * s, 0.02 * s, 0.23 * s);
   put(group, eyeR, 0.1 * s, 0.02 * s, 0.23 * s);
   const cable = box(0.045 * s, 0.045 * s, 0.34 * s, '#1c3a28', 0.6);
@@ -472,47 +469,35 @@ function trophyPlaqueTex() {
   });
 }
 
-function metalBox(w: number, h: number, d: number, color: string, rough = 0.36) {
-  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bronze(color, rough));
-}
-
-function metalSphere(r: number, color: string) {
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), bronze(color, 0.34));
-  return mesh;
-}
-
-function metalCyl(top: number, bottom: number, h: number, color: string) {
-  return new THREE.Mesh(new THREE.CylinderGeometry(top, bottom, h, 12), bronze(color, 0.36));
+function cast(color: string) {
+  return mat(color, 0.58, 0.12);
 }
 
 function buildMarine(s: number) {
   const marine = new THREE.Group();
-  const armor = '#8a5a30';
-  const dark = '#4a2c14';
-  const lite = '#c4924e';
-  put(marine, metalCyl(0.05 * s, 0.06 * s, 0.05 * s, dark), -0.07 * s, 0.03 * s, 0.02 * s);
-  put(marine, metalCyl(0.05 * s, 0.06 * s, 0.05 * s, dark), 0.07 * s, 0.03 * s, 0.02 * s);
-  put(marine, metalCyl(0.038 * s, 0.046 * s, 0.16 * s, armor), -0.065 * s, 0.13 * s, 0);
-  put(marine, metalCyl(0.038 * s, 0.046 * s, 0.16 * s, armor), 0.065 * s, 0.13 * s, 0);
-  const hips = metalSphere(0.085 * s, dark);
-  hips.scale.y = 0.65;
-  put(marine, hips, 0, 0.23 * s, 0);
-  put(marine, metalCyl(0.1 * s, 0.12 * s, 0.2 * s, armor), 0, 0.38 * s, 0);
-  put(marine, metalBox(0.11 * s, 0.09 * s, 0.035 * s, lite, 0.3), 0, 0.38 * s, 0.09 * s);
-  put(marine, metalSphere(0.065 * s, lite), -0.15 * s, 0.48 * s, 0);
-  put(marine, metalSphere(0.065 * s, lite), 0.15 * s, 0.48 * s, 0);
-  put(marine, metalCyl(0.028 * s, 0.034 * s, 0.15 * s, armor), -0.16 * s, 0.34 * s, 0.02 * s);
-  const gunArm = metalCyl(0.03 * s, 0.034 * s, 0.13 * s, armor);
-  gunArm.rotation.z = -0.55;
-  put(marine, gunArm, 0.18 * s, 0.38 * s, 0.05 * s);
-  const rifle = metalBox(0.035 * s, 0.035 * s, 0.26 * s, dark, 0.4);
-  rifle.rotation.x = 0.25;
-  put(marine, rifle, 0.2 * s, 0.3 * s, 0.16 * s);
-  const helm = metalSphere(0.085 * s, armor);
-  helm.scale.set(1, 0.92, 1.05);
-  put(marine, helm, 0, 0.56 * s, 0.02 * s);
-  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.1 * s, 0.026 * s, 0.02 * s), glow('#1a1208', 0.15));
-  put(marine, visor, 0, 0.55 * s, 0.09 * s);
+  const armor = '#6a4324';
+  const dark = '#3a2412';
+  const plate = '#8a5c32';
+  const boot = (x: number) => put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.04 * s, 0.11 * s), cast(dark)), x, 0.02 * s, 0.02 * s);
+  boot(-0.055 * s);
+  boot(0.055 * s);
+  const leg = (x: number) => put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.055 * s, 0.16 * s, 0.06 * s), cast(armor)), x, 0.12 * s, 0);
+  leg(-0.05 * s);
+  leg(0.05 * s);
+  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.16 * s, 0.06 * s, 0.08 * s), cast(dark)), 0, 0.21 * s, 0);
+  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.18 * s, 0.2 * s, 0.1 * s), cast(armor)), 0, 0.34 * s, 0);
+  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.1 * s, 0.12 * s, 0.03 * s), cast(plate)), 0, 0.34 * s, 0.06 * s);
+  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.05 * s, 0.08 * s), cast(plate)), -0.12 * s, 0.42 * s, 0);
+  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.07 * s, 0.05 * s, 0.08 * s), cast(plate)), 0.12 * s, 0.42 * s, 0);
+  put(marine, new THREE.Mesh(new THREE.BoxGeometry(0.04 * s, 0.14 * s, 0.04 * s), cast(armor)), -0.13 * s, 0.3 * s, 0.02 * s);
+  const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.03 * s, 0.035 * s, 0.32 * s), cast('#2a1a0e'));
+  rifle.rotation.y = 0.35;
+  rifle.rotation.z = -0.15;
+  put(marine, rifle, 0.12 * s, 0.3 * s, 0.1 * s);
+  const helm = new THREE.Mesh(new THREE.BoxGeometry(0.11 * s, 0.1 * s, 0.11 * s), cast(armor));
+  put(marine, helm, 0, 0.5 * s, 0.01 * s);
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.09 * s, 0.028 * s, 0.02 * s), glow('#140e08', 0.12));
+  put(marine, visor, 0, 0.49 * s, 0.065 * s);
   marine.userData.visor = visor.material;
   return marine;
 }
@@ -554,7 +539,7 @@ function buildArchive(world: FloatWorld) {
   put(group, new THREE.Mesh(new THREE.BoxGeometry(0.42 * s, 0.05 * s, 0.42 * s), bronze(lite, 0.3)), 0, 0.45 * s, 0);
 
   const marine = buildMarine(s);
-  marine.scale.setScalar(0.82);
+  marine.scale.setScalar(1.15);
   put(group, marine, 0, 0.48 * s, 0);
   bob(group, marine);
   const visor = marine.userData.visor as THREE.Material | undefined;
