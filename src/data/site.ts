@@ -363,7 +363,7 @@ export const projects: Project[] = [
     ],
     story: {
       stack: ['Python', 'OpenAI API', 'PyPI'],
-      shots: [{ image: localLatticeShot, alt: 'The Local Lattice repository on GitHub.' }],
+      shots: [{ image: localLatticeShot, alt: 'Diagram: apps ask Local Lattice for a role such as role:coder, and it routes the request to MLX, LM Studio, or a cloud key, or runs several models to vote, chain, or debate.' }],
       brief: {
         problem:
           'Every local model server and cloud provider names its models differently, so apps hard-code one and break when you switch.',

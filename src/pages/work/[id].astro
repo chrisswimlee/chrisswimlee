@@ -13,6 +13,8 @@ const { project } = Astro.props as { project: (typeof projects)[number] };
 const story = project.story!;
 const others = projects.filter((item) => item.story && item.id !== project.id);
 const offsite = (href: string) => /^https?:\/\//.test(href);
+// Connecting Captions already has a product page; this build story shouldn't compete with it in search.
+const hasProductPage = project.id === 'connectingCaptions';
 const steps = [
   ['Problem', story.brief.problem],
   ['Constraint', story.brief.constraint],
@@ -31,7 +33,7 @@ const jsonLd = {
 };
 ---
 
-<Layout title={`${project.title} — ${site.name}`} description={project.summary} jsonLd={jsonLd}>
+<Layout title={`${project.title} — ${site.name}`} description={project.summary} jsonLd={jsonLd} noindex={hasProductPage}>
   <main id="main" class="resume-page story-page wrap">
     <div class="resume-top">
       <div>
@@ -39,10 +41,12 @@ const jsonLd = {
         <h1>{project.title}</h1>
       </div>
       <div class="resume-meta">
-        <p>{project.summary}</p>
-        <div class="tags story-tags">
-          {story.stack.map((item) => <span class="tag">{item}</span>)}
-        </div>
+        <p class="story-lede">{project.summary}</p>
+        {hasProductPage && (
+          <p class="story-note">
+            This is the build story. Downloads and prices are on the <a href="/connectingCaptions/">Connecting Captions page</a>.
+          </p>
+        )}
         <div class="hero-actions">
           {
             project.links.map((link, index) => (
@@ -98,10 +102,25 @@ const jsonLd = {
         </dl>
       </section>
       <section class="resume-block">
-        <h2>What it does</h2>
-        <ul class="points">
-          {project.points.map((point) => <li>{point}</li>)}
-        </ul>
+        <h2>At a glance</h2>
+        <dl class="case-steps story-facts">
+          <div>
+            <dt>Role</dt>
+            <dd>Solo · designed and built</dd>
+          </div>
+          <div>
+            <dt>Shipped</dt>
+            <dd>{project.year} · {project.kind.toLowerCase()}</dd>
+          </div>
+          <div>
+            <dt>Built with</dt>
+            <dd>
+              <span class="tags story-tags">
+                {story.stack.map((item) => <span class="tag">{item}</span>)}
+              </span>
+            </dd>
+          </div>
+        </dl>
         {
           project.command && (
             <div class="get-cmd">
@@ -115,7 +134,7 @@ const jsonLd = {
       </section>
     </div>
 
-    <section class="resume-block">
+    <section class="resume-block story-more">
       <h2>More work</h2>
       <div class="hero-actions">
         {others.map((item) => <a class="btn" href={storyPath(item.id)}>{item.title}</a>)}

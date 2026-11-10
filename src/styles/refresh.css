@@ -64,3 +64,52 @@ a.btn-solid:hover {
     font-size: 1rem;
   }
 }
+
+/* Footer: sans, normal case, to match the nav. */
+.footer {
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* One accent for headings: section titles keep the accent, the small labels under them go quiet. */
+.case-steps dt {
+  color: var(--muted);
+}
+
+/* Project pages: title, then the summary and actions directly under it. */
+.story-page .resume-top {
+  display: block;
+}
+
+.story-page .resume-meta {
+  max-width: 62ch;
+  margin-top: 1rem;
+}
+
+.story-lede {
+  margin: 0;
+  font-size: 1.08rem;
+  color: var(--ink);
+}
+
+.story-note {
+  margin: 0.6rem 0 0;
+}
+
+.story-page .resume-meta .hero-actions {
+  margin-top: 1.2rem;
+}
+
+.story-facts .story-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0.35rem 0 0;
+}
+
+.story-more .btn-text {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding-inline: 0;
+}
