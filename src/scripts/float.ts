@@ -910,9 +910,18 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   const ac = new AbortController();
   const { signal } = ac;
   // Phones: high-DPR screens don't need MSAA, and 30fps is plenty for slow drift.
+  // While something is actually moving (the intro, opening or closing a world, a
+  // touch) phones render at full rate, then drop back to 30fps once it settles.
   const lowPower = matchMedia('(pointer: coarse)').matches || innerWidth < 800;
   const maxRatio = lowPower ? 1.5 : 2;
-  const frameGap = lowPower ? 30 : 12;
+  const idleGap = lowPower ? 30 : 12;
+  const busyGap = 12;
+  let busyUntil = 0;
+  const wake = (ms = 1400) => {
+    busyUntil = Math.max(busyUntil, performance.now() + ms);
+  };
+  // Resolution steps down on phones that can't keep up, instead of stuttering.
+  let ratio = Math.min(devicePixelRatio || 1, maxRatio);
   const renderer = new THREE.WebGLRenderer({
     canvas: view,
     antialias: !(lowPower && devicePixelRatio >= 2),
@@ -1158,6 +1167,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     }
     focusId = id;
     hoverId = null;
+    wake();
     targetYaw = 0;
     targetPitch = 0;
     const index = Math.max(
@@ -1176,6 +1186,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   function unfocus(push = true) {
     const wasFocused = focusId !== null || !panelEl.hidden;
     focusId = null;
+    wake();
     panelEl.hidden = true;
     root.classList.remove('is-in');
     intro?.toggleAttribute('inert', false);
@@ -1267,6 +1278,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   view.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
     press = { x: e.clientX, y: e.clientY };
+    wake(900);
   }, { signal });
 
   let lastHoverAt = 0;
@@ -1390,7 +1402,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     camera.aspect = width / height;
     targetDist = focusId ? inspectDist() : idleDist();
     camera.updateProjectionMatrix();
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, maxRatio));
+    renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
     layoutHomes(width, height);
     keepoutAt = 0;
@@ -1482,8 +1494,16 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     }
   }
 
+  // Easing factors were tuned per 60fps frame. Scale them by the real frame
+  // time so motion keeps the same speed at 30, 60, or 120fps and on uneven frames.
+  let prevFrame = 0;
+  let dtk = 1;
+  const ease = (a: number) => (reduced ? 1 : 1 - (1 - a) ** dtk);
+
   function frame(now: number) {
     if (!running) return;
+    dtk = prevFrame ? Math.min(6, Math.max(0.25, (now - prevFrame) / 16.667)) : 1;
+    prevFrame = now;
     const t = now * 0.001;
     if (!focusId && !reduced) {
       targetYaw = Math.sin(t * 0.07) * 0.16;
@@ -1494,17 +1514,17 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     }
     const introK = skipEnter || focusId ? 1 : arrive(now, 0);
     targetDist = (focusId ? inspectDist() : idleDist()) + (focusId ? 0 : (1 - introK) * 2.8);
-    yaw += (targetYaw - yaw) * (focusId ? 0.14 : 0.06);
-    pitch += (targetPitch - pitch) * (focusId ? 0.14 : 0.06);
-    rim.intensity += (((document.documentElement.dataset.theme === 'light' ? 0.28 : 0.55) * (focusId ? 1.35 : 1)) - rim.intensity) * 0.08;
+    yaw += (targetYaw - yaw) * ease(focusId ? 0.14 : 0.06);
+    pitch += (targetPitch - pitch) * ease(focusId ? 0.14 : 0.06);
+    rim.intensity += (((document.documentElement.dataset.theme === 'light' ? 0.28 : 0.55) * (focusId ? 1.35 : 1)) - rim.intensity) * ease(0.08);
     galaxy.rotation.y = yaw;
     galaxy.rotation.x = pitch;
-    camera.position.z += (targetDist - camera.position.z) * 0.08;
+    camera.position.z += (targetDist - camera.position.z) * ease(0.08);
     const held = focusId ? stagePos() : null;
     // Desktop looks a little right of the object so it sits left of the panel; phones keep it centred.
     if (held) lookTo.set(held.x + (camera.aspect < 1 ? 0 : 0.85), held.y * 0.35, 0);
     else lookTo.set(0, 0, 0);
-    look.lerp(lookTo, reduced ? 1 : 0.12);
+    look.lerp(lookTo, ease(0.12));
     camera.lookAt(look);
 
     for (const floater of floaters) {
@@ -1536,7 +1556,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
           }
         }
         const dest = inspecting && held ? held : floater.home;
-        floater.anchor.lerp(dest, reduced ? 1 : inspecting || focusId ? 0.12 : 0.09);
+        floater.anchor.lerp(dest, ease(inspecting || focusId ? 0.12 : 0.09));
         const drift = reduced || inspecting ? 0 : focusId ? 0.08 : hovering ? 0.35 : 1;
         const fx = Math.sin(t * 0.4 + floater.phase) * 0.16 * drift;
         const fy = Math.cos(t * 0.33 + floater.phase * 1.3) * 0.13 * drift + (hovering ? 0.14 : 0);
@@ -1546,7 +1566,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       let wantScale = inspecting ? inspectScale(floater.span) : hovering ? floater.homeScale * 1.06 : focusId ? floater.homeScale * 0.9 : floater.homeScale;
       if (!focusId) wantScale *= 0.62 + 0.38 * k;
       scaleTo.setScalar(wantScale);
-      floater.group.scale.lerp(scaleTo, reduced ? 1 : k < 1 ? 0.22 : 0.14);
+      floater.group.scale.lerp(scaleTo, ease(k < 1 ? 0.22 : 0.14));
       const restY = (floater.group.userData.restY as number | undefined) ?? 0;
       const restZ = (floater.group.userData.restZ as number | undefined) ?? 0;
       if (inspecting && floater.group.userData.faceCam) {
@@ -1584,25 +1604,49 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     renderer.render(scene, camera);
   }
   let lastFrame = 0;
+  let lastRaf = 0;
+  let slow = 0;
+  let stepAt = 0;
+  function adapt(now: number, interval: number, gap: number) {
+    if (!lowPower || ratio <= 1 || interval > 400 || now - born < 2500) return;
+    slow = slow * 0.92 + (interval > Math.max(gap, 16.7) * 1.7 ? 0.08 : 0);
+    if (slow < 0.5 || now - stepAt < 3000) return;
+    stepAt = now;
+    slow = 0;
+    ratio = Math.max(1, ratio - 0.25);
+    renderer.setPixelRatio(ratio);
+    renderer.setSize(root.clientWidth || 1, root.clientHeight || 1, false);
+  }
   function tick(now: number) {
     if (!running || document.hidden) return;
     if (!root.classList.contains('is-ready') && (skipEnter || now - born > 90)) root.classList.add('is-ready');
-    if (now - lastFrame < frameGap) return;
+    const busy = now < busyUntil || (!skipEnter && now - born < 2200);
+    const gap = busy ? busyGap : idleGap;
+    // A couple of ms of slack so vsync jitter doesn't drop every other frame.
+    if (now - lastFrame < gap - 3) return;
+    const interval = now - lastFrame;
     lastFrame = now;
     try {
       frame(now);
     } catch (err) {
       console.error(err);
     }
+    adapt(now, interval, gap);
   }
   function loop(now: number) {
+    lastRaf = now;
     tick(now);
     if (running) rafId = requestAnimationFrame(loop);
   }
   // The aside starts hidden in markup. Do not force it closed here —
   // a hash on load has already opened a world via `focus()`.
   let rafId = requestAnimationFrame(loop);
-  const pulse = window.setInterval(() => tick(performance.now()), 32);
+  // Fallback only for when requestAnimationFrame stalls (some embedded or
+  // throttled views). Rendering from a timer alongside rAF draws off-vsync and stutters.
+  const pulse = window.setInterval(() => {
+    const now = performance.now();
+    if (now - lastRaf > 250) tick(now);
+  }, 100);
   const teardown = () => {
     if (!running) return;
     running = false;

@@ -9,13 +9,11 @@ import { education, site } from '../data/site';
 
 const isResume = Astro.url.pathname.startsWith('/resume');
 const path = Astro.url.pathname;
-// The homepage is the 3D galaxy. The walkable town lives at /town/.
-const isTown = path.startsWith('/town');
-const isJourney = path === '/';
-const isScene = isTown || isJourney;
+// The homepage is the 3D galaxy, a full-viewport scene.
+const isScene = path === '/';
 const isHome = path === '/';
 const isMap = path.startsWith('/map');
-const fonts = `https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400${isTown ? '&family=Pixelify+Sans:wght@400;500;600;700' : ''}&display=swap`;
+const fonts = `https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap`;
 
 interface Props {
   title?: string;

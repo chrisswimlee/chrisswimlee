@@ -56,8 +56,19 @@ html[data-theme='light'] {
   --star-cyan: 0, 0, 0;
 }
 
+/* A short cross-fade between pages instead of a hard cut (Chrome, Edge, Safari 18.2+). */
 @view-transition {
-  navigation: none;
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: ease-out;
+}
+
+.nav {
+  view-transition-name: site-nav;
 }
 
 *,
@@ -2457,7 +2468,7 @@ html[data-theme='light'] .vanta-fog.is-on {
   pointer-events: none;
 }
 
-/* Scene pages (globe, town): the canvas fills the viewport; chrome is hidden. */
+/* Scene pages (the galaxy): the canvas fills the viewport; chrome is hidden. */
 html:has(body.is-world) {
   height: 100%;
   overflow: hidden;

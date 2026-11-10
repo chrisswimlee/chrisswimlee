@@ -8,7 +8,7 @@ type Edge = { from: string; to: string; label?: string; style?: 'test' };
 type Flows = {
   lanes: Record<string, Edge[]>;
   nodes: Record<string, { lane: string; detail: boolean }>;
-  /** Old links: ids that now live in the pixel town, and renamed ids. */
+  /** Old links: ids from the retired town and 3D sky, and renamed ids. */
   toTown: string[];
   alias: Record<string, string>;
 };
@@ -372,7 +372,7 @@ export function mountSystem(root: HTMLElement) {
     if (!id || id === 'top' || id === 'main') return false;
     id = data.alias[id] ?? id;
     if (data.toTown.includes(id)) {
-      // that place lives in the pixel town now
+      // that place now lives on the homepage galaxy
       location.replace(`/#${id}`);
       return true;
     }

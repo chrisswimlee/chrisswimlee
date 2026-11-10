@@ -2,7 +2,7 @@ import type { ImageMetadata } from 'astro';
 import localLatticeShot from '../assets/work/local-lattice.jpg';
 import d22ArchiveShot from '../assets/work/d22soso-archive.jpg';
 // `?url` keeps Astro 7 from compiling these as SVG components — we only
-// need a src string for the 2D town cards, and the component path crashed
+// need a src string for the cards, and the component path crashed
 // the homepage (`styles.length` of undefined).
 import goldmanMark from '../assets/marks/goldman.svg?url';
 import trinityMark from '../assets/marks/trinity.svg?url';

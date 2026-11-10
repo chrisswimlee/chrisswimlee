@@ -20,6 +20,7 @@ export default defineConfig({
   ],
   redirects: {
     '/world': '/',
+    '/town': '/',
     '/3d': '/',
     '/tutor': '/engage/',
     '/fluidTranslation': '/connectingCaptions/',

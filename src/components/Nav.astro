@@ -90,15 +90,11 @@ const isCurrent = (href: string) => !href.includes('#') && (href === '/' ? path 
   }
 
   brand?.addEventListener('click', (e) => {
-    if (location.pathname !== '/' && !document.querySelector('[data-town], [data-sys]')) return;
+    if (location.pathname !== '/' && !document.querySelector('[data-sys]')) return;
     e.preventDefault();
     setOpen(false);
     if (document.querySelector('[data-world]')) {
       window.dispatchEvent(new CustomEvent('world:home'));
-      return;
-    }
-    if (document.querySelector('[data-town]')) {
-      window.dispatchEvent(new CustomEvent('town:home'));
       return;
     }
     if (location.hash) history.replaceState(null, '', location.pathname);

@@ -273,29 +273,10 @@ export const lanes: Lane[] = [
 
 /** Smaller things I shipped, shown as a row of boxes under the lanes. */
 export const shipped: SysNode[] = [
-  {
-    id: 'world',
-    kind: 'app',
-    title: 'The Developer’s World',
-    metric: 'a pixel town engine, from scratch',
-    stack: ['TypeScript', 'Canvas 2D', 'A* pathfinding'],
-    col: 1,
-    row: 1,
-    status: 'live',
-    detail: {
-      lede: 'A walkable pixel-art town where every building is one of my jobs or projects.',
-      points: [
-        'No game engine and no image files: every tile, building, and character is drawn in code.',
-        'Tile collision, A* pathfinding for click-to-walk, depth sorting, and a day/night lighting pass tied to the site theme.',
-        'Keyboard, mouse, and touch controls, plus a text version for screen readers.',
-      ],
-      links: [{ label: 'Walk around the town', href: '/town/' }],
-    },
-  },
-  product('phonecoding', 'app', { col: 2, row: 1 }, ['SwiftUI', 'iOS'], 'building', 'SwiftUI apps from the phone you’re holding'),
-  product('deskbreak', 'app', { col: 3, row: 1 }, ['macOS', 'menu bar', 'MIT'], 'live', 'a menu-bar timer that tells you to stand'),
-  product('d22soso', 'site', { col: 4, row: 1 }, ['3D', 'web'], 'live', 'a 3D archive of a champion’s career'),
-  product('2handholdem', 'site', { col: 5, row: 1 }, ['web', 'iPhone'], 'live', 'a patented table game, playable in the browser'),
+  product('phonecoding', 'app', { col: 1, row: 1 }, ['SwiftUI', 'iOS'], 'building', 'SwiftUI apps from the phone you’re holding'),
+  product('deskbreak', 'app', { col: 2, row: 1 }, ['macOS', 'menu bar', 'MIT'], 'live', 'a menu-bar timer that tells you to stand'),
+  product('d22soso', 'site', { col: 3, row: 1 }, ['3D', 'web'], 'live', 'a 3D archive of a champion’s career'),
+  product('2handholdem', 'site', { col: 4, row: 1 }, ['web', 'iPhone'], 'live', 'a patented table game, playable in the browser'),
 ];
 
 export const schools = education.map((e) => ({ school: e.school, degree: e.degree, dates: e.dates, note: e.note }));
@@ -315,7 +296,7 @@ export const kindLabel: Record<NodeKind, string> = {
   sink: 'output',
 };
 
-/** Old links from the 3D sky and the town still land somewhere sensible. */
+/** Old links from the 3D sky and the retired town land on the homepage galaxy. */
 export const legacyToTown = ['townhall', 'study', 'trine', 'trinity', 'play', 'hct-2016-spring', 'americas-2016', 'hct-2017-summer', 'wild-2019', 'americas-2025', 'achievements', 'mail', 'welcome', 'record'];
 export const legacyAlias: Record<string, string> = {
   work: 'stealth',
