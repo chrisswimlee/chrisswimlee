@@ -5,7 +5,8 @@
 .hire-hero {
   position: relative;
   z-index: 2;
-  padding: calc(var(--nav-offset, var(--nav-h)) + clamp(1.6rem, 5vh, 3.5rem)) 0 clamp(2.4rem, 7vh, 4rem);
+  /* The nav is sticky (in flow), so it doesn't need adding to the top padding. */
+  padding: clamp(1.6rem, 5vh, 3.2rem) 0 clamp(1.6rem, 4vh, 2.6rem);
 }
 
 .hire-hero-main {
@@ -203,7 +204,7 @@
 /* Phones and tablets: a small portrait beside the name, numbers in a 2×2. */
 @media (max-width: 860px) {
   .hire-hero {
-    padding-top: calc(var(--nav-offset, 52px) + 1.6rem);
+    padding-top: 1.4rem;
   }
 
   .hire-id {
@@ -249,4 +250,9 @@
 
 .hire-page .contact-box h2 {
   max-width: 14ch;
+}
+
+/* Projects come right after the numbers, so start them close to the fold. */
+.hire-page .paper > .section:first-child {
+  padding-top: clamp(1.2rem, 3vw, 2rem);
 }

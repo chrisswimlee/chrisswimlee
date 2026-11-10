@@ -34,12 +34,11 @@ export const site = {
 
 export const nav = [
   { href: '/hire/', label: 'Hire me' },
-  { href: '/#localhost', label: 'local-host.ai' },
-  { href: '/connectingCaptions/', label: 'Captions' },
   { href: '/experience/', label: 'Experience' },
-  { href: '/map/', label: 'System map' },
-  { href: '/', label: 'Home' },
+  { href: '/connectingCaptions/', label: 'Captions' },
+  { href: '/#localhost', label: 'local-host.ai' },
 ];
+// The town and the system map are extras: linked from the homepage and footer, not the top nav.
 
 export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Pricing — Chris Swim Lee')}&body=${encodeURIComponent('Which tier: scoping call, architecture audit, custom build, or complete works\n\nWhat you need:\n\nConstraint:\n')}`;
 

@@ -480,3 +480,68 @@ html.world-flat .world-archive {
     padding-bottom: 5.2rem;
   }
 }
+
+/* Secondary ways in: the town and the system map are extras, not equals.
+   Desktop: in the hint line at the bottom, so the centred intro keeps its size.
+   Phones: under the hiring button, where the intro sits above the grid. */
+.world-intro-extras {
+  display: none;
+  width: fit-content;
+  margin: 0.45rem auto 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hint-extras {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.hint-extras a {
+  pointer-events: auto;
+  color: var(--ink);
+  text-underline-offset: 0.2em;
+}
+
+.world.is-in .hint-extras a {
+  pointer-events: none;
+}
+
+.world-intro-extras a {
+  pointer-events: auto;
+  color: var(--ink);
+  text-underline-offset: 0.2em;
+}
+
+.world.is-in .world-intro-extras a {
+  pointer-events: none;
+}
+
+/* Light mode: pale glass labels vanish on the pale sky, so give them a solid card. */
+html[data-theme='light'] .world-label {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 0 0 1px var(--line-strong), 0 6px 18px -10px rgba(28, 36, 46, 0.45);
+  text-shadow: none;
+}
+
+@media (max-width: 800px) {
+  .world-intro-extras {
+    display: block;
+  }
+
+  .hint-extras {
+    display: none;
+  }
+
+  /* The grid labels already list every world on phones; the rail only returns
+     once a world is open, to hop between them. */
+  .world:not(.is-in) .world-rail {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .world:not(.is-in) .world-intro-hint {
+    bottom: calc(max(0.65rem, env(safe-area-inset-bottom)) + 0.4rem);
+  }
+}

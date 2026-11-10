@@ -1357,7 +1357,9 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         continue;
       }
       const [lx, ly] = floater.label;
-      projected.set(floater.group.position.x + lx, floater.group.position.y + ly, floater.group.position.z);
+      // Phones: pin labels to the resting spot, not the drifting object, so each row stays level.
+      const at = camera.aspect < 1 ? floater.anchor : floater.group.position;
+      projected.set(at.x + lx, at.y + ly, at.z);
       galaxy.localToWorld(projected);
       projected.project(camera);
       if (projected.z > 1) {
@@ -1411,7 +1413,8 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     galaxy.rotation.x = pitch;
     camera.position.z += (targetDist - camera.position.z) * 0.08;
     const held = focusId ? stagePos() : null;
-    if (held) lookTo.set(held.x + 0.85, held.y * 0.35, 0);
+    // Desktop looks a little right of the object so it sits left of the panel; phones keep it centred.
+    if (held) lookTo.set(held.x + (camera.aspect < 1 ? 0 : 0.85), held.y * 0.35, 0);
     else lookTo.set(0, 0, 0);
     look.lerp(lookTo, reduced ? 1 : 0.12);
     camera.lookAt(look);

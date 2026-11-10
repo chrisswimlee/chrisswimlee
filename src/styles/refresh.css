@@ -1,0 +1,66 @@
+/* Design refresh, loaded after global.css.
+   One warm accent for actions (it matches the gold in the name), and the sans
+   for buttons and nav so the uppercase mono is saved for small labels and dates. */
+
+.btn {
+  font: 500 0.92rem/1 var(--sans);
+  letter-spacing: 0.005em;
+  text-transform: none;
+}
+
+.btn:hover {
+  color: var(--bg);
+  background: var(--ink);
+  border-color: var(--ink);
+  box-shadow: 0 12px 32px -14px color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+.btn-solid,
+a.btn-solid {
+  background: var(--warm);
+  border-color: var(--warm);
+  color: var(--bg);
+}
+
+.btn-solid:hover,
+a.btn-solid:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.nav-links,
+.nav-resume,
+.nav-theme,
+.nav-toggle {
+  font-family: var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.nav-links {
+  font-size: 0.92rem;
+}
+
+.nav-resume,
+.nav-theme,
+.nav-toggle {
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.nav-links a[href='/hire/'] {
+  color: var(--warm);
+}
+
+.nav-links a.is-active::after,
+.nav-links a[aria-current='location']::after,
+.nav-links a[aria-current='page']::after {
+  background: var(--warm);
+}
+
+@media (max-width: 860px) {
+  .nav-links a {
+    font-size: 1rem;
+  }
+}
