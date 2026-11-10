@@ -282,7 +282,7 @@ const faceArt: Record<string, FaceArt> = {
     image: d22ArchiveShot,
     alt: 'The Living Archive at d22soso.com, a rotatable 3D map of Wayne Chiang’s career.',
   },
-  lattice: { image: localLatticeShot, alt: 'The Local Lattice repository on GitHub.' },
+  lattice: { image: localLatticeShot, alt: 'Diagram of Local Lattice routing a role to MLX, LM Studio, or a cloud key.' },
   trine: {
     image: trineStudy,
     alt: 'A graduation cap on a laptop under a brass lamp, card catalog drawers behind.',

@@ -722,3 +722,70 @@ html[data-theme='light'] .world-label {
     }
   }
 }
+
+/* --- Year scrubber ------------------------------------------------------- */
+.world-years {
+  position: absolute;
+  z-index: 4;
+  right: max(0.9rem, env(safe-area-inset-right));
+  bottom: calc(max(0.65rem, env(safe-area-inset-bottom)) + 74px);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font: 500 0.68rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: opacity 400ms ease;
+}
+.world-years input {
+  width: clamp(9rem, 18vw, 15rem);
+  accent-color: var(--accent);
+  cursor: ew-resize;
+}
+.world-years output {
+  min-width: 3.2em;
+  font: 400 italic 1.5rem/1 var(--display);
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: var(--ink);
+}
+.world-years button {
+  min-height: 32px;
+  padding: 0 0.6rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  color: var(--ink);
+  font: inherit;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.world:not(.is-ready) .world-years,
+.world.is-in .world-years {
+  opacity: 0;
+  pointer-events: none;
+}
+.world-label {
+  transition: opacity 320ms ease;
+}
+.world-label.is-off {
+  opacity: 0.28;
+}
+.world.is-year .world-rail button:not(.is-year-on) {
+  opacity: 0.4;
+}
+.world-rail button.is-year-on {
+  color: var(--ink);
+  border-top-color: var(--accent);
+}
+html.world-flat .world-years {
+  display: none !important;
+}
+/* Phones list the worlds as a grid and hide the rail, so the scrubber goes too. */
+@media (max-width: 800px), (pointer: coarse) {
+  .world-years {
+    display: none;
+  }
+}

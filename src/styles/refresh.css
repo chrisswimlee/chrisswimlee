@@ -173,3 +173,187 @@ a.btn-solid:hover {
     transform: none;
   }
 }
+
+/* Display type carries the inner pages. */
+.section-head h2 {
+  font-size: clamp(3rem, 9vw, 6.6rem);
+  letter-spacing: -0.055em;
+}
+.section-head .note {
+  font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+  max-width: 24ch;
+}
+.story-page .resume-top h1 {
+  font-size: clamp(3rem, 9.5vw, 7.2rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  padding-inline-end: 0.08em;
+  overflow-wrap: anywhere;
+}
+.story-page .resume-meta {
+  max-width: 46rem;
+  margin-top: 1.4rem;
+}
+.story-lede {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  line-height: 1.22;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+/* Measured results on a project page. */
+.story-proof {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem 2rem;
+  margin: 0 0 2rem;
+  padding: 1.2rem 0;
+  border-block: 1px solid var(--line-strong);
+}
+.story-proof dt {
+  font-family: var(--display);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.story-proof dd {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+}
+
+/* The world panel's picture and title carry over into the project page. */
+.story-hero {
+  view-transition-name: work-hero;
+}
+.story-title {
+  view-transition-name: work-title;
+}
+.world-panel .is-story-art {
+  view-transition-name: work-hero;
+}
+.world-panel .is-story-title {
+  view-transition-name: work-title;
+}
+::view-transition-group(work-hero),
+::view-transition-group(work-title) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(work-hero),
+::view-transition-new(work-hero) {
+  height: 100%;
+  object-fit: cover;
+  overflow: clip;
+}
+::view-transition-old(work-title),
+::view-transition-new(work-title) {
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+.world-art a {
+  display: block;
+}
+
+/* A still starfield: the first thing painted on the homepage, before the 3D sky draws
+   over it, and the backdrop of the 404 page. */
+:root {
+  --star: rgba(232, 240, 248, 0.75);
+  --star-warm: rgba(224, 177, 92, 0.85);
+}
+html[data-theme='light'] {
+  --star: rgba(28, 36, 46, 0.28);
+  --star-warm: rgba(160, 112, 20, 0.55);
+}
+.world::before,
+.missing-sky {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(2.2px 2.2px at 12% 22%, var(--star) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 31% 68%, var(--star) 50%, transparent 51%),
+    radial-gradient(2.2px 2.2px at 47% 12%, var(--star-warm) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 58% 44%, var(--star) 50%, transparent 51%),
+    radial-gradient(2.2px 2.2px at 73% 81%, var(--star) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 86% 30%, var(--star-warm) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 94% 62%, var(--star) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 5% 88%, var(--star) 50%, transparent 51%);
+  background-size: 420px 380px;
+}
+.world::before {
+  z-index: 0;
+}
+.world-archive {
+  position: relative;
+  z-index: 1;
+}
+
+/* 404, set in the galaxy. */
+.missing {
+  position: relative;
+  min-height: min(78vh, 46rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: clip;
+}
+.missing > :not(.missing-sky, .missing-code) {
+  position: relative;
+}
+.missing-sky {
+  inset: 0 -50vw;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+}
+.missing-code {
+  position: absolute;
+  right: -0.04em;
+  top: 50%;
+  margin: 0;
+  translate: 0 -50%;
+  font: 300 italic clamp(9rem, 34vw, 26rem) / 0.8 var(--display);
+  letter-spacing: -0.06em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--line-strong);
+  user-select: none;
+}
+.missing-title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 8vw, 5.6rem);
+  line-height: 0.95;
+  text-wrap: balance;
+}
+.missing-title em {
+  color: var(--warm);
+  display: inline-block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .missing-code {
+    animation: missing-drift 14s ease-in-out infinite alternate;
+  }
+  .missing-title em {
+    animation: missing-off 5s var(--ease-buoy) infinite alternate;
+  }
+}
+@keyframes missing-drift {
+  from {
+    transform: translate3d(0, -10px, 0) rotate(-2deg);
+  }
+  to {
+    transform: translate3d(-18px, 12px, 0) rotate(3deg);
+  }
+}
+@keyframes missing-off {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate3d(0.12em, -0.12em, 0) rotate(7deg);
+  }
+}

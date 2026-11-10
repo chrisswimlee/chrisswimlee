@@ -1,6 +1,9 @@
 ---
 import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
+import CaptionsDemo from '../../components/CaptionsDemo.astro';
+import LatticeDemo from '../../components/LatticeDemo.astro';
+import '../../styles/demos.css';
 import { projects, site, storyPath } from '../../data/site';
 
 export function getStaticPaths() {
@@ -38,7 +41,7 @@ const jsonLd = {
     <div class="resume-top">
       <div>
         <p class="kicker">{project.kind} · {project.year}</p>
-        <h1>{project.title}</h1>
+        <h1 class="story-title">{project.title}</h1>
       </div>
       <div class="resume-meta">
         <p class="story-lede">{project.summary}</p>
@@ -64,10 +67,23 @@ const jsonLd = {
       </div>
     </div>
 
+    {
+      story.proof && story.proof.length > 0 && (
+        <dl class="story-proof">
+          {story.proof.map((item) => (
+            <div>
+              <dt>{item.value}</dt>
+              <dd>{item.label}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+
     <div class:list={['project-shots', story.shots.length === 1 && 'story-shots-single']}>
       {
         story.shots.map((shot, index) => (
-          <figure class="project-shot">
+          <figure class:list={['project-shot', index === 0 && 'story-hero']}>
             <Image
               src={shot.image}
               alt={shot.alt}
@@ -86,6 +102,9 @@ const jsonLd = {
         ))
       }
     </div>
+
+    {project.id === 'connectingCaptions' && <CaptionsDemo />}
+    {project.id === 'lattice' && <LatticeDemo />}
 
     <div class="project-split">
       <section class="resume-block">

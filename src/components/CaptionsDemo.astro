@@ -1,0 +1,112 @@
+---
+/**
+ * A scripted replay of the Connecting Captions Theater window: English arrives word by
+ * word, and each Korean line appears once its sentence is finished.
+ */
+const lines = [
+  ['Good morning, everyone.', '여러분, 좋은 아침입니다.'],
+  ['Today we’ll look at three ideas.', '오늘은 세 가지 아이디어를 살펴보겠습니다.'],
+  ['Feel free to ask questions at any time.', '언제든지 편하게 질문해 주세요.'],
+  ['Let’s start with the first one.', '첫 번째부터 시작하겠습니다.'],
+];
+---
+
+<section class="demo cc-demo" aria-labelledby="cc-demo-title" data-cc-demo>
+  <div class="demo-head">
+    <h2 id="cc-demo-title">Try it</h2>
+    <p class="demo-note">A replay of the Theater window. The app listens to your mic instead.</p>
+  </div>
+  <div class="cc-stage" aria-live="off">
+    <div class="cc-bar">
+      <span class="cc-pill"><span class="cc-dot" aria-hidden="true"></span>English → Korean · on this Mac</span>
+      <button class="cc-toggle" type="button" data-cc-toggle aria-pressed="true">Pause</button>
+    </div>
+    <ol class="cc-lines" data-cc-lines>
+      {
+        lines.map(([en, ko]) => (
+          <li class="cc-line is-done" data-en={en} data-ko={ko}>
+            <p class="cc-en">{en}</p>
+            <p class="cc-ko" lang="ko">{ko}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (const root of document.querySelectorAll<HTMLElement>('[data-cc-demo]')) {
+    const list = root.querySelector<HTMLOListElement>('[data-cc-lines]')!;
+    const toggle = root.querySelector<HTMLButtonElement>('[data-cc-toggle]')!;
+    const items = [...list.querySelectorAll<HTMLLIElement>('.cc-line')];
+    const data = items.map((li) => ({ en: li.dataset.en!, ko: li.dataset.ko! }));
+    if (reduce) {
+      toggle.hidden = true;
+      continue;
+    }
+
+    let playing = true;
+    let visible = false;
+    let timer = 0;
+    let line = 0;
+    let word = 0;
+
+    const render = () => {
+      items.forEach((li, i) => {
+        const en = li.querySelector('.cc-en')!;
+        const ko = li.querySelector('.cc-ko')!;
+        if (i < line) {
+          en.textContent = data[i].en;
+          li.className = 'cc-line is-done';
+        } else if (i === line) {
+          const words = data[i].en.split(' ');
+          en.textContent = words.slice(0, word).join(' ');
+          li.className = word >= words.length ? 'cc-line is-done' : 'cc-line is-live';
+        } else {
+          en.textContent = '';
+          li.className = 'cc-line is-wait';
+        }
+        ko.toggleAttribute('hidden', !li.classList.contains('is-done'));
+      });
+    };
+
+    const step = () => {
+      if (!playing || !visible) return;
+      const words = data[line].en.split(' ');
+      let wait = 230 + Math.random() * 140;
+      if (word < words.length) {
+        word += 1;
+        if (word === words.length) wait = 1500;
+      } else if (line < data.length - 1) {
+        line += 1;
+        word = 0;
+        wait = 500;
+      } else {
+        line = 0;
+        word = 0;
+        wait = 900;
+      }
+      render();
+      timer = window.setTimeout(step, wait);
+    };
+
+    line = 0;
+    word = 0;
+    render();
+
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      clearTimeout(timer);
+      if (visible) timer = window.setTimeout(step, 400);
+    }).observe(root);
+
+    toggle.addEventListener('click', () => {
+      playing = !playing;
+      toggle.textContent = playing ? 'Pause' : 'Play';
+      toggle.setAttribute('aria-pressed', String(playing));
+      clearTimeout(timer);
+      if (playing) timer = window.setTimeout(step, 200);
+    });
+  }
+</script>

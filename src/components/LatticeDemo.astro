@@ -1,0 +1,133 @@
+---
+/**
+ * An illustration of Local Lattice routing: pick a role and a mode, and watch the request
+ * go to one backend, or fan out to several and come back as one answer.
+ */
+const roles = ['coder', 'reasoner', 'fast'] as const;
+const modes = [
+  ['single', 'One model'],
+  ['vote', 'Vote'],
+  ['chain', 'Chain'],
+  ['debate', 'Debate'],
+] as const;
+const backends = [
+  ['mlx', 'MLX', 'on-device'],
+  ['lms', 'LM Studio', 'local server'],
+  ['cloud', 'Cloud key', 'your API key'],
+] as const;
+---
+
+<section class="demo lat-demo" aria-labelledby="lat-demo-title" data-lat-demo>
+  <div class="demo-head">
+    <h2 id="lat-demo-title">Try it</h2>
+    <p class="demo-note">An illustration of how a request is routed. Which model fills each role is up to you.</p>
+  </div>
+  <div class="lat-stage">
+    <div class="lat-controls">
+      <div class="lat-group" role="group" aria-label="Role">
+        <span class="lat-label">Ask for</span>
+        {
+          roles.map((role, i) => (
+            <button type="button" class="lat-chip" data-role={role} aria-pressed={i === 0 ? 'true' : 'false'}>
+              role:{role}
+            </button>
+          ))
+        }
+      </div>
+      <div class="lat-group" role="group" aria-label="Mode">
+        <span class="lat-label">Mode</span>
+        {
+          modes.map(([mode, label], i) => (
+            <button type="button" class="lat-chip" data-mode={mode} aria-pressed={i === 0 ? 'true' : 'false'}>
+              {label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="lat-flow">
+      <div class="lat-node lat-app">
+        <span class="lat-node-k">Your app</span>
+        <code data-lat-req>model: "role:coder"</code>
+      </div>
+      <div class="lat-wire" aria-hidden="true"><span class="lat-pulse"></span></div>
+      <div class="lat-node lat-core">
+        <span class="lat-node-k">Lattice</span>
+        <strong data-lat-mode>One model</strong>
+      </div>
+      <ul class="lat-backends">
+        {
+          backends.map(([id, name, note]) => (
+            <li class="lat-node lat-be" data-be={id}>
+              <span>{name}</span>
+              <small>{note}</small>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <p class="lat-log" aria-live="polite" data-lat-log></p>
+  </div>
+</section>
+
+<script>
+  type Mode = 'single' | 'vote' | 'chain' | 'debate';
+  const pick: Record<string, string[]> = {
+    coder: ['mlx'],
+    reasoner: ['cloud'],
+    fast: ['lms'],
+  };
+  const all = ['mlx', 'lms', 'cloud'];
+  const describe = (role: string, mode: Mode, used: string[]) => {
+    const names: Record<string, string> = { mlx: 'MLX', lms: 'LM Studio', cloud: 'the cloud key' };
+    const list = used.map((id) => names[id]);
+    const joined = list.length > 1 ? `${list.slice(0, -1).join(', ')} and ${list.at(-1)}` : list[0];
+    if (mode === 'single') return `role:${role} goes to the model you mapped to it, here on ${joined}.`;
+    if (mode === 'vote') return `The same question goes to ${joined}. The answer most of them agree on comes back.`;
+    if (mode === 'chain') return `${list[0]} drafts, then ${list.slice(1).join(' and ')} refine it in turn.`;
+    return `${joined} argue it out, and a final pass writes one answer.`;
+  };
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (const root of document.querySelectorAll<HTMLElement>('[data-lat-demo]')) {
+    let role = 'coder';
+    let mode: Mode = 'single';
+    let run = 0;
+    const req = root.querySelector('[data-lat-req]')!;
+    const modeLabel = root.querySelector('[data-lat-mode]')!;
+    const log = root.querySelector('[data-lat-log]')!;
+    const bes = [...root.querySelectorAll<HTMLElement>('[data-be]')];
+
+    const go = async () => {
+      const id = ++run;
+      const used = mode === 'single' ? pick[role] : mode === 'chain' ? [pick[role][0], ...all.filter((b) => b !== pick[role][0])] : all;
+      req.textContent = `model: "role:${role}"`;
+      modeLabel.textContent = root.querySelector(`[data-mode="${mode}"]`)!.textContent!.trim();
+      root.classList.remove('is-sending');
+      bes.forEach((b) => b.classList.remove('is-on'));
+      void root.offsetWidth;
+      root.classList.add('is-sending');
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+      await wait(520);
+      for (const be of used) {
+        if (id !== run) return;
+        root.querySelector(`[data-be="${be}"]`)!.classList.add('is-on');
+        await wait(mode === 'chain' ? 420 : 120);
+      }
+      if (id === run) log.textContent = describe(role, mode, used);
+    };
+
+    root.addEventListener('click', (e) => {
+      const btn = (e.target as Element).closest<HTMLButtonElement>('.lat-chip');
+      if (!btn) return;
+      const key = btn.dataset.role ? 'data-role' : 'data-mode';
+      root.querySelectorAll(`[${key}]`).forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      if (btn.dataset.role) role = btn.dataset.role;
+      if (btn.dataset.mode) mode = btn.dataset.mode as Mode;
+      go();
+    });
+    go();
+  }
+</script>

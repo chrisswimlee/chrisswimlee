@@ -170,6 +170,8 @@ type ProjectStory = {
   stack: string[];
   shots: { image: ImageMetadata; alt: string }[];
   brief: { problem: string; constraint: string; decision: string; outcome: string };
+  /** Measured results, shown as a row of figures under the title. Only add real numbers. */
+  proof?: { value: string; label: string }[];
 };
 
 export const projects: Project[] = [

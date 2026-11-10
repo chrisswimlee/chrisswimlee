@@ -38,15 +38,54 @@ export type FloatWorld = {
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch] ?? ch);
 
-function mat(color: string, roughness = 0.55, metalness = 0.18) {
-  return new THREE.MeshStandardMaterial({ color, roughness, metalness });
+// One art direction: every object is the same soft matte, lit by the same sun.
+// Callers may ask for something rougher, never glossier or more metallic.
+const MATTE = 0.74;
+const SHEEN = 0.04;
+function mat(color: string, roughness = MATTE, metalness = SHEEN) {
+  return new THREE.MeshStandardMaterial({
+    color,
+    roughness: Math.max(roughness, MATTE),
+    metalness: Math.min(metalness, SHEEN),
+  });
+}
+
+/** The same soft shadow sits under every object, so they read as one set. */
+let shadowTex: THREE.Texture | null = null;
+function groundShadow(group: THREE.Object3D) {
+  if (!shadowTex) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d')!;
+    const grad = g.createRadialGradient(64, 64, 4, 64, 64, 64);
+    grad.addColorStop(0, 'rgba(0,0,0,0.55)');
+    grad.addColorStop(0.55, 'rgba(0,0,0,0.18)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 128, 128);
+    shadowTex = new THREE.CanvasTexture(c);
+  }
+  const bounds = new THREE.Box3().setFromObject(group);
+  const size = bounds.getSize(new THREE.Vector3());
+  const centre = bounds.getCenter(new THREE.Vector3());
+  const shadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.5, fog: false }),
+  );
+  shadow.rotation.x = -Math.PI / 2;
+  shadow.scale.set(Math.max(size.x, 0.6) * 1.25, Math.max(size.z, 0.5) * 1.7, 1);
+  shadow.position.set(centre.x, bounds.min.y - 0.1, centre.z);
+  shadow.renderOrder = -1;
+  shadow.userData.shadow = true;
+  shadow.visible = document.documentElement.dataset.theme === 'light';
+  group.add(shadow);
 }
 
 function glow(color: string, emit = 0.55) {
   const material = new THREE.MeshStandardMaterial({
     color,
-    roughness: 0.4,
-    metalness: 0.2,
+    roughness: MATTE,
+    metalness: SHEEN,
     emissive: color,
     emissiveIntensity: emit,
   });
@@ -450,7 +489,7 @@ function buildHait(world: FloatWorld) {
     put(group, book, -0.42 * s, -0.58 * s + i * 0.1 * s, 0.28);
   });
   const apple = new THREE.Group();
-  const skin = new THREE.MeshStandardMaterial({ color: '#a3141a', roughness: 0.3, metalness: 0.05, emissive: '#3a0406', emissiveIntensity: 0.3 });
+  const skin = new THREE.MeshStandardMaterial({ color: '#a3141a', roughness: MATTE, metalness: SHEEN, emissive: '#3a0406', emissiveIntensity: 0.3 });
   const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.09 * s, 20, 14), skin);
   fruit.scale.set(1.05, 0.92, 1.05);
   put(apple, fruit, 0, 0, 0);
@@ -948,7 +987,22 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
 
   const applyTheme = () => {
     const light = document.documentElement.dataset.theme === 'light';
-    const bg = new THREE.Color(light ? 0xdfe4ee : 0x04060d);
+    // The sky follows the visitor's clock: warm at dawn and dusk, clear by day, deep at night.
+    const hour = new Date().getHours();
+    const part = hour >= 5 && hour < 8 ? 'dawn' : hour >= 8 && hour < 17 ? 'day' : hour >= 17 && hour < 20 ? 'dusk' : 'night';
+    const skies = {
+      dawn: { light: 0xe6e3e4, dark: 0x0b0810, sun: 0xffd9b0 },
+      day: { light: 0xdfe4ee, dark: 0x050915, sun: 0xfff1d8 },
+      dusk: { light: 0xe2e1ea, dark: 0x0c0712, sun: 0xffcf9e },
+      night: { light: 0xd9deea, dark: 0x04060d, sun: 0xe6ecff },
+    }[part];
+    root.dataset.sky = part;
+    sun.color.setHex(skies.sun);
+    const bg = new THREE.Color(light ? skies.light : skies.dark);
+    // Soft ground shadows only read against the pale sky.
+    scene.traverse((obj) => {
+      if (obj.userData.shadow) obj.visible = light;
+    });
     scene.background = bg;
     scene.fog = new THREE.Fog(bg, 14, 34);
     // Stars and nebulae are tuned per theme; the dark station frames read
@@ -1062,6 +1116,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const group = buildWorld(world);
     const homeScale = homeFit[world.id] ?? 1;
     const span = objectSpan(group);
+    groundShadow(group);
     group.scale.setScalar(homeScale);
     const [nx, ny] = nudge[world.id] ?? [0, 0];
     const anchor = new THREE.Vector3(world.position[0] + nx, world.position[1] + ny, depth[world.id] ?? 0);
@@ -1101,8 +1156,34 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     .map((w) => `<button type="button" data-go="${esc(w.id)}"><small>${esc(w.when)}</small>${esc(w.rail)}</button>`)
     .join('');
 
+  const years = worlds.flatMap((w) => (w.when.match(/\d{4}/g) ?? []).map(Number));
+  const firstYear = Math.min(...years, new Date().getFullYear());
+  const yearsEl = document.createElement('div');
+  yearsEl.className = 'world-years';
+  yearsEl.innerHTML = `
+    <label for="world-year">Drag through the years</label>
+    <input id="world-year" type="range" min="${firstYear}" max="${new Date().getFullYear()}" step="1" value="${new Date().getFullYear()}" />
+    <output for="world-year" data-year-out>All</output>
+    <button type="button" data-year-all hidden>All years</button>`;
+  railEl.before(yearsEl);
+  const yearInput = yearsEl.querySelector<HTMLInputElement>('input')!;
+  const yearOut = yearsEl.querySelector<HTMLOutputElement>('[data-year-out]')!;
+  const yearAll = yearsEl.querySelector<HTMLButtonElement>('[data-year-all]')!;
+
   let focusId: string | null = null;
   let hoverId: string | null = null;
+  // Year scrubber: worlds outside the chosen year fade back.
+  let yearFilter: number | null = null;
+  // Opening a write-up pushes the camera in before the page changes.
+  let dive = 0;
+  const thisYear = new Date().getFullYear();
+  const activeIn = (when: string, year: number) => {
+    const nums = (when.match(/\d{4}/g) ?? []).map(Number);
+    if (!nums.length) return true;
+    if (when.includes('·')) return nums.includes(year);
+    const end = /present/i.test(when) ? thisYear : nums[nums.length - 1];
+    return year >= nums[0] && year <= end;
+  };
   let aspectIndex = 0;
   let targetYaw = 0;
   let targetPitch = 0;
@@ -1140,15 +1221,33 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   function applyDim() {
     for (const floater of floaters) {
       const dimmed = focusId !== null && focusId !== floater.id;
+      const off = !dimmed && focusId === null && yearFilter !== null && !activeIn(floater.world.when, yearFilter);
       for (const { mat, base } of floater.mats) {
-        mat.opacity = base * (dimmed ? 0.05 : 1);
+        mat.opacity = base * (dimmed ? 0.05 : off ? 0.12 : 1);
         mat.transparent = Boolean(mat.userData.keepTransparent) || mat.opacity < 0.99;
-        mat.depthWrite = !dimmed;
+        mat.depthWrite = !dimmed && !off;
       }
+      labels.get(floater.id)?.classList.toggle('is-off', off);
       // Faint ghosts behind the open world read as clutter; hide them outright.
       floater.group.visible = !dimmed;
     }
   }
+
+  function setYear(year: number | null) {
+    yearFilter = year;
+    const on = year === null ? [] : worlds.filter((w) => activeIn(w.when, year));
+    yearOut.textContent = year === null ? 'All' : String(year);
+    yearAll.hidden = year === null;
+    root.classList.toggle('is-year', year !== null);
+    railEl.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((button) => {
+      button.classList.toggle('is-year-on', year !== null && on.some((w) => w.id === button.dataset.go));
+    });
+    applyDim();
+    wake();
+    if (year !== null) say(`${year}: ${on.map((w) => w.rail).join(', ') || 'nothing yet'}.`);
+  }
+  yearInput.addEventListener('input', () => setYear(Number(yearInput.value)), { signal });
+  yearAll.addEventListener('click', () => setYear(null), { signal });
 
   function renderPanel(world: FloatWorld, index: number, dir = 0) {
     const aspect = world.aspects[index] ?? world.aspects[0];
@@ -1160,11 +1259,14 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const activeStep = activeEl && panelBodyEl.contains(activeEl) ? activeEl.dataset.step : undefined;
     const activeClose = Boolean(activeEl && panelBodyEl.contains(activeEl) && activeEl.closest('[data-close-panel]'));
     const ext = (href: string) => /^https?:\/\//.test(href);
+    // An aspect with a write-up: its picture and title carry into that page (see refresh.css).
+    const story = aspect.links.find((link) => link.href.startsWith('/work/'))?.href;
+    const art = aspect.art ? `<img src="${esc(aspect.art.src)}" alt="${esc(aspect.art.alt)}" loading="lazy" decoding="async" />` : '';
     panelBodyEl.innerHTML = `
       <p class="world-kicker">${esc(world.kicker)} · ${esc(world.when)}</p>
-      <h2 id="world-panel-title">${esc(aspect.title)}</h2>
+      <h2 id="world-panel-title"><span${story ? ' class="is-story-title"' : ''}>${esc(aspect.title)}</span></h2>
       <p class="world-meta">${esc(world.place)}</p>
-      ${aspect.art ? `<figure class="world-art"><img src="${esc(aspect.art.src)}" alt="${esc(aspect.art.alt)}" loading="lazy" decoding="async" /></figure>` : ''}
+      ${art ? `<figure class="world-art${story ? ' is-story-art' : ''}">${story ? `<a href="${esc(story)}" aria-label="Read more about ${esc(aspect.title)}">${art}</a>` : art}</figure>` : ''}
       <p class="world-line">${esc(aspect.line)}</p>
       ${aspect.points.filter((point) => point !== aspect.line).length ? `<ul>${aspect.points.filter((point) => point !== aspect.line).slice(0, 3).map((point) => `<li>${esc(point)}</li>`).join('')}</ul>` : ''}
       ${aspect.links.length ? `<p class="world-links">${aspect.links.map((link) => `<a href="${esc(link.href)}"${ext(link.href) ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(link.label)}</a>`).join('')}</p>` : ''}
@@ -1198,6 +1300,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     }
     focusId = id;
     hoverId = null;
+    if (yearFilter !== null) setYear(null);
     wake(swingMs + 200);
     targetYaw = 0;
     targetPitch = 0;
@@ -1252,9 +1355,21 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       }
       return;
     }
+    const more = el.closest<HTMLAnchorElement>('[data-world-panel] a[href^="/work/"]');
+    const plain = e instanceof MouseEvent && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+    if (more && plain && !reduced && !dive) {
+      // Push in toward the object, then let the page transition carry its picture across.
+      e.preventDefault();
+      dive = 3.2;
+      wake(600);
+      window.setTimeout(() => (location.href = more.href), 240);
+      return;
+    }
     const go = el.closest<HTMLElement>('[data-go]');
     if (go?.dataset.go) focus(go.dataset.go);
   }, { signal });
+  // Coming back from the write-up (bfcache) restores the normal distance.
+  addEventListener('pageshow', () => (dive = 0), { signal });
 
   // --- Click to inspect, hover to lift -----------------------------------
   const raycaster = new THREE.Raycaster();
@@ -1366,6 +1481,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const target = e.target as Element | null;
     const typing = Boolean(target?.closest('input, textarea, select, [contenteditable="true"]'));
     if (e.key === 'Escape' && focusId && !typing) return unfocus();
+    if (e.key === 'Escape' && yearFilter !== null) return setYear(null);
     if (!focusId || typing) return;
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     const world = floaters.find((item) => item.id === focusId)?.world;
@@ -1564,7 +1680,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       targetPitch = 0;
     }
     const introK = skipEnter || focusId ? 1 : arrive(now, 0);
-    targetDist = (focusId ? inspectDist() : idleDist()) + (focusId ? 0 : (1 - introK) * 2.8);
+    targetDist = (focusId ? inspectDist() : idleDist()) + (focusId ? 0 : (1 - introK) * 2.8) - dive;
     yaw += (targetYaw - yaw) * ease(focusId ? 0.14 : 0.06);
     pitch += (targetPitch - pitch) * ease(focusId ? 0.14 : 0.06);
     rim.intensity += (((document.documentElement.dataset.theme === 'light' ? 0.28 : 0.55) * (focusId ? 1.35 : 1)) - rim.intensity) * ease(0.08);

@@ -1,0 +1,313 @@
+/* Live demos on project pages. The stages stay dark in both themes, like the apps they mimic. */
+.demo {
+  margin-top: clamp(2.4rem, 5vw, 3.6rem);
+}
+.demo-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1.5rem;
+  margin-bottom: 1rem;
+}
+.demo-head h2 {
+  margin: 0;
+}
+.demo-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* Connecting Captions */
+.cc-stage {
+  background: #07090c;
+  color: #e8f0f8;
+  border: 1px solid rgba(232, 244, 245, 0.12);
+  border-radius: 14px;
+  padding: clamp(1rem, 3vw, 1.6rem) clamp(1rem, 4vw, 2.4rem) clamp(1.4rem, 4vw, 2.2rem);
+  min-height: 22rem;
+  box-shadow: 0 30px 60px -40px rgba(0, 0, 0, 0.6);
+}
+.cc-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+.cc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 500 0.78rem/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: #93a6bc;
+}
+.cc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4fd1b5;
+  box-shadow: 0 0 0 0 rgba(79, 209, 181, 0.6);
+  animation: cc-pulse 1.8s ease-out infinite;
+}
+@keyframes cc-pulse {
+  to {
+    box-shadow: 0 0 0 10px rgba(79, 209, 181, 0);
+  }
+}
+.cc-toggle {
+  min-height: 36px;
+  padding: 0 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(232, 244, 245, 0.2);
+  background: transparent;
+  color: inherit;
+  font: 500 0.82rem var(--sans);
+  cursor: pointer;
+}
+.cc-toggle:hover {
+  border-color: rgba(232, 244, 245, 0.45);
+}
+.cc-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.1rem;
+}
+.cc-line p {
+  margin: 0;
+}
+.cc-en {
+  min-height: 1.4em;
+  font: 500 clamp(1.15rem, 2.4vw, 1.55rem) / 1.3 var(--sans);
+  color: #4fd1b5;
+}
+.cc-ko {
+  margin-top: 0.15rem !important;
+  font: 600 clamp(1.25rem, 2.8vw, 1.8rem) / 1.3 var(--sans);
+  color: #f4f7fb;
+  animation: cc-in 420ms var(--ease-buoy) both;
+}
+.cc-line.is-live .cc-en::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 4px;
+  vertical-align: -0.12em;
+  background: currentColor;
+  animation: cc-caret 0.9s steps(1) infinite;
+}
+.cc-line.is-done:not(:last-child) {
+  opacity: 0.55;
+}
+.cc-line.is-wait {
+  display: none;
+}
+@keyframes cc-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes cc-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Local Lattice */
+.lat-stage {
+  background: #07090c;
+  color: #e8f0f8;
+  border: 1px solid rgba(232, 244, 245, 0.12);
+  border-radius: 14px;
+  padding: clamp(1rem, 3vw, 1.8rem);
+  box-shadow: 0 30px 60px -40px rgba(0, 0, 0, 0.6);
+  --lat-accent: #6b9fff;
+}
+.lat-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 2rem;
+  margin-bottom: 1.6rem;
+}
+.lat-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+.lat-label {
+  font: 500 0.74rem var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93a6bc;
+  margin-right: 0.3rem;
+}
+.lat-chip {
+  min-height: 36px;
+  padding: 0 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(232, 244, 245, 0.16);
+  background: #0d131c;
+  color: #c9d6e6;
+  font: 500 0.82rem var(--mono);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.lat-chip:hover {
+  border-color: rgba(232, 244, 245, 0.4);
+}
+.lat-chip[aria-pressed='true'] {
+  border-color: var(--lat-accent);
+  background: #11223a;
+  color: #fff;
+}
+.lat-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 0 0.9rem;
+}
+.lat-node {
+  border: 1px solid rgba(232, 244, 245, 0.14);
+  border-radius: 10px;
+  background: #0d131c;
+  padding: 0.8rem 0.95rem;
+  display: grid;
+  gap: 0.25rem;
+}
+.lat-node-k {
+  font: 500 0.72rem var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93a6bc;
+}
+.lat-node code {
+  font: 0.86rem var(--mono);
+  color: #e8f0f8;
+  overflow-wrap: anywhere;
+}
+.lat-core {
+  border-color: var(--lat-accent);
+  background: #0b1626;
+  box-shadow: 0 0 40px -12px rgba(107, 159, 255, 0.45);
+}
+.lat-core strong {
+  font: 600 1.05rem var(--sans);
+}
+.lat-wire {
+  position: relative;
+  height: 2px;
+  background: rgba(107, 159, 255, 0.35);
+}
+.lat-pulse {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lat-accent);
+  opacity: 0;
+}
+.is-sending .lat-pulse {
+  animation: lat-send 520ms ease-in both;
+}
+@keyframes lat-send {
+  from {
+    left: 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    left: calc(100% - 8px);
+    opacity: 0;
+  }
+}
+.lat-backends {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.lat-be {
+  padding: 0.6rem 0.85rem;
+  transition: border-color 0.25s, background 0.25s, opacity 0.25s, transform 0.35s var(--ease-buoy);
+  opacity: 0.5;
+}
+.lat-be span {
+  font: 500 0.95rem var(--sans);
+}
+.lat-be small {
+  font: 0.74rem var(--mono);
+  color: #93a6bc;
+}
+.lat-be.is-on {
+  opacity: 1;
+  border-color: var(--lat-accent);
+  background: #11223a;
+  transform: translateX(4px);
+}
+.lat-log {
+  min-height: 3em;
+  margin: 1.4rem 0 0;
+  font: 0.95rem/1.5 var(--sans);
+  color: #c9d6e6;
+}
+
+@media (max-width: 700px) {
+  .lat-flow {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .lat-wire {
+    width: 2px;
+    height: 28px;
+    margin: 0 auto;
+  }
+  .lat-pulse {
+    left: -3px;
+  }
+  @keyframes lat-send {
+    from {
+      top: 0;
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    to {
+      top: calc(100% - 8px);
+      opacity: 0;
+    }
+  }
+  .lat-core {
+    margin-bottom: 0.9rem;
+  }
+  .lat-be.is-on {
+    transform: none;
+  }
+  .lat-controls {
+    gap: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-dot,
+  .cc-ko,
+  .cc-line.is-live .cc-en::after,
+  .is-sending .lat-pulse {
+    animation: none;
+  }
+  .lat-be {
+    transition: none;
+  }
+}
