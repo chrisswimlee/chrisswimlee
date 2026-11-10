@@ -2,7 +2,8 @@
 import { nav } from '../data/site';
 
 const path = Astro.url.pathname;
-const isCurrent = (href: string) => !href.includes('#') && path.startsWith(href);
+// '/' is a prefix of every path, so Home only counts on the homepage itself.
+const isCurrent = (href: string) => !href.includes('#') && (href === '/' ? path === '/' : path.startsWith(href));
 ---
 
 <header class="nav">

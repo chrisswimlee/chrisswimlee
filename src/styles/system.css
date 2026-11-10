@@ -323,7 +323,9 @@
 
 .sys-lane-more {
   display: inline-block;
-  margin-top: 0.7rem;
+  margin-top: 0.2rem;
+  /* Padding grows the tap target to ~32px without moving the text. */
+  padding: 0.5rem 0;
   font: 500 0.72rem/1 var(--mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -986,3 +988,9 @@ html[data-theme='light'] [data-kind='site'] { --k: #b03a74; }
 html[data-theme='light'] [data-kind='infra'] { --k: #5d6b79; }
 html[data-theme='light'] [data-kind='suite'] { --k: #8a5f0d; }
 html[data-theme='light'] [data-kind='course'] { --k: #806019; }
+
+/* The dark-theme green and amber are too light for small status text on the light background (WCAG AA). */
+html[data-theme='light'] .sys {
+  --sys-green: #16683f;
+  --sys-amber: #8a5a00;
+}

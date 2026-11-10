@@ -90,10 +90,10 @@ const og = new URL(site.ogImage, site.url).href;
     <meta name="twitter:image:alt" content={`${site.name}, ${site.location}`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href={fonts}
-      rel="stylesheet"
-    />
+    {/* Load the font CSS without blocking first paint; text shows in the fallback until it lands. */}
+    <link rel="preload" as="style" href={fonts} />
+    <link rel="stylesheet" href={fonts} media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href={fonts} /></noscript>
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Person',

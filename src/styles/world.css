@@ -100,7 +100,7 @@
   bottom: calc(max(0.65rem, env(safe-area-inset-bottom)) + 74px);
   margin: 0;
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
@@ -122,7 +122,6 @@
   }
 }
 
-.world:not(.is-ready) .world-intro,
 .world:not(.is-ready) .world-intro-hint,
 .world:not(.is-ready) .world-labels,
 .world:not(.is-ready) .world-rail {
@@ -390,7 +389,7 @@ html[data-theme='light'] .world-label {
 }
 
 .world-rail button small {
-  font: 500 0.62rem/1 var(--mono);
+  font: 500 0.68rem/1 var(--mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -450,9 +449,11 @@ html.world-flat .world-archive {
     height: 104px;
   }
 
-  /* Hire me is already in the nav; the overlay CTA covers the Work station. */
+  /* On phones the worlds sit in a grid below the intro, so the CTA has room. */
   .world-intro-hire {
-    display: none;
+    margin-top: 0.6rem;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.7rem;
   }
 
   .world-label strong {

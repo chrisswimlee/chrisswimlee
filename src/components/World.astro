@@ -130,7 +130,10 @@ const json = JSON.stringify(payload).replace(/</g, '\\u003c');
     Boolean(navigator.connection?.saveData) || matchMedia('(prefers-reduced-data: reduce)').matches;
   if (saveData) flat();
   else {
-    import('../scripts/float')
+    // Let the name and photo paint first; the 3D scene follows when the main thread is free.
+    const idle = (fn: () => void) =>
+      'requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 200);
+    idle(() => import('../scripts/float')
       .then(({ mountFloat }) => {
         if (!node?.textContent || !root) throw new Error('World payload missing');
         mountFloat(root, JSON.parse(node.textContent) as FloatWorld[]);
@@ -138,6 +141,6 @@ const json = JSON.stringify(payload).replace(/</g, '\\u003c');
       .catch((error) => {
         console.error(error);
         flat();
-      });
+      }));
   }
 </script>

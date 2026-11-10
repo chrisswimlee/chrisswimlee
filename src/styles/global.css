@@ -449,6 +449,9 @@ html[data-theme='light'] .nav-theme .to-dark {
 }
 
 .brand {
+  /* Padding makes the tap target ~44px tall (inline-flex would eat the spaces between words). */
+  display: inline-block;
+  padding-block: 0.5rem;
   font-family: var(--display);
   font-size: 1.45rem;
   font-weight: 500;

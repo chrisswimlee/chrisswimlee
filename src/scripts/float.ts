@@ -539,7 +539,7 @@ function buildArchive(world: FloatWorld) {
   put(group, new THREE.Mesh(new THREE.BoxGeometry(0.42 * s, 0.05 * s, 0.42 * s), bronze(lite, 0.3)), 0, 0.45 * s, 0);
 
   const marine = buildMarine(s);
-  marine.scale.setScalar(1.15);
+  marine.scale.setScalar(0.85);
   put(group, marine, 0, 0.48 * s, 0);
   bob(group, marine);
   const visor = marine.userData.visor as THREE.Material | undefined;
@@ -823,7 +823,15 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ac = new AbortController();
   const { signal } = ac;
-  const renderer = new THREE.WebGLRenderer({ canvas: view, antialias: true });
+  // Phones: high-DPR screens don't need MSAA, and 30fps is plenty for slow drift.
+  const lowPower = matchMedia('(pointer: coarse)').matches || innerWidth < 800;
+  const maxRatio = lowPower ? 1.5 : 2;
+  const frameGap = lowPower ? 30 : 12;
+  const renderer = new THREE.WebGLRenderer({
+    canvas: view,
+    antialias: !(lowPower && devicePixelRatio >= 2),
+    powerPreference: lowPower ? 'low-power' : 'default',
+  });
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
@@ -937,7 +945,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     study: [0, 0.62],
     localhost: [0, 0.48],
     phonecoding: [0, 0.72],
-    d22soso: [0, 0.42],
+    d22soso: [0, 0.6],
     play: [0, 0.34],
   };
   const homeFit: Record<string, number> = {
@@ -1294,7 +1302,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     camera.aspect = width / height;
     targetDist = focusId ? inspectDist() : idleDist();
     camera.updateProjectionMatrix();
-    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, maxRatio));
     renderer.setSize(width, height, false);
     layoutHomes(width, height);
     keepoutAt = 0;
@@ -1486,9 +1494,9 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   }
   let lastFrame = 0;
   function tick(now: number) {
-    if (!running) return;
+    if (!running || document.hidden) return;
     if (!root.classList.contains('is-ready') && (skipEnter || now - born > 90)) root.classList.add('is-ready');
-    if (now - lastFrame < 12) return;
+    if (now - lastFrame < frameGap) return;
     lastFrame = now;
     try {
       frame(now);
