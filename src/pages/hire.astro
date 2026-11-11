@@ -28,7 +28,8 @@ import { about, hire, hireMail, site } from '../data/site';
           <div class="contact-actions" data-reveal>
             <a class="mail" href={hireMail}>{site.email}</a>
             <div class="card-links">
-              <a class="btn btn-solid" href="/resume/">Resume</a>
+              <a class="btn btn-solid" href={site.resumePdf} download>Resume PDF</a>
+              <a class="btn" href="/resume/">Resume</a>
               <a class="btn" href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
               <a class="btn" href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>

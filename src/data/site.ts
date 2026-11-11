@@ -30,6 +30,7 @@ export const site = {
   ogImage: '/images/chris-og.jpg',
   jobTitle: 'Software Engineer',
   built: 'Data systems and local tools.',
+  resumePdf: '/chris-swim-lee-resume.pdf',
 };
 
 export const nav = [
@@ -75,10 +76,10 @@ export const hire = {
   lede: 'Three years at Goldman Sachs, then founding CTO of a fintech. Now I build local AI tools and teach a college AI course.',
   // Single source for the proof stats: HireHero and SystemMap both render this.
   proof: [
-    { value: '80%', label: 'less processing time on a 10,000-account system', source: 'Goldman Sachs' },
-    { value: '<100ms', label: 'from market feed to order book', source: 'Founding CTO' },
-    { value: '90%', label: 'less morning analysis with a daily pre-market brief', source: 'Founding CTO' },
-    { value: '50+', label: 'internal teams on my Kafka and REST pipelines', source: 'Goldman Sachs' },
+    { value: '80%', label: 'less processing time on a 10,000-account system', source: 'Goldman Sachs', href: '/work/goldman/' },
+    { value: '<100ms', label: 'from market feed to order book', source: 'Founding CTO', href: '/work/stealth/' },
+    { value: '90%', label: 'less morning analysis with a daily pre-market brief', source: 'Founding CTO', href: '/work/stealth/' },
+    { value: '50+', label: 'internal teams on my Kafka and REST pipelines', source: 'Goldman Sachs', href: '/work/goldman/' },
   ],
   recordNote: 'What each job was really about. The longer versions are under Experience.',
   workNote: 'Things I built and shipped on my own, with the source.',
@@ -380,6 +381,11 @@ export const projects: Project[] = [
 
 export const storyPath = (id: string) => `/work/${id}/`;
 
+/** Jobs whose measured results have a write-up page. Side projects use the same /work/ path. */
+export const caseStudyIds = ['goldman', 'stealth', 'onedave'] as const;
+
+export const isCaseStudy = (id: string) => (caseStudyIds as readonly string[]).includes(id);
+
 /** A project's links, plus “Read more” when it has a write-up page. */
 export const projectLinks = (project: Project) =>
   project.story ? [...project.links, { label: 'Read more', href: storyPath(project.id) }] : project.links;
@@ -525,6 +531,8 @@ export type Role = {
   scan: string;
   bullets: string[];
   projects: RoleProject[];
+  /** Measured results already stated in the bullets. Shown on the case-study page. */
+  figures?: { value: string; label: string }[];
 };
 
 export const roles: Role[] = [
@@ -622,6 +630,10 @@ export const roles: Role[] = [
       'Wrote agents that check portfolios against the SQL ledger.',
       'Owned the models: PyTorch time-series models that retrain around the clock, news processors that catch sudden moves, and a daily pre-market brief that cut morning analysis by 90%.',
     ],
+    figures: [
+      { value: '<100ms', label: 'from the Kraken feed to the order book' },
+      { value: '90%', label: 'less morning analysis with the pre-market brief' },
+    ],
     projects: [
       {
         id: 'stealth-ingest',
@@ -703,6 +715,13 @@ export const roles: Role[] = [
       'Built a Selenium and TestNG suite that raised test accuracy 22% across hundreds of financial and compliance scenarios.',
       'Kept supporting the trading, compliance, and market-data APIs after they shipped.',
     ],
+    figures: [
+      { value: '80%', label: 'less data processing time' },
+      { value: '10,000+', label: 'client accounts on the beneficiary system' },
+      { value: '50+', label: 'internal teams on the pipelines and APIs' },
+      { value: '15%', label: 'less data-access latency' },
+      { value: '22%', label: 'higher test accuracy' },
+    ],
     projects: [
       {
         id: 'gs-beneficiary',
@@ -782,6 +801,7 @@ export const roles: Role[] = [
       'Led a system-wide upgrade that cut email-server response time by 70%.',
       'Built and maintained secure National Defense web applications.',
     ],
+    figures: [{ value: '70%', label: 'faster email-server response after the upgrade' }],
     projects: [
       {
         id: 'od-curtis',

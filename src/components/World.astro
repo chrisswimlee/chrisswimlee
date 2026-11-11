@@ -24,19 +24,31 @@ const payload: FloatWorld[] = await Promise.all(
     scale: world.radius * 0.74,
     aspects: await Promise.all(
       world.aspects.map(async (aspect, aspectIndex) => {
-        // The first aspect doubles as the 3D station face (shown large);
-        // the rest only ever appear in the 380px panel, so ship them
-        // smaller. Panel <img> tags load lazily on open regardless.
-        const target = aspectIndex === 0 ? 760 : 480;
-        const width = Math.min(target, aspect.art.image.width);
-        const out = await getImage({ src: aspect.art.image, width, format: 'webp', quality: 76 });
+        // Staged scenes stay off the panel. A logo is shown when we have one.
+        // Real screenshots ship as photos. The first shot is larger because it
+        // can also face the camera on a 3D object.
+        const panel = aspect.art.panel ?? 'shot';
+        let art: { src: string; alt: string; mark?: boolean } | undefined;
+        if (panel === 'mark' && aspect.art.card) {
+          const image = aspect.art.card.image;
+          if (typeof image === 'string') art = { src: image, alt: aspect.title, mark: true };
+          else {
+            const out = await getImage({ src: image, width: 320, format: 'webp', quality: 82 });
+            art = { src: out.src, alt: aspect.title, mark: true };
+          }
+        } else if (panel !== 'none') {
+          const target = aspectIndex === 0 ? 760 : 480;
+          const width = Math.min(target, aspect.art.image.width);
+          const out = await getImage({ src: aspect.art.image, width, format: 'webp', quality: 76 });
+          art = { src: out.src, alt: aspect.art.alt };
+        }
         return {
           id: aspect.id,
           title: aspect.title,
           line: aspect.line,
           points: aspect.points,
           links: aspect.links,
-          art: { src: out.src, alt: aspect.art.alt },
+          art,
         };
       }),
     ),

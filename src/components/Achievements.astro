@@ -1,5 +1,5 @@
 ---
-import { achievementsNote, technicalAchievements } from '../data/site';
+import { achievementsNote, isCaseStudy, storyPath, technicalAchievements } from '../data/site';
 
 const note = Astro.props.note ?? achievementsNote;
 ---
@@ -17,6 +17,9 @@ const note = Astro.props.note ?? achievementsNote;
           <p class="when">{item.when}</p>
           <h3>{item.claim}</h3>
           <p>{item.proof}</p>
+          {isCaseStudy(item.id) && (
+            <p class="achieve-more"><a href={storyPath(item.id)}>Read the write-up</a></p>
+          )}
         </li>
       ))
     }

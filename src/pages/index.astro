@@ -4,9 +4,6 @@ import World from '../components/World.astro';
 import { site } from '../data/site';
 ---
 
-<Layout
-  title={`The Galaxy — ${site.name}`}
-  description="Chris Swim Lee's galaxy: a desk, a phone, a schoolhouse, a trophy — the work floating around the name. Click a world to open it."
->
+<Layout title={site.title} description={site.description}>
   <World />
 </Layout>

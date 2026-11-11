@@ -1,42 +1,165 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import CaptionsDemo from '../../components/CaptionsDemo.astro';
 import LatticeDemo from '../../components/LatticeDemo.astro';
 import '../../styles/demos.css';
-import { projects, site, storyPath } from '../../data/site';
+import { isCaseStudy, projects, roles, site, storyPath } from '../../data/site';
+
+type ProjectEntry = (typeof projects)[number];
+type RoleEntry = (typeof roles)[number];
 
 export function getStaticPaths() {
-  return projects
+  const fromProjects = projects
     .filter((project) => project.story)
-    .map((project) => ({ params: { id: project.id }, props: { project } }));
+    .map((project) => ({
+      params: { id: project.id },
+      props: { project, role: null as RoleEntry | null },
+    }));
+  const fromRoles = roles
+    .filter((role) => isCaseStudy(role.id))
+    .map((role) => ({
+      params: { id: role.id },
+      props: { project: null as ProjectEntry | null, role },
+    }));
+  return [...fromProjects, ...fromRoles];
 }
 
-const { project } = Astro.props as { project: (typeof projects)[number] };
-const story = project.story!;
-const others = projects.filter((item) => item.story && item.id !== project.id);
+const { project, role } = Astro.props as { project: ProjectEntry | null; role: RoleEntry | null };
+const story = project?.story;
+const others = projects.filter((item) => item.story && item.id !== project?.id);
+const otherStudies = roles.filter((item) => isCaseStudy(item.id) && item.id !== role?.id);
+const ogShot = story?.shots[0];
+const share = ogShot
+  ? await getImage({ src: ogShot.image, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 78 })
+  : null;
 const offsite = (href: string) => /^https?:\/\//.test(href);
 // Connecting Captions already has a product page; this build story shouldn't compete with it in search.
-const hasProductPage = project.id === 'connectingCaptions';
-const steps = [
-  ['Problem', story.brief.problem],
-  ['Constraint', story.brief.constraint],
-  ['Decision', story.brief.decision],
-  ['Outcome', story.brief.outcome],
-] as const;
+const hasProductPage = project?.id === 'connectingCaptions';
+const steps = story
+  ? ([
+      ['Problem', story.brief.problem],
+      ['Constraint', story.brief.constraint],
+      ['Decision', story.brief.decision],
+      ['Outcome', story.brief.outcome],
+    ] as const)
+  : [];
 
-const jsonLd = {
-  '@type': 'CreativeWork',
-  name: project.title,
-  description: project.summary,
-  url: new URL(storyPath(project.id), site.url).href,
-  dateCreated: project.year,
-  keywords: story.stack.join(', '),
-  author: { '@type': 'Person', name: site.legalName, url: site.url },
-};
+const jsonLd = project && story
+  ? {
+      '@type': 'CreativeWork',
+      name: project.title,
+      description: project.summary,
+      url: new URL(storyPath(project.id), site.url).href,
+      dateCreated: project.year,
+      keywords: story.stack.join(', '),
+      author: { '@type': 'Person', name: site.legalName, url: site.url },
+    }
+  : role
+    ? {
+        '@type': 'CreativeWork',
+        name: `${role.title}, ${role.company}`,
+        description: role.scan,
+        url: new URL(storyPath(role.id), site.url).href,
+        author: { '@type': 'Person', name: site.legalName, url: site.url },
+      }
+    : undefined;
 ---
 
-<Layout title={`${project.title} — ${site.name}`} description={project.summary} jsonLd={jsonLd} noindex={hasProductPage}>
+{
+  role && (
+    <Layout title={`${role.company} — ${site.name}`} description={`${role.title}, ${role.dates}. ${role.scan}`} jsonLd={jsonLd}>
+      <main id="main" class="resume-page story-page wrap">
+        <div class="resume-top">
+          <div>
+            <p class="kicker">{role.dates} · {role.location}</p>
+            <h1 class="story-title">{role.company}</h1>
+          </div>
+          <div class="resume-meta">
+            <p class="story-lede">{role.title}. {role.note}.</p>
+            <p class="story-note">{role.scan}</p>
+            <div class="hero-actions">
+              <a class="btn btn-solid" href="/experience/">All experience</a>
+              <a class="btn" href={`/#${role.id}`}>Back to the galaxy</a>
+            </div>
+          </div>
+        </div>
+
+        {
+          role.figures && role.figures.length > 0 && (
+            <dl class="story-proof">
+              {role.figures.map((item) => (
+                <div>
+                  <dt>{item.value}</dt>
+                  <dd>{item.label}</dd>
+                </div>
+              ))}
+            </dl>
+          )
+        }
+
+        {
+          role.projects.map((item) => (
+            <section class="resume-block">
+              <h2>{item.title}</h2>
+              <p class="story-lede">{item.oneLiner}</p>
+              {
+                item.stack && item.stack.length > 0 && (
+                  <p class="tags story-tags">
+                    {item.stack.map((tag) => <span class="tag">{tag}</span>)}
+                  </p>
+                )
+              }
+              {
+                item.brief && (
+                  <dl class="case-steps">
+                    <div>
+                      <dt>Problem</dt>
+                      <dd>{item.brief.problem}</dd>
+                    </div>
+                    <div>
+                      <dt>Constraint</dt>
+                      <dd>{item.brief.constraint}</dd>
+                    </div>
+                    <div>
+                      <dt>Decision</dt>
+                      <dd>{item.brief.decision}</dd>
+                    </div>
+                    <div>
+                      <dt>Outcome</dt>
+                      <dd>{item.brief.outcome}</dd>
+                    </div>
+                  </dl>
+                )
+              }
+            </section>
+          ))
+        }
+
+        <section class="resume-block story-more">
+          <h2>More of the record</h2>
+          <div class="hero-actions">
+            {otherStudies.map((item) => <a class="btn" href={storyPath(item.id)}>{item.company}</a>)}
+            <a class="btn btn-text" href="/hire/">Hire me</a>
+          </div>
+        </section>
+      </main>
+    </Layout>
+  )
+}
+
+{project && story && (
+
+<Layout
+  title={`${project.title} — ${site.name}`}
+  description={project.summary}
+  image={share?.src}
+  imageAlt={ogShot?.alt}
+  imageWidth={share?.attributes.width}
+  imageHeight={share?.attributes.height}
+  jsonLd={jsonLd}
+  noindex={hasProductPage}
+>
   <main id="main" class="resume-page story-page wrap">
     <div class="resume-top">
       <div>
@@ -162,6 +285,7 @@ const jsonLd = {
     </section>
   </main>
 </Layout>
+)}
 
 <script>
   import '../../scripts/copy-buttons';

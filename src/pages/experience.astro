@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { roles, site } from '../data/site';
+import { isCaseStudy, roles, site, storyPath } from '../data/site';
 
 // Two highlights per job up front; the rest open with the writeups.
 const SHOWN = 2;
@@ -46,6 +46,9 @@ const moreLine = (role: (typeof roles)[number]) => {
                 <h3>{role.title}</h3>
                 <p class="company">{role.company}</p>
                 <p class="role-note">{role.scan}</p>
+                {isCaseStudy(role.id) && (
+                  <p class="role-note"><a href={storyPath(role.id)}>Read the write-up</a></p>
+                )}
               </div>
             </div>
             <ul class="role-highlights">

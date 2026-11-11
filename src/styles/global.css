@@ -1123,6 +1123,14 @@ html[data-theme='light'] .nav-theme .to-dark {
   font-size: 0.95rem;
 }
 
+.achieve-more {
+  margin-top: 0.8rem;
+}
+
+.achieve-more a {
+  color: var(--ink);
+}
+
 .work-piece h3 {
   font-family: var(--display);
   font-size: clamp(1.45rem, 2.2vw, 1.9rem);
@@ -2319,6 +2327,14 @@ html[data-theme='light'] .nav-theme .to-dark {
 }
 
 @media print {
+  @page {
+    margin: 12mm 14mm;
+  }
+
+  .resume-page {
+    padding-top: 0 !important;
+  }
+
   :root {
     --bg: #fff;
     --paper: #fff;
@@ -2346,7 +2362,8 @@ html[data-theme='light'] .nav-theme .to-dark {
 
   .project-summary::after {
     display: none;
-  }.nav, .hero-actions, .resume-jump, .footer, .skip, .hero-photo, .fx-grain, .fx-progress, #achievements, #work, #contact
+  }  .nav, .hero-actions, .resume-jump, .footer, .skip, .hero-photo, .fx-grain, .fx-progress, #achievements, #work, #contact,
+  astro-dev-toolbar
   {
     display: none !important;
   }

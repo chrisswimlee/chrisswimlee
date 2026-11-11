@@ -33,8 +33,9 @@ import {
           <a href={site.url}>{site.url.replace('https://', '')}</a>
         </p>
         <div class="hero-actions">
+          <a class="btn btn-solid" href={site.resumePdf} download>Download PDF</a>
+          <button class="btn" type="button" onclick="window.print()">Print</button>
           <a class="btn" href="/">Back to site</a>
-          <button class="btn" type="button" onclick="window.print()">Print / PDF</button>
         </div>
       </div>
     </div>
@@ -90,7 +91,7 @@ import {
         <strong>Connecting Captions</strong> — live subtitles for the Mac (GPLv3).
         Translation happens on the machine, and each sentence appears as soon as it’s ready.
         {' '}
-        <a href="/connectingCaptions/">Get it</a>
+        <a href={`${site.url}/connectingCaptions/`}>Get it</a>
         {' · '}
         <a href="https://github.com/chrisswimlee/connectingCaptions" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/connectingCaptions</a>
       </p>
@@ -98,7 +99,7 @@ import {
         <strong>DeskBreak</strong> — macOS menu-bar timer (MIT). After
         40 minutes, a little character tells you to stand. Nothing leaves your Mac.
         {' '}
-        <a href="/#work">The work</a>
+        <a href={`${site.url}/#work`}>The work</a>
         {' · '}
         <a href="https://github.com/chrisswimlee/deskbreak" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/deskbreak</a>
       </p>
@@ -107,7 +108,7 @@ import {
         OpenAI API (Apache-2.0). You ask for a role like coder or reasoner,
         and it chooses the model.
         {' '}
-        <a href="/#work">The work</a>
+        <a href={`${site.url}/#work`}>The work</a>
         {' · '}
         <a href="https://github.com/chrisswimlee/local-lattice" target="_blank" rel="noopener noreferrer">github.com/chrisswimlee/local-lattice</a>
       </p>

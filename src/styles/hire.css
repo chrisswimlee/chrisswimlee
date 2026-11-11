@@ -173,6 +173,11 @@
   color: var(--cobalt);
 }
 
+.hire-stat-more {
+  margin-left: 0.7rem;
+  color: var(--ink);
+}
+
 /* Wide screens: the portrait sits opposite the name and pitch. */
 @media (min-width: 861px) {
   .hire-hero-main {

@@ -23,7 +23,7 @@
 
 .world-intro {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   left: 50%;
   top: 50%;
   width: min(26rem, calc(100vw - 2.4rem));
@@ -280,6 +280,14 @@ html[data-theme='light'] .world-label {
   background: color-mix(in srgb, var(--bg) 70%, #000);
 }
 
+.world-art.is-mark img {
+  width: auto;
+  max-width: 8.5rem;
+  max-height: 2.6rem;
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+}
+
 .world-line {
   margin-top: 0.7rem;
   line-height: 1.5;
@@ -476,10 +484,14 @@ html.world-flat .world-archive {
     right: 0;
     bottom: 0;
     width: auto;
-    max-height: 52dvh;
+    max-height: min(84dvh, calc(100dvh - var(--nav-offset, 68px) - 8px));
     border-bottom: 0;
     border-radius: 10px 10px 0 0;
-    padding-bottom: 5.2rem;
+    padding-bottom: max(1.2rem, calc(env(safe-area-inset-bottom) + 4.8rem));
+  }
+
+  .world-art img {
+    max-height: 8.5rem;
   }
 }
 
@@ -787,5 +799,138 @@ html.world-flat .world-years {
 @media (max-width: 800px), (pointer: coarse) {
   .world-years {
     display: none;
+  }
+}
+
+/* Short laptops: a centred intro leaves no room for the trophy between the
+   name and the rail. Park the intro under the nav and let the galaxy use the rest. */
+@media (min-width: 900px) and (min-height: 521px) and (max-height: 760px) {
+  .world-intro,
+  .world:not(.is-ready) .world-intro {
+    top: calc(var(--nav-offset, 68px) + 0.3rem);
+    transform: translateX(-50%);
+  }
+}
+
+/* Up to 860px tall the intro stays in the middle of the orbit, a size smaller,
+   so the ring has room to clear it. */
+@media (min-width: 900px) and (min-height: 521px) and (max-height: 860px) {
+
+  .world-portrait {
+    width: 84px;
+    height: 84px;
+    margin: 0.05rem auto 0.15rem;
+  }
+
+  .world-intro h1 {
+    margin-bottom: 0.35rem;
+    font-size: clamp(1.85rem, 3.6vw, 2.7rem);
+  }
+}
+
+/* iPad portrait is wider than a phone, so the desktop intro stayed centred
+   and the grid packed into the bottom of the screen. Pin the intro up top. */
+@media (orientation: portrait) and (max-width: 1100px) {
+  .world-intro,
+  .world:not(.is-ready) .world-intro {
+    top: calc(var(--nav-offset, 68px) + 0.85rem);
+    transform: translateX(-50%);
+  }
+
+  .world-intro-extras {
+    display: block;
+  }
+
+  .hint-extras {
+    display: none;
+  }
+
+  .world:not(.is-in) .world-rail {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .world:not(.is-in) .world-years {
+    display: none;
+  }
+
+  .world:not(.is-in) .world-intro-hint {
+    bottom: calc(max(0.65rem, env(safe-area-inset-bottom)) + 0.4rem);
+  }
+}
+
+/* Phone landscape is wide enough to take the desktop orbit, which drops
+   the names onto the photo. Use a short header instead. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .world-intro,
+  .world:not(.is-ready) .world-intro {
+    top: calc(var(--nav-offset, 52px) + 0.2rem);
+    left: max(0.65rem, env(safe-area-inset-left));
+    right: max(0.65rem, env(safe-area-inset-right));
+    width: auto;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.55rem;
+    text-align: left;
+  }
+
+  .world-intro .kicker,
+  .world-intro-extras {
+    display: none;
+  }
+
+  .world-portrait {
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    flex: none;
+  }
+
+  .world-intro h1 {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: clamp(1.2rem, 4.4vh, 1.65rem);
+    text-align: left;
+  }
+
+  .world-intro-hire {
+    margin: 0;
+    flex: none;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.62rem;
+  }
+
+  .world:not(.is-in) .world-rail {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .world:not(.is-in) .world-intro-hint {
+    bottom: calc(max(0.4rem, env(safe-area-inset-bottom)) + 0.3rem);
+  }
+
+  .world-years {
+    display: none;
+  }
+
+  .world-label small {
+    display: none;
+  }
+
+  .world-label strong {
+    font-size: 0.82rem;
+  }
+
+  .world-intro-hint .hint-fine,
+  .hint-extras {
+    display: none;
+  }
+
+  .world-intro-hint .hint-touch {
+    display: inline;
   }
 }

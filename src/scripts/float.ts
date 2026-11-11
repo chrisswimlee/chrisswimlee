@@ -18,7 +18,7 @@ export type FloatAspect = {
   line: string;
   points: string[];
   links: { label: string; href: string }[];
-  art?: { src: string; alt: string };
+  art?: { src: string; alt: string; mark?: boolean };
 };
 
 export type FloatWorld = {
@@ -904,6 +904,11 @@ type Floater = {
   deskScale: number;
   label: [number, number];
   deskLabel: [number, number];
+  /** Mesh top and bottom at scale 1, so the name sits above the object. */
+  crownLocal: number;
+  footLocal: number;
+  /** Half the mesh width at scale 1, so other names can steer round it. */
+  halfWLocal: number;
   world: FloatWorld;
   mats: { mat: THREE.Material; base: number }[];
 };
@@ -1091,16 +1096,6 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     study: [0.05, -0.28],
     play: [0.05, -0.08],
   };
-  const labelOff: Record<string, [number, number]> = {
-    work: [0, 0.38],
-    hait: [0, 0.78],
-    projects: [0, 0.62],
-    study: [0, 0.62],
-    localhost: [0, 0.66],
-    phonecoding: [0, 0.72],
-    d22soso: [0, 0.6],
-    play: [0, 0.34],
-  };
   const homeFit: Record<string, number> = {
     work: 0.84,
     projects: 0.8,
@@ -1116,7 +1111,14 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const group = buildWorld(world);
     const homeScale = homeFit[world.id] ?? 1;
     const span = objectSpan(group);
+    group.updateMatrixWorld(true);
+    // Measure the mesh itself; the ground shadow is wider and lower than it.
+    const bounds = new THREE.Box3().setFromObject(group);
+    const crownLocal = Number.isFinite(bounds.max.y) ? bounds.max.y : 0.55;
+    const footLocal = Number.isFinite(bounds.min.y) ? bounds.min.y : -0.55;
+    const halfWLocal = Number.isFinite(bounds.max.x) ? Math.max(Math.abs(bounds.min.x), Math.abs(bounds.max.x), 0.2) : 0.6;
     groundShadow(group);
+    const deskLabel: [number, number] = [0, crownLocal * homeScale + 0.08];
     group.scale.setScalar(homeScale);
     const [nx, ny] = nudge[world.id] ?? [0, 0];
     const anchor = new THREE.Vector3(world.position[0] + nx, world.position[1] + ny, depth[world.id] ?? 0);
@@ -1135,8 +1137,11 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       deskHome: anchor.clone(),
       deskScale: homeScale,
       world,
-      label: labelOff[world.id] ?? [0, 0.6],
-      deskLabel: labelOff[world.id] ?? [0, 0.6],
+      label: deskLabel,
+      deskLabel,
+      crownLocal,
+      footLocal,
+      halfWLocal,
       mats: collectMats(group),
     });
   });
@@ -1260,13 +1265,15 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const activeClose = Boolean(activeEl && panelBodyEl.contains(activeEl) && activeEl.closest('[data-close-panel]'));
     const ext = (href: string) => /^https?:\/\//.test(href);
     // An aspect with a write-up: its picture and title carry into that page (see refresh.css).
-    const story = aspect.links.find((link) => link.href.startsWith('/work/'))?.href;
+    const story = aspect.links.find((link) => link.href.startsWith('/work/'))?.href ?? '';
     const art = aspect.art ? `<img src="${esc(aspect.art.src)}" alt="${esc(aspect.art.alt)}" loading="lazy" decoding="async" />` : '';
+    const storyArt = Boolean(story && aspect.art && !aspect.art.mark);
+    const title = story ? `<a href="${esc(story)}">${esc(aspect.title)}</a>` : esc(aspect.title);
     panelBodyEl.innerHTML = `
       <p class="world-kicker">${esc(world.kicker)} · ${esc(world.when)}</p>
-      <h2 id="world-panel-title"><span${story ? ' class="is-story-title"' : ''}>${esc(aspect.title)}</span></h2>
+      <h2 id="world-panel-title"><span${story ? ' class="is-story-title"' : ''}>${title}</span></h2>
       <p class="world-meta">${esc(world.place)}</p>
-      ${art ? `<figure class="world-art${story ? ' is-story-art' : ''}">${story ? `<a href="${esc(story)}" aria-label="Read more about ${esc(aspect.title)}">${art}</a>` : art}</figure>` : ''}
+      ${art ? `<figure class="world-art${storyArt ? ' is-story-art' : ''}${aspect.art?.mark ? ' is-mark' : ''}">${storyArt ? `<a href="${esc(story)}" aria-label="Read more about ${esc(aspect.title)}">${art}</a>` : art}</figure>` : ''}
       <p class="world-line">${esc(aspect.line)}</p>
       ${aspect.points.filter((point) => point !== aspect.line).length ? `<ul>${aspect.points.filter((point) => point !== aspect.line).slice(0, 3).map((point) => `<li>${esc(point)}</li>`).join('')}</ul>` : ''}
       ${aspect.links.length ? `<p class="world-links">${aspect.links.map((link) => `<a href="${esc(link.href)}"${ext(link.href) ? ' target="_blank" rel="noopener noreferrer"' : ''}>${esc(link.label)}</a>`).join('')}</p>` : ''}
@@ -1284,8 +1291,16 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       else button.removeAttribute('aria-current');
     });
     say(`${aspect.title}. ${aspect.line}`);
-    if (activeStep) panelBodyEl.querySelector<HTMLElement>(`[data-step="${activeStep}"]`)?.focus();
-    else if (activeClose) panelBodyEl.querySelector<HTMLElement>('[data-close-panel]')?.focus();
+    // Next used to leave the new entry scrolled to the old one's position,
+    // and focusing the step button pulled the title back off screen.
+    const pinTop = () => {
+      panelEl.scrollTop = 0;
+    };
+    pinTop();
+    if (activeStep) panelBodyEl.querySelector<HTMLElement>(`[data-step="${activeStep}"]`)?.focus({ preventScroll: true });
+    else if (activeClose) panelBodyEl.querySelector<HTMLElement>('[data-close-panel]')?.focus({ preventScroll: true });
+    pinTop();
+    requestAnimationFrame(pinTop);
   }
 
   function focus(id: string, aspectId?: string, push = true) {
@@ -1391,41 +1406,99 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     return id ? (floaters.find((item) => item.id === id) ?? null) : null;
   }
 
+  // Desk framing pulls the camera back on short screens. Phone grids ignore it.
+  let deskMode = true;
+  let restDist = 10.5;
+  let restLookY = 0;
+  let chrome = { top: 76, bottom: 130 };
+
+  function phoneLandscape(width: number, height: number) {
+    return height <= 520 && width > height;
+  }
+
+  // Short laptop windows (matches the CSS that parks the intro under the nav):
+  // the orbit can't fit between the intro and the rail, so the worlds line up
+  // in two rows instead of shrinking into the middle.
+  function shortDesk(width: number, height: number) {
+    return width >= 900 && height > 520 && height <= 760;
+  }
+
+  // Tallest name card, so layouts can leave room for it above each object.
+  function labelRoom() {
+    let h = 0;
+    for (const button of labels.values()) h = Math.max(h, button.offsetHeight);
+    return h || 48;
+  }
+
+  function visibleBox(el: HTMLElement | null) {
+    if (!el) return null;
+    const style = getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') return null;
+    const rect = el.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return null;
+    return rect;
+  }
+
   function idleDist() {
+    if (deskMode) return restDist;
     return camera.aspect < 1 ? Math.min(17, (10.5 / Math.max(camera.aspect, 0.55)) * 0.82) : 10.5;
   }
 
+  // The card sits on the right above 800px. Only a narrower window turns it
+  // into a bottom sheet. Aspect ratio is the wrong test: a tall window is
+  // portrait and still has the side card.
+  function sheetMode() {
+    return root.clientWidth <= 800;
+  }
+
   function inspectDist() {
-    return camera.aspect < 1 ? 7.4 : 6.2;
+    return sheetMode() ? 7.4 : 6.2;
   }
 
   function panelFrac() {
-    if (camera.aspect < 1) return 0;
+    if (sheetMode()) return 0;
     return Math.min(400, root.clientWidth * 0.42) / Math.max(root.clientWidth, 1);
   }
 
   function stageFrustum() {
-    const mobile = camera.aspect < 1;
+    const sheet = sheetMode();
     const vFov = (camera.fov * Math.PI) / 180;
-    const objectZ = mobile ? 0.85 : 1.2;
+    const objectZ = sheet ? 0.85 : 1.2;
     const zFromCam = inspectDist() - objectZ;
     const h = 2 * Math.tan(vFov / 2) * zFromCam;
     const w = h * camera.aspect;
-    return { mobile, objectZ, h, w, panel: panelFrac() };
+    return { sheet, objectZ, h, w, panel: panelFrac() };
+  }
+
+  // The bottom sheet covers most of a phone. The object has to sit in the
+  // strip between the nav and the sheet, not at a fixed height behind it.
+  function sheetGap() {
+    const height = root.clientHeight || 1;
+    const nav = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-offset')) || 68;
+    const top = nav + 8;
+    const panel = visibleBox(panelEl);
+    const rootTop = root.getBoundingClientRect().top;
+    const bottom = Math.max(top + 48, panel ? panel.top - rootTop - 8 : height * 0.4);
+    const mid = top + (bottom - top) / 2;
+    return { ndcY: 1 - (2 * mid) / height, frac: (bottom - top) / height };
   }
 
   function stagePos() {
-    const { mobile, objectZ, h, w, panel } = stageFrustum();
-    const ndcX = mobile ? 0 : -(panel + 0.2);
-    const ndcY = mobile ? 0.28 : 0.04;
+    const { sheet, objectZ, h, w, panel } = stageFrustum();
+    // These coordinates land on screen only while the camera looks at the origin.
+    // Side card: the middle of the open band. Bottom sheet: the middle of the strip above it.
+    const gap = sheet ? sheetGap() : null;
+    const ndcX = sheet ? 0 : -panel;
+    const ndcY = gap ? gap.ndcY : 0.04;
     stage.set(ndcX * (w / 2), ndcY * (h / 2), objectZ);
     return stage;
   }
 
   function inspectScale(span: number) {
-    const { mobile, h, w, panel } = stageFrustum();
-    const regionW = w * (1 - panel) * 0.58;
-    const regionH = h * (mobile ? 0.46 : 0.62);
+    const { sheet, h, w, panel } = stageFrustum();
+    const gap = sheet ? sheetGap() : null;
+    const regionW = w * (1 - panel) * (sheet ? 0.72 : 0.58);
+    const regionH = h * (gap ? gap.frac * 0.9 : 0.62);
     return Math.min(1.4, regionW / span, regionH / span);
   }
 
@@ -1502,11 +1575,15 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   }, { signal });
   addEventListener('world:home', () => unfocus(), { signal });
 
-  // Phones: the name sits at the top, so the worlds go in a 3-column grid
-  // in the band between the intro and the rail instead of a ring around it.
+  // Portrait phones and iPads: a grid under the intro. Landscape phones are
+  // short enough that the desktop orbit drops names onto the portrait, so
+  // they get a 4-column grid in the band under the compact header instead.
   const phoneOrder = ['work', 'localhost', 'projects', 'hait', 'phonecoding', 'study', 'd22soso', 'play'];
   function layoutHomes(width: number, height: number) {
-    if (camera.aspect >= 1) {
+    const land = phoneLandscape(width, height);
+    const short = shortDesk(width, height);
+    deskMode = !land && !short && camera.aspect >= 1;
+    if (deskMode) {
       for (const floater of floaters) {
         floater.home.copy(floater.deskHome);
         floater.homeScale = floater.deskScale;
@@ -1514,34 +1591,113 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       }
       return;
     }
+    const cols = land || short ? 4 : 3;
     const rootTop = root.getBoundingClientRect().top;
-    const introBottom = intro ? intro.getBoundingClientRect().bottom - rootTop : height * 0.4;
-    const railEl = root.querySelector<HTMLElement>('.world-intro-hint') ?? rail;
-    const railTop = railEl ? railEl.getBoundingClientRect().top - rootTop : height * 0.85;
-    const top = Math.min(height * 0.6, introBottom + 12);
-    const bottom = Math.max(top + 160, railTop - 8);
-    const rows = Math.ceil(phoneOrder.length / 3);
+    const introBottom = intro ? intro.getBoundingClientRect().bottom - rootTop : height * 0.34;
+    // The grid stops at whichever piece of bottom chrome sits highest.
+    let floor = height - 24;
+    for (const sel of ['.world-rail', '.world-years', '.world-intro-hint']) {
+      const box = visibleBox(root.querySelector<HTMLElement>(sel));
+      if (box) floor = Math.min(floor, box.top - rootTop);
+    }
+    const top = introBottom + 8;
+    const bottom = Math.max(top + 96, floor - 6);
+    const rows = Math.ceil(phoneOrder.length / cols);
     const rowH = (bottom - top) / rows;
     const vFov = (camera.fov * Math.PI) / 180;
     const dist = idleDist();
+    const z = 0;
+    const halfH = Math.tan(vFov / 2) * (dist - z);
+    const halfW = halfH * camera.aspect;
+    const unit = (2 * halfH) / height;
+    const room = labelRoom();
+    // Wide windows keep the grid to a readable measure instead of spreading it edge to edge.
+    const gridW = Math.min(width, 1240);
+    const gridLeft = (width - gridW) / 2;
     phoneOrder.forEach((id, i) => {
       const floater = floaters.find((item) => item.id === id);
       if (!floater) return;
-      const row = Math.floor(i / 3);
-      const inRow = Math.min(3, phoneOrder.length - row * 3);
-      const col = i % 3;
-      const px = width * ((col + 0.5 + (3 - inRow) / 2) / 3);
-      // Leave the upper part of each cell for the label.
-      const py = top + rowH * (row + 0.64);
-      const z = 0;
-      const halfH = Math.tan(vFov / 2) * (dist - z);
-      const halfW = halfH * camera.aspect;
-      floater.home.set(((px / width) * 2 - 1) * halfW, (1 - (py / height) * 2) * halfH, z);
-      const unit = (2 * halfH) / height; // world units per CSS pixel
-      const fit = Math.min((width / 3) * 0.62, rowH * 0.58) * unit;
-      floater.homeScale = Math.min(floater.deskScale, fit / floater.span);
-      floater.label = [0, rowH * 0.27 * unit];
+      const row = Math.floor(i / cols);
+      const inRow = Math.min(cols, phoneOrder.length - row * cols);
+      const col = i % cols;
+      const px = gridLeft + gridW * ((col + 0.5 + (cols - inRow) / 2) / cols);
+      // Each cell holds the name card, then the object under it, centred as a pair.
+      const tall = Math.max(0.2, floater.crownLocal - floater.footLocal);
+      const fitH = Math.max(24, rowH - room - 12) * unit;
+      const fitW = (gridW / cols) * 0.6 * unit;
+      floater.homeScale = Math.min(floater.deskScale, fitH / tall, fitW / (floater.halfWLocal * 2));
+      const objPx = (tall * floater.homeScale) / unit;
+      const crownPx = top + rowH * row + (rowH - (room + 4 + objPx)) / 2 + room + 4;
+      const crownWorld = (1 - (crownPx / height) * 2) * halfH;
+      floater.home.set(((px / width) * 2 - 1) * halfW, crownWorld - floater.crownLocal * floater.homeScale, z);
+      floater.label = [0, floater.crownLocal * floater.homeScale + 3 * unit];
     });
+  }
+
+  // Short laptop screens: keep the designed arrangement, but pull back and
+  // look up until the lowest object clears the rail and the year slider.
+  function measureChrome() {
+    const rootRect = root.getBoundingClientRect();
+    const height = root.clientHeight || 1;
+    const nav = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-offset')) || 0;
+    let top = nav + 8;
+    let bottom = 16;
+    for (const sel of ['.world-rail', '.world-years']) {
+      const rect = visibleBox(root.querySelector<HTMLElement>(sel));
+      if (!rect) continue;
+      bottom = Math.max(bottom, rootRect.bottom - rect.top);
+    }
+    // When the intro sits in the top band (short laptops, phones), the
+    // objects have to clear it. A centred intro is part of the composition.
+    const introBox = visibleBox(intro);
+    if (introBox) {
+      const introBottom = introBox.bottom - rootRect.top;
+      if (introBottom < height * 0.48) top = Math.max(top, introBottom + 16);
+    }
+    chrome = { top, bottom: bottom + 8 };
+  }
+
+  function fitDeskFrame() {
+    if (!deskMode) {
+      restDist = 10.5;
+      restLookY = 0;
+      return;
+    }
+    measureChrome();
+    const height = root.clientHeight || 1;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const floater of floaters) {
+      minY = Math.min(minY, floater.deskHome.y + floater.footLocal * floater.deskScale);
+      maxY = Math.max(maxY, floater.deskHome.y + floater.crownLocal * floater.deskScale);
+    }
+    const pad = 0.16;
+    minY -= pad;
+    maxY += pad;
+    const span = Math.max(0.8, maxY - minY);
+    const mid = (minY + maxY) / 2;
+    // The top row's names sit above their objects, so they need room under the nav too.
+    const top = chrome.top + labelRoom() + 6;
+    const bottom = chrome.bottom;
+    const usable = Math.max(180, height - top - bottom);
+    const vFov = (camera.fov * Math.PI) / 180;
+    const distForSpan = (span * height) / (usable * 2 * Math.tan(vFov / 2));
+    const dist = Math.max(10.5, distForSpan);
+    const safeCenter = top + usable / 2;
+    const worldPerPx = (2 * Math.tan(vFov / 2) * dist) / height;
+    const lookY = mid - (height / 2 - safeCenter) * worldPerPx;
+    const basePerPx = (2 * Math.tan(vFov / 2) * 10.5) / height;
+    const footAtBase = height / 2 - minY / basePerPx;
+    const headAtBase = height / 2 - maxY / basePerPx;
+    // Looking at the span's middle pulls the lower worlds onto the name.
+    // Keep the origin when the designed framing already clears the chrome.
+    if (footAtBase <= height - bottom && headAtBase >= top) {
+      restDist = 10.5;
+      restLookY = 0;
+      return;
+    }
+    restDist = dist;
+    restLookY = lookY;
   }
 
   // Labels must never sit on the name, photo, or hiring button.
@@ -1551,31 +1707,37 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   function refreshKeepouts(now: number) {
     if (now - keepoutAt < 500) return;
     keepoutAt = now;
+    measureChrome();
     const rootRect = root.getBoundingClientRect();
-    keepouts = [...root.querySelectorAll<HTMLElement>('.world-intro > *')]
+    const blocks = [
+      ...root.querySelectorAll<HTMLElement>('.world-intro > *'),
+      ...root.querySelectorAll<HTMLElement>('.world-rail, .world-years, .world-intro-hint'),
+    ];
+    keepouts = blocks
+      .filter((el) => visibleBox(el))
       .map((el) => el.getBoundingClientRect())
-      .filter((r) => r.width > 0 && r.height > 0)
       .map((r) => new DOMRect(r.left - rootRect.left - 6, r.top - rootRect.top - 6, r.width + 12, r.height + 12));
     labelSize.clear();
   }
-  const overlaps = (a: DOMRect, b: DOMRect) =>
-    a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-
   function resize() {
     const width = root.clientWidth || 1;
     const height = root.clientHeight || 1;
     camera.aspect = width / height;
-    targetDist = focusId ? inspectDist() : idleDist();
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
     layoutHomes(width, height);
+    fitDeskFrame();
+    targetDist = focusId ? inspectDist() : idleDist();
     keepoutAt = 0;
   }
 
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(root);
   resize();
+  document.fonts?.ready.then(() => {
+    if (running) resize();
+  });
 
   const hashId = decodeURIComponent(location.hash.replace(/^#/, ''));
   const startWorld = worlds.find((world) => world.id === hashId || world.aspects.some((aspect) => aspect.id === hashId));
@@ -1609,26 +1771,51 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   }
 
   const projected = new THREE.Vector3();
+  // Where each name last sat (0 above, 1 right, 2 left, 3 below), so it holds
+  // its place while the objects drift instead of hopping between sides.
+  const labelSlot = new Map<string, number>();
+  const overlapArea = (a: DOMRect, b: DOMRect) =>
+    Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) *
+    Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
   function placeLabels() {
     const width = root.clientWidth;
     const height = root.clientHeight;
     const now = performance.now();
     refreshKeepouts(now);
-    const placed: { button: HTMLButtonElement; rect: DOMRect }[] = [];
+    if (focusId) {
+      for (const button of labels.values()) button.hidden = true;
+      return;
+    }
+    const toPx = (x: number, y: number, z: number) => {
+      projected.set(x, y, z);
+      galaxy.localToWorld(projected);
+      projected.project(camera);
+      return { x: (projected.x * 0.5 + 0.5) * width, y: (-projected.y * 0.5 + 0.5) * height, z: projected.z };
+    };
+    // Pass 1: where every object is on screen. Names avoid these as well as each other.
+    const boxes = new Map<string, { cx: number; top: number; bottom: number; half: number; rect: DOMRect }>();
+    for (const floater of floaters) {
+      // Grids pin names to the resting spot, not the drifting object, so each row stays level.
+      const at = deskMode ? floater.group.position : floater.anchor;
+      const scale = floater.homeScale;
+      const crown = toPx(at.x, at.y + floater.crownLocal * scale, at.z);
+      if (crown.z > 1) continue;
+      const foot = toPx(at.x, at.y + floater.footLocal * scale, at.z);
+      const side = toPx(at.x + floater.halfWLocal * scale, at.y, at.z);
+      const half = Math.abs(side.x - crown.x);
+      const top = Math.min(crown.y, foot.y);
+      const bottom = Math.max(crown.y, foot.y);
+      boxes.set(floater.id, { cx: crown.x, top, bottom, half, rect: new DOMRect(crown.x - half, top, half * 2, bottom - top) });
+    }
+    // Grids already start under the intro, which is a keep-out of its own.
+    const minTop = deskMode ? chrome.top : 0;
+    const maxBottom = height - chrome.bottom;
+    const placed: DOMRect[] = [];
     for (const floater of floaters) {
       const button = labels.get(floater.id);
       if (!button) continue;
-      if (focusId) {
-        button.hidden = true;
-        continue;
-      }
-      const [lx, ly] = floater.label;
-      // Phones: pin labels to the resting spot, not the drifting object, so each row stays level.
-      const at = camera.aspect < 1 ? floater.anchor : floater.group.position;
-      projected.set(at.x + lx, at.y + ly, at.z);
-      galaxy.localToWorld(projected);
-      projected.project(camera);
-      if (projected.z > 1) {
+      const box = boxes.get(floater.id);
+      if (!box) {
         button.hidden = true;
         continue;
       }
@@ -1639,21 +1826,48 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         size = { w: button.offsetWidth, h: button.offsetHeight };
         labelSize.set(floater.id, size);
       }
-      const half = Math.max(64, size.w / 2 + 6);
-      let x = Math.min(width - half, Math.max(half, (projected.x * 0.5 + 0.5) * width));
-      let y = Math.min(height - 88, Math.max(76, (-projected.y * 0.5 + 0.5) * height));
-      // (x, y) is the label's bottom centre. Slide it off the intro, then off
-      // any label already placed, by the shortest vertical move.
-      const rectAt = () => new DOMRect(x - size.w / 2, y - size.h, size.w, size.h);
-      for (let pass = 0; pass < 3; pass++) {
-        const rect = rectAt();
-        const hit = keepouts.find((r) => overlaps(rect, r)) ?? placed.find((p) => overlaps(rect, p.rect))?.rect;
-        if (!hit) break;
-        const up = hit.top - 2;
-        const down = hit.bottom + size.h + 2;
-        y = Math.abs(up - y) <= Math.abs(down - y) ? up : down;
+      const { w, h } = size;
+      const gap = 4;
+      const midY = (box.top + box.bottom) / 2;
+      // Candidate spots as [bottom-centre x, bottom y]: above the crown first,
+      // then either side, then underneath.
+      const spots: [number, number][] = [
+        [box.cx, box.top - gap],
+        [box.cx + box.half + gap + w / 2, midY + h / 2],
+        [box.cx - box.half - gap - w / 2, midY + h / 2],
+        [box.cx, box.bottom + gap + h],
+      ];
+      const cost = ([x, y]: [number, number]) => {
+        const rect = new DOMRect(x - w / 2, y - h, w, h);
+        let sum = 0;
+        if (rect.left < 4) sum += (4 - rect.left) * h;
+        if (rect.right > width - 4) sum += (rect.right - width + 4) * h;
+        if (rect.top < minTop) sum += (minTop - rect.top) * w;
+        if (rect.bottom > maxBottom) sum += (rect.bottom - maxBottom) * w;
+        for (const keep of keepouts) sum += overlapArea(rect, keep);
+        for (const other of placed) sum += overlapArea(rect, other);
+        for (const [id, item] of boxes) if (id !== floater.id) sum += overlapArea(rect, item.rect);
+        return sum;
+      };
+      // Above the object whenever that is free; otherwise stay on the side it was on.
+      const last = labelSlot.get(floater.id) ?? 0;
+      const order = [0, last, 1, 2, 3].filter((slot, i, all) => all.indexOf(slot) === i);
+      let best = order[0];
+      let bestCost = Infinity;
+      for (const slot of order) {
+        const c = cost(spots[slot]);
+        if (c < bestCost - 0.5) {
+          best = slot;
+          bestCost = c;
+        }
+        if (c === 0) break;
       }
-      placed.push({ button, rect: rectAt() });
+      labelSlot.set(floater.id, best);
+      let [x, y] = spots[best];
+      // Whatever was chosen, the card stays on screen.
+      x = Math.min(width - w / 2 - 4, Math.max(w / 2 + 4, x));
+      y = Math.min(height - 4, Math.max(h + 4, y));
+      placed.push(new DOMRect(x - w / 2, y - h, w, h));
       button.style.opacity = k < 1 ? String(Math.max(0, (k - 0.45) / 0.55)) : '';
       button.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
       button.classList.toggle('is-on', focusId === floater.id);
@@ -1692,9 +1906,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     sky.position.z += (skyZ - sky.position.z) * ease(0.05);
     if (!reduced) sky.rotation.z = Math.sin(t * 0.021) * 0.05;
     const held = focusId ? stagePos() : null;
-    // Desktop looks a little right of the object so it sits left of the panel; phones keep it centred.
-    if (held) lookTo.set(held.x + (camera.aspect < 1 ? 0 : 0.85), held.y * 0.35, 0);
-    else lookTo.set(0, 0, 0);
+    // stagePos is the on-screen place while the camera looks at the origin.
+    // An extra look offset used to pull the desk back under the side card.
+    if (held) lookTo.set(0, 0, 0);
+    else lookTo.set(0, deskMode ? restLookY : 0, 0);
     look.lerp(lookTo, ease(0.12));
     camera.lookAt(look);
 

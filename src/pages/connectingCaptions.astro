@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import VantaFog from '../components/VantaFog.astro';
 import theaterShot from '../assets/work/connectingCaptions-theater.jpg';
@@ -7,6 +7,14 @@ import languagesShot from '../assets/work/connectingCaptions-languages.jpg';
 import { commercialLicense, connectingCaptions, releaseDownload, site, storyPath } from '../data/site';
 
 const brew = connectingCaptions.brew.join('\n');
+const share = await getImage({
+  src: theaterShot,
+  width: 1200,
+  height: 630,
+  fit: 'cover',
+  format: 'jpg',
+  quality: 78,
+});
 
 const appJsonLd = {
   '@type': 'SoftwareApplication',
@@ -31,6 +39,10 @@ const appJsonLd = {
 <Layout
   title={`${connectingCaptions.title} — ${site.name}`}
   description={connectingCaptions.description}
+  image={share.src}
+  imageAlt="Theater captions: Hello. and 안녕."
+  imageWidth={share.attributes.width}
+  imageHeight={share.attributes.height}
   jsonLd={appJsonLd}
 >
   <VantaFog />

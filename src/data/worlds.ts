@@ -23,11 +23,13 @@ import {
   achievementsNote,
   education,
   hero,
+  isCaseStudy,
   localHost,
   projectLinks,
   projects,
   record,
   roles,
+  storyPath,
   technicalAchievements,
   work,
 } from './site';
@@ -39,7 +41,16 @@ export type CardFit = 'cover' | 'contain';
 /** The view that faces the camera on the 3D object. Without one, the face art is used. */
 export type FaceCard = { image: ImageMetadata | string; fit: CardFit; background: string };
 
-export type FaceArt = { image: ImageMetadata; alt: string; card?: FaceCard };
+export type FaceArt = {
+  image: ImageMetadata;
+  alt: string;
+  card?: FaceCard;
+  /**
+   * What the side panel shows. Staged scenes (`none`) stay off the panel so
+   * they don't sit next to real screenshots. `mark` shows the logo instead.
+   */
+  panel?: 'shot' | 'mark' | 'none';
+};
 
 /** What the browser gets once Globe.astro has optimized a FaceArt. */
 export type WorldImage = {
@@ -262,19 +273,23 @@ const faceArt: Record<string, FaceArt> = {
   hait: {
     image: haitWork,
     alt: 'An empty college computer lab at dusk, misty Chiang Rai mountains through the windows.',
+    panel: 'none',
   },
   stealth: {
     image: stealthWork,
     alt: 'Three monitors of live futures charts and order-book depth on a desk at night.',
+    panel: 'none',
   },
   goldman: {
     image: goldmanWork,
     alt: 'One printed report on a conference table with three chairs, Manhattan at night behind it.',
     card: { image: goldmanMark, fit: 'contain', background: '#7399c6' },
+    panel: 'mark',
   },
   onedave: {
     image: onedaveWork,
     alt: 'Pipeline valves with inventory tags and a rugged laptop beside a locked server cage.',
+    panel: 'none',
   },
   localhost: { image: localHost.image, alt: `${localHost.title} — ${localHost.url}` },
   ...shots,
@@ -287,11 +302,13 @@ const faceArt: Record<string, FaceArt> = {
     image: trineStudy,
     alt: 'A graduation cap on a laptop under a brass lamp, card catalog drawers behind.',
     card: { image: trineMark, fit: 'contain', background: '#ffffff' },
+    panel: 'mark',
   },
   trinity: {
     image: trinityStudy,
     alt: 'A chalkboard of proofs in a gothic lecture hall at dusk.',
     card: { image: trinityMark, fit: 'contain', background: '#ffffff' },
+    panel: 'mark',
   },
   'hct-2016-spring': {
     image: hctBracket2016,
@@ -304,6 +321,7 @@ const faceArt: Record<string, FaceArt> = {
   'hct-2017-summer': {
     image: hctSummer2017,
     alt: 'A laptop mid-game beside a bracket on a second screen, summer evening outside.',
+    panel: 'none',
   },
   'wild-2019': {
     image: wildLadder2019,
@@ -377,6 +395,7 @@ const worlds: WorldSpec[] = [
         line: [claims[role.id] ?? role.scan, proofs[role.id]].filter(Boolean).join(' '),
         points: [`${role.title} · ${role.dates} · ${role.location}`, ...role.bullets],
         links: [
+          ...(isCaseStudy(role.id) ? [{ label: 'Read the write-up', href: storyPath(role.id) }] : []),
           ...role.projects.flatMap((project) => project.links ?? []),
           { label: 'Experience', href: '/experience/' },
         ],

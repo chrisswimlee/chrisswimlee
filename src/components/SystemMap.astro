@@ -50,7 +50,10 @@ const flowsJson = JSON.stringify({
             <dt>{item.value}</dt>
             <dd>
               {item.label}
-              <small>{item.source}</small>
+              <small>
+                {item.source}
+                {item.href && <> · <a href={item.href}>Write-up</a></>}
+              </small>
             </dd>
           </div>
         ))
