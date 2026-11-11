@@ -12,7 +12,6 @@ const path = Astro.url.pathname;
 // The homepage is the 3D galaxy, a full-viewport scene.
 const isScene = path === '/';
 const isHome = path === '/';
-const isMap = path.startsWith('/map');
 const fonts = `https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap`;
 
 interface Props {
@@ -154,8 +153,8 @@ const ogHeight = Astro.props.imageHeight ?? 630;
   <body class:list={[{ 'is-world': isScene, 'is-home': isHome }]}>
     <a class="skip" href="#main">Skip to content</a>
     {!isResume && <Effects />}
-    {/* The scenes and the system map run their own motion, so they skip the GSAP bundle. */}
-    {!isResume && !isScene && !isMap && <Motion />}
+    {/* The galaxy runs its own motion, so it skips the GSAP bundle. */}
+    {!isResume && !isScene && <Motion />}
     <Nav />
     <slot />
     <Footer />

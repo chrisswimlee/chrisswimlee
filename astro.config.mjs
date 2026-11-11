@@ -8,7 +8,7 @@ export default defineConfig({
     sitemap({
       // Legacy names redirect; keep them out of the index.
       // The Connecting Captions build story is noindex; the product page is the one to rank.
-      filter: (page) => !/\/(tutor|fluidTranslation|fluidSubtitles|world|3d)\//.test(page) && !page.endsWith('/work/connectingCaptions/'),
+      filter: (page) => !/\/(tutor|fluidTranslation|fluidSubtitles|world|3d|map)\//.test(page) && !page.endsWith('/work/connectingCaptions/'),
       changefreq: 'monthly',
       priority: 0.7,
       serialize(item) {
@@ -26,5 +26,6 @@ export default defineConfig({
     '/fluidTranslation': '/connectingCaptions/',
     '/fluidSubtitles': '/connectingCaptions/',
     '/fluidSubtitles/license': '/connectingCaptions/license/',
+    '/map': '/resume/',
   },
 });

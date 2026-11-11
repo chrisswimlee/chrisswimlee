@@ -39,7 +39,6 @@ export const nav = [
   { href: '/connectingCaptions/', label: 'Captions' },
   { href: '/#localhost', label: 'local-host.ai' },
 ];
-// The system map is an extra: linked from the homepage and footer, not the top nav.
 
 export const mail = `mailto:suyoung.lee99@gmail.com?subject=${encodeURIComponent('Pricing — Chris Swim Lee')}&body=${encodeURIComponent('Which tier: scoping call, architecture audit, custom build, or complete works\n\nWhat you need:\n\nConstraint:\n')}`;
 
@@ -74,7 +73,7 @@ export const hire = {
   kicker: 'Open to AI roles · US',
   role: 'Software engineer for AI and data systems.',
   lede: 'Three years at Goldman Sachs, then founding CTO of a fintech. Now I build local AI tools and teach a college AI course.',
-  // Single source for the proof stats: HireHero and SystemMap both render this.
+  // Single source for the proof stats on the hiring page.
   proof: [
     { value: '80%', label: 'less processing time on a 10,000-account system', source: 'Goldman Sachs', href: '/work/goldman/' },
     { value: '<100ms', label: 'from market feed to order book', source: 'Founding CTO', href: '/work/stealth/' },
