@@ -6,7 +6,7 @@
   position: relative;
   z-index: 2;
   /* The nav is sticky (in flow), so it doesn't need adding to the top padding. */
-  padding: clamp(1.6rem, 5vh, 3.2rem) 0 clamp(1.6rem, 4vh, 2.6rem);
+  padding: clamp(1.2rem, 3.5vh, 2.2rem) 0 0.75rem;
 }
 
 .hire-hero-main {
@@ -72,7 +72,7 @@
 .hire-name {
   margin: 0;
   font-family: var(--display);
-  font-size: clamp(3rem, 7.4vw, 6rem);
+  font-size: clamp(2.6rem, 5.4vw, 4.4rem);
   font-style: italic;
   font-weight: 500;
   letter-spacing: -0.045em;
@@ -117,13 +117,13 @@
 }
 
 .hire-actions {
-  margin-top: 1.6rem;
+  margin-top: 1.15rem;
 }
 
 .hire-proof {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: clamp(2.4rem, 6vh, 3.6rem) 0 0;
+  margin: clamp(1.3rem, 3vh, 1.8rem) 0 0;
   border-top: 1px solid var(--line-strong);
   border-bottom: 1px solid var(--line);
 }
@@ -257,7 +257,22 @@
   max-width: 14ch;
 }
 
-/* Projects come right after the numbers, so start them close to the fold. */
+/* Projects come right after the numbers, and the first one has to be on screen. */
 .hire-page .paper > .section:first-child {
-  padding-top: clamp(1.2rem, 3vw, 2rem);
+  padding-top: 0.85rem;
+  padding-bottom: 2.2rem;
+}
+
+.hire-page .section-head {
+  margin-bottom: 0.85rem;
+  align-items: baseline;
+}
+
+.hire-page .section-head h2 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.hire-page .section-head .note {
+  font-size: 1.02rem;
+  max-width: 42ch;
 }

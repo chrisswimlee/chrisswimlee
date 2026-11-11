@@ -2,8 +2,8 @@
  * Site motion layer.
  *
  * Everywhere motion is allowed (`html.has-motion`):
- * - GSAP + ScrollTrigger reveals, image settle, and a vanilla port of
- *   react-bits SplitText for section titles.
+ * - GSAP + ScrollTrigger reveals and image settle.
+ *   Titles stay whole. Letter-by-letter splits fought the type size.
  *
  * Desktop with a fine pointer only (`html.has-desktop-motion`):
  * - Lenis momentum smooth scroll, with same-page hash links routed through it.
@@ -22,8 +22,8 @@ const desktop = root.classList.contains('has-desktop-motion');
 const navOffset = () =>
   (parseFloat(getComputedStyle(root).getPropertyValue('--nav-offset')) || 68) + 12;
 
-/** Only hide things the visitor has not seen yet; anything above the fold stays put. */
-const belowFold = (el: Element) => el.getBoundingClientRect().top > window.innerHeight * 0.92;
+/** Only hide things that start below the screen. A card already in view stays put. */
+const belowFold = (el: Element) => el.getBoundingClientRect().top > window.innerHeight - 24;
 
 function smoothScroll() {
   const lenis = new Lenis({ lerp: 0.095, smoothWheel: true, autoRaf: false });
@@ -52,95 +52,6 @@ function smoothScroll() {
   });
 
   return lenis;
-}
-
-/** react-bits SplitText, vanilla: letters rise in with a stagger. */
-function splitTitles() {
-  const titles = document.querySelectorAll<HTMLElement>('.section-head h2, .contact-box h2');
-  for (const title of titles) {
-    // Leave anything with markup alone; only plain-text titles are split.
-    if (title.children.length || !title.textContent?.trim()) continue;
-    const text = title.textContent.trim();
-    const hide = belowFold(title);
-    title.setAttribute('aria-label', text);
-    title.textContent = '';
-    const chars: HTMLElement[] = [];
-    for (const word of text.split(/(\s+)/)) {
-      if (/^\s+$/.test(word)) {
-        title.append(word);
-        continue;
-      }
-      const w = document.createElement('span');
-      w.className = 'split-word';
-      w.setAttribute('aria-hidden', 'true');
-      for (const ch of word) {
-        const c = document.createElement('span');
-        c.className = 'split-char';
-        c.textContent = ch;
-        w.append(c);
-        chars.push(c);
-      }
-      title.append(w);
-    }
-    if (!hide) continue;
-    gsap.set(chars, { autoAlpha: 0, yPercent: 60, rotate: 4 });
-    ScrollTrigger.create({
-      trigger: title,
-      start: 'top 88%',
-      once: true,
-      onEnter: () =>
-        gsap.to(chars, {
-          autoAlpha: 1,
-          yPercent: 0,
-          rotate: 0,
-          duration: 0.9,
-          ease: 'power3.out',
-          stagger: 0.035,
-          clearProps: 'all',
-        }),
-    });
-  }
-}
-
-/** Project page titles: letters rise in on arrival, after the page cross-fade. */
-function heroTitle() {
-  const title = document.querySelector<HTMLElement>('.story-page .resume-top h1');
-  if (!title || title.children.length || !title.textContent?.trim()) return;
-  const text = title.textContent.trim();
-  title.setAttribute('aria-label', text);
-  title.textContent = '';
-  const chars: HTMLElement[] = [];
-  for (const word of text.split(/(\s+)/)) {
-    if (/^\s+$/.test(word)) {
-      title.append(word);
-      continue;
-    }
-    const w = document.createElement('span');
-    w.className = 'split-word';
-    w.setAttribute('aria-hidden', 'true');
-    for (const ch of word) {
-      const c = document.createElement('span');
-      c.className = 'split-char';
-      c.textContent = ch;
-      w.append(c);
-      chars.push(c);
-    }
-    title.append(w);
-  }
-  gsap.fromTo(
-    chars,
-    { autoAlpha: 0, yPercent: 70, rotate: 6 },
-    {
-      autoAlpha: 1,
-      yPercent: 0,
-      rotate: 0,
-      duration: 1.05,
-      delay: 0.12,
-      ease: 'expo.out',
-      stagger: Math.min(0.035, 0.6 / chars.length),
-      clearProps: 'all',
-    },
-  );
 }
 
 /** Staggered reveals for [data-reveal], consistent across browsers. */
@@ -220,8 +131,6 @@ if (root.classList.contains('has-motion')) {
   // Mobile URL bars resize the viewport while scrolling; re-measuring then makes triggers jump.
   ScrollTrigger.config({ ignoreMobileResize: true });
   if (desktop) smoothScroll();
-  heroTitle();
-  splitTitles();
   reveals();
   imageSettle();
   if (desktop) {

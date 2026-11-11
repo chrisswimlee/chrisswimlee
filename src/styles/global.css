@@ -2415,16 +2415,6 @@ html.has-motion .contact-box h2 {
   animation: none !important;
 }
 
-.split-word {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.split-char {
-  display: inline-block;
-  will-change: transform, opacity;
-}
-
 /* SpotlightCard */
 .spot::after {
   content: '';

@@ -1166,11 +1166,12 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   const yearsEl = document.createElement('div');
   yearsEl.className = 'world-years';
   yearsEl.innerHTML = `
-    <label for="world-year">Drag through the years</label>
+    <label class="visually-hidden" for="world-year">Drag through the years</label>
     <input id="world-year" type="range" min="${firstYear}" max="${new Date().getFullYear()}" step="1" value="${new Date().getFullYear()}" />
     <output for="world-year" data-year-out>All</output>
     <button type="button" data-year-all hidden>All years</button>`;
-  railEl.before(yearsEl);
+  // One bottom bar: the year scrubber leads the rail instead of floating above it.
+  railEl.prepend(yearsEl);
   const yearInput = yearsEl.querySelector<HTMLInputElement>('input')!;
   const yearOut = yearsEl.querySelector<HTMLOutputElement>('[data-year-out]')!;
   const yearAll = yearsEl.querySelector<HTMLButtonElement>('[data-year-all]')!;
@@ -1497,9 +1498,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   function inspectScale(span: number) {
     const { sheet, h, w, panel } = stageFrustum();
     const gap = sheet ? sheetGap() : null;
-    const regionW = w * (1 - panel) * (sheet ? 0.72 : 0.58);
-    const regionH = h * (gap ? gap.frac * 0.9 : 0.62);
-    return Math.min(1.4, regionW / span, regionH / span);
+    // Side card: fill most of the open band. The sheet's strip is already short.
+    const regionW = w * (1 - panel) * (sheet ? 0.72 : 0.82);
+    const regionH = h * (gap ? gap.frac * 0.9 : 0.74);
+    return Math.min(sheet ? 1.4 : 1.85, regionW / span, regionH / span);
   }
 
   view.addEventListener('pointerdown', (e) => {
@@ -1844,7 +1846,9 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         if (rect.right > width - 4) sum += (rect.right - width + 4) * h;
         if (rect.top < minTop) sum += (minTop - rect.top) * w;
         if (rect.bottom > maxBottom) sum += (rect.bottom - maxBottom) * w;
-        for (const keep of keepouts) sum += overlapArea(rect, keep);
+        // The name, photo, and hire button are off limits even when a side slot
+        // overlaps another object a little.
+        for (const keep of keepouts) sum += overlapArea(rect, keep) * 40;
         for (const other of placed) sum += overlapArea(rect, other);
         for (const [id, item] of boxes) if (id !== floater.id) sum += overlapArea(rect, item.rect);
         return sum;
@@ -1864,10 +1868,22 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       }
       labelSlot.set(floater.id, best);
       let [x, y] = spots[best];
-      // Whatever was chosen, the card stays on screen.
+      // Whatever was chosen, the card stays on screen and off the intro.
       x = Math.min(width - w / 2 - 4, Math.max(w / 2 + 4, x));
       y = Math.min(height - 4, Math.max(h + 4, y));
-      placed.push(new DOMRect(x - w / 2, y - h, w, h));
+      let rect = new DOMRect(x - w / 2, y - h, w, h);
+      for (const keep of keepouts) {
+        const ox = Math.min(rect.right, keep.right) - Math.max(rect.left, keep.left);
+        const oy = Math.min(rect.bottom, keep.bottom) - Math.max(rect.top, keep.top);
+        if (ox <= 0 || oy <= 0) continue;
+        const above = keep.top - 6;
+        if (above - h >= minTop) y = above;
+        else x = x < keep.left + keep.width / 2 ? keep.left - w / 2 - 8 : keep.right + w / 2 + 8;
+        x = Math.min(width - w / 2 - 4, Math.max(w / 2 + 4, x));
+        y = Math.min(height - 4, Math.max(h + 4, y));
+        rect = new DOMRect(x - w / 2, y - h, w, h);
+      }
+      placed.push(rect);
       button.style.opacity = k < 1 ? String(Math.max(0, (k - 0.45) / 0.55)) : '';
       button.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
       button.classList.toggle('is-on', focusId === floater.id);
