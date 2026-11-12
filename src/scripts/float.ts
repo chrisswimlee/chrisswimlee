@@ -896,6 +896,8 @@ type Floater = {
   group: THREE.Group;
   anchor: THREE.Vector3;
   home: THREE.Vector3;
+  /** Where this world sits while another one is open, so it rings the selection. */
+  ring: THREE.Vector3;
   phase: number;
   span: number;
   homeScale: number;
@@ -1092,9 +1094,9 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     hait: [0.45, 0.16],
     localhost: [-0.28, 0.38],
     phonecoding: [-1.3, -0.3],
-    d22soso: [0.05, -0.52],
-    study: [0.05, -0.28],
-    play: [0.05, -0.08],
+    d22soso: [0.05, 0.14],
+    study: [0.05, 0.02],
+    play: [0.05, 0.48],
   };
   const homeFit: Record<string, number> = {
     work: 0.84,
@@ -1131,6 +1133,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       group,
       anchor,
       home: anchor.clone(),
+      ring: anchor.clone(),
       phase: i * 1.37,
       span,
       homeScale,
@@ -1165,10 +1168,12 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   const firstYear = Math.min(...years, new Date().getFullYear());
   const yearsEl = document.createElement('div');
   yearsEl.className = 'world-years';
+  const latestYear = new Date().getFullYear();
   yearsEl.innerHTML = `
+    <span class="world-years-kicker">Years</span>
     <label class="visually-hidden" for="world-year">Drag through the years</label>
-    <input id="world-year" type="range" min="${firstYear}" max="${new Date().getFullYear()}" step="1" value="${new Date().getFullYear()}" />
-    <output for="world-year" data-year-out>All</output>
+    <input id="world-year" type="range" min="${firstYear}" max="${latestYear}" step="1" value="${latestYear}" />
+    <output for="world-year" data-year-out>${latestYear}</output>
     <button type="button" data-year-all hidden>All years</button>`;
   // One bottom bar: the year scrubber leads the rail instead of floating above it.
   railEl.prepend(yearsEl);
@@ -1229,20 +1234,23 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       const dimmed = focusId !== null && focusId !== floater.id;
       const off = !dimmed && focusId === null && yearFilter !== null && !activeIn(floater.world.when, yearFilter);
       for (const { mat, base } of floater.mats) {
-        mat.opacity = base * (dimmed ? 0.05 : off ? 0.12 : 1);
+        // On a desktop the orbit stays, quieter, so opening a world keeps the picture.
+        // A phone sheet has no room for it.
+        const fade = dimmed ? (sheetMode() ? 0 : 0.62) : off ? 0.12 : 1;
+        mat.opacity = base * fade;
         mat.transparent = Boolean(mat.userData.keepTransparent) || mat.opacity < 0.99;
-        mat.depthWrite = !dimmed && !off;
+        mat.depthWrite = fade > 0.9;
       }
       labels.get(floater.id)?.classList.toggle('is-off', off);
-      // Faint ghosts behind the open world read as clutter; hide them outright.
-      floater.group.visible = !dimmed;
+      floater.group.visible = !dimmed || !sheetMode();
     }
   }
 
   function setYear(year: number | null) {
     yearFilter = year;
     const on = year === null ? [] : worlds.filter((w) => activeIn(w.when, year));
-    yearOut.textContent = year === null ? 'All' : String(year);
+    // The number matches the thumb. "All" only appears once a year is actually chosen.
+    yearOut.textContent = String(year ?? yearInput.value);
     yearAll.hidden = year === null;
     root.classList.toggle('is-year', year !== null);
     railEl.querySelectorAll<HTMLButtonElement>('[data-go]').forEach((button) => {
@@ -1253,7 +1261,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     if (year !== null) say(`${year}: ${on.map((w) => w.rail).join(', ') || 'nothing yet'}.`);
   }
   yearInput.addEventListener('input', () => setYear(Number(yearInput.value)), { signal });
-  yearAll.addEventListener('click', () => setYear(null), { signal });
+  yearAll.addEventListener('click', () => {
+    yearInput.value = String(thisYear);
+    setYear(null);
+  }, { signal });
 
   function renderPanel(world: FloatWorld, index: number, dir = 0) {
     const aspect = world.aspects[index] ?? world.aspects[0];
@@ -1453,7 +1464,9 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   }
 
   function inspectDist() {
-    return sheetMode() ? 7.4 : 6.2;
+    // Desktop stays at the landing distance so the orbit is still the frame.
+    // Phones push in: the sheet covers the orbit, and one object fills the strip.
+    return sheetMode() ? 7.4 : idleDist();
   }
 
   function panelFrac() {
@@ -1495,13 +1508,42 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     return stage;
   }
 
+  const ringOrder: Floater[] = [];
+  // The worlds that stay behind a selection. Evenly spaced, in the same
+  // clockwise order as the landing, and kept in the band left of the card.
+  function placeRing(held: THREE.Vector3) {
+    const { w } = stageFrustum();
+    const half = w / 2;
+    const maxX = half * (1 - panelFrac() * 2) - 1.2;
+    const minX = -half + 0.65;
+    ringOrder.length = 0;
+    for (const floater of floaters) if (floater.id !== focusId) ringOrder.push(floater);
+    ringOrder.sort((a, b) => Math.atan2(a.home.y, a.home.x) - Math.atan2(b.home.y, b.home.x));
+    const n = ringOrder.length || 1;
+    const rx = Math.min(3.05, (maxX - held.x) * 0.9, (held.x - minX) * 0.9);
+    const ry = 2.0;
+    for (let i = 0; i < ringOrder.length; i++) {
+      const ang = -Math.PI / 2 + (i / n) * Math.PI * 2;
+      const floater = ringOrder[i];
+      floater.ring.set(
+        Math.min(maxX, Math.max(minX, held.x + Math.cos(ang) * rx)),
+        Math.min(2.35, Math.max(-2.4, held.y + Math.sin(ang) * ry)),
+        floater.home.z,
+      );
+    }
+  }
+
   function inspectScale(span: number) {
-    const { sheet, h, w, panel } = stageFrustum();
-    const gap = sheet ? sheetGap() : null;
-    // Side card: fill most of the open band. The sheet's strip is already short.
-    const regionW = w * (1 - panel) * (sheet ? 0.72 : 0.82);
-    const regionH = h * (gap ? gap.frac * 0.9 : 0.74);
-    return Math.min(sheet ? 1.4 : 1.85, regionW / span, regionH / span);
+    if (!sheetMode()) {
+      // Step forward into the space the name left. The orbit stays around it.
+      const home = floaters.find((item) => item.id === focusId)?.homeScale ?? 1;
+      return Math.min(1.55, home * 1.42);
+    }
+    const { h, w, panel } = stageFrustum();
+    const gap = sheetGap();
+    const regionW = w * (1 - panel) * 0.72;
+    const regionH = h * (gap ? gap.frac * 0.9 : 0.62);
+    return Math.min(1.4, regionW / span, regionH / span);
   }
 
   view.addEventListener('pointerdown', (e) => {
@@ -1712,8 +1754,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     measureChrome();
     const rootRect = root.getBoundingClientRect();
     const blocks = [
-      ...root.querySelectorAll<HTMLElement>('.world-intro > *'),
+      // The intro fades once a world is open, so it is no longer something to dodge.
+      ...(focusId ? [] : [...root.querySelectorAll<HTMLElement>('.world-intro > *')]),
       ...root.querySelectorAll<HTMLElement>('.world-rail, .world-years, .world-intro-hint'),
+      ...(focusId ? [panelEl] : []),
     ];
     keepouts = blocks
       .filter((el) => visibleBox(el))
@@ -1784,10 +1828,6 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const height = root.clientHeight;
     const now = performance.now();
     refreshKeepouts(now);
-    if (focusId) {
-      for (const button of labels.values()) button.hidden = true;
-      return;
-    }
     const toPx = (x: number, y: number, z: number) => {
       projected.set(x, y, z);
       galaxy.localToWorld(projected);
@@ -1799,7 +1839,8 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     for (const floater of floaters) {
       // Grids pin names to the resting spot, not the drifting object, so each row stays level.
       const at = deskMode ? floater.group.position : floater.anchor;
-      const scale = floater.homeScale;
+      // The live scale, so a world that has stepped forward is a real keep-out.
+      const scale = Math.max(floater.group.scale.x, 0.001);
       const crown = toPx(at.x, at.y + floater.crownLocal * scale, at.z);
       if (crown.z > 1) continue;
       const foot = toPx(at.x, at.y + floater.footLocal * scale, at.z);
@@ -1816,6 +1857,12 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     for (const floater of floaters) {
       const button = labels.get(floater.id);
       if (!button) continue;
+      // The open panel names the world you picked. On a desktop the others keep
+      // their cards. A phone sheet has no room for them, and their objects are gone.
+      if (focusId === floater.id || (focusId && sheetMode())) {
+        button.hidden = true;
+        continue;
+      }
       const box = boxes.get(floater.id);
       if (!box) {
         button.hidden = true;
@@ -1829,16 +1876,28 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         labelSize.set(floater.id, size);
       }
       const { w, h } = size;
-      const gap = 4;
+      const gap = focusId ? 14 : 4;
       const midY = (box.top + box.bottom) / 2;
+      const hero = focusId ? boxes.get(focusId) : undefined;
+      const heroRect = hero
+        ? new DOMRect(hero.rect.x - 14, hero.rect.y - 14, hero.rect.width + 28, hero.rect.height + 28)
+        : null;
       // Candidate spots as [bottom-centre x, bottom y]: above the crown first,
-      // then either side, then underneath.
+      // then either side, then underneath. While a world is open, one more
+      // spot sits on the far side of this object, away from the selection.
       const spots: [number, number][] = [
         [box.cx, box.top - gap],
         [box.cx + box.half + gap + w / 2, midY + h / 2],
         [box.cx - box.half - gap - w / 2, midY + h / 2],
         [box.cx, box.bottom + gap + h],
       ];
+      if (hero) {
+        const dx = box.cx - hero.cx;
+        const dy = midY - (hero.top + hero.bottom) / 2;
+        const len = Math.hypot(dx, dy) || 1;
+        const reach = Math.hypot(box.half, (box.bottom - box.top) / 2) + Math.max(w, h) * 0.45 + gap;
+        spots.push([box.cx + (dx / len) * reach, midY + (dy / len) * reach + h / 2]);
+      }
       const cost = ([x, y]: [number, number]) => {
         const rect = new DOMRect(x - w / 2, y - h, w, h);
         let sum = 0;
@@ -1849,13 +1908,19 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         // The name, photo, and hire button are off limits even when a side slot
         // overlaps another object a little.
         for (const keep of keepouts) sum += overlapArea(rect, keep) * 40;
-        for (const other of placed) sum += overlapArea(rect, other);
-        for (const [id, item] of boxes) if (id !== floater.id) sum += overlapArea(rect, item.rect);
+        for (const other of placed) sum += overlapArea(rect, other) * 4;
+        for (const [id, item] of boxes) if (id !== floater.id) sum += overlapArea(rect, item.rect) * (id === focusId ? 80 : 1);
+        if (heroRect) sum += overlapArea(rect, heroRect) * 80;
+        sum += overlapArea(rect, box.rect) * 12;
+        if (hero) {
+          const hy = (hero.top + hero.bottom) / 2;
+          sum -= Math.hypot(x - hero.cx, y - h / 2 - hy) * 0.45;
+        }
         return sum;
       };
       // Above the object whenever that is free; otherwise stay on the side it was on.
       const last = labelSlot.get(floater.id) ?? 0;
-      const order = [0, last, 1, 2, 3].filter((slot, i, all) => all.indexOf(slot) === i);
+      const order = [0, last, 1, 2, 3, 4].filter((slot, i, all) => all.indexOf(slot) === i && slot < spots.length);
       let best = order[0];
       let bestCost = Infinity;
       for (const slot of order) {
@@ -1922,6 +1987,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     sky.position.z += (skyZ - sky.position.z) * ease(0.05);
     if (!reduced) sky.rotation.z = Math.sin(t * 0.021) * 0.05;
     const held = focusId ? stagePos() : null;
+    if (held && !sheetMode()) placeRing(held);
     // stagePos is the on-screen place while the camera looks at the origin.
     // An extra look offset used to pull the desk back under the side card.
     if (held) lookTo.set(0, 0, 0);
@@ -1957,7 +2023,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
             }
           }
         }
-        const dest = inspecting && held ? held : floater.home;
+        const dest = inspecting && held ? held : held && !sheetMode() ? floater.ring : floater.home;
         floater.anchor.lerp(dest, ease(inspecting || focusId ? 0.12 : 0.09));
         const drift = reduced || inspecting ? 0 : focusId ? 0.08 : hovering ? 0.35 : 1;
         const fx = Math.sin(t * 0.4 + floater.phase) * 0.16 * drift;
@@ -1965,7 +2031,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
         floater.group.position.set(floater.anchor.x + fx, floater.anchor.y + fy, floater.anchor.z);
       }
       const drift = reduced || inspecting || k < 1 ? 0 : focusId ? 0.08 : hovering ? 0.35 : 1;
-      let wantScale = inspecting ? inspectScale(floater.span) : hovering ? floater.homeScale * 1.06 : focusId ? floater.homeScale * 0.9 : floater.homeScale;
+      let wantScale = inspecting ? inspectScale(floater.span) : hovering ? floater.homeScale * 1.06 : focusId ? floater.homeScale * 0.7 : floater.homeScale;
       if (!focusId) wantScale *= 0.62 + 0.38 * k;
       scaleTo.setScalar(wantScale);
       floater.group.scale.lerp(scaleTo, ease(k < 1 ? 0.22 : 0.14));
