@@ -2,7 +2,6 @@ import type { ImageMetadata } from 'astro';
 import chrisPhoto from '../assets/chris.jpg';
 import connectingCaptionsShot from '../assets/work/connectingCaptions.jpg';
 import connectingCaptionsHomeShot from '../assets/work/connectingCaptions-home.jpg';
-import connectingCaptionsSiteShot from '../assets/work/connectingCaptions-site.jpg';
 import d22sosoShot from '../assets/work/d22soso.jpg';
 import deskbreakShot from '../assets/work/deskbreak.jpg';
 import haiteduShot from '../assets/work/haitedu.jpg';
@@ -183,7 +182,8 @@ export const projects: Project[] = [
     year: '2026',
     summary:
       'Live subtitles for your Mac. Translation happens on the machine, and each sentence shows up as soon as it’s ready.',
-    image: connectingCaptionsSiteShot,
+    // The app itself, not its web page: local-host.ai's card below already shows that page.
+    image: connectingCaptionsTheaterShot,
     featured: true,
     points: [
       'Pick the language you speak and the one to show. A Theater window sits over your slides.',
