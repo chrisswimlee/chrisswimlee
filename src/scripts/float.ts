@@ -913,6 +913,12 @@ type Floater = {
   halfWLocal: number;
   world: FloatWorld;
   mats: { mat: THREE.Material; base: number }[];
+  /** Soft light behind the object. Managed apart from `mats`: it never writes depth. */
+  halo: THREE.SpriteMaterial | null;
+  /** Place on the desktop orbit: resting angle, and how wide and deep its ring is. */
+  slot: number;
+  ringX: number;
+  ringZ: number;
 };
 
 const spanBox = new THREE.Box3();
@@ -990,10 +996,16 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   fill.position.set(-6, 4, 4);
   const rim = new THREE.PointLight(0xe0b15c, 0.55, 18, 2);
   rim.position.set(0, 0.4, 3.4);
-  scene.add(ambient, sun, fill, rim);
+  // The name is the sun of this system: a warm light at the centre, so each
+  // object is lit on the side that faces it as the orbit turns.
+  const core = new THREE.PointLight(0xffd7a0, 1, 16, 1.5);
+  core.position.set(0, 0, 0.4);
+  scene.add(ambient, sun, fill, rim, core);
+  let isLight = false;
 
   const applyTheme = () => {
     const light = document.documentElement.dataset.theme === 'light';
+    isLight = light;
     // The sky follows the visitor's clock: warm at dawn and dusk, clear by day, deep at night.
     const hour = new Date().getHours();
     const part = hour >= 5 && hour < 8 ? 'dawn' : hour >= 8 && hour < 17 ? 'day' : hour >= 17 && hour < 20 ? 'dusk' : 'night';
@@ -1021,6 +1033,7 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     sun.intensity = light ? 1.15 : 1.5;
     fill.intensity = light ? 0.3 : 0.45;
     rim.intensity = light ? 0.28 : 0.55;
+    core.intensity = light ? 0.3 : 1;
   };
   applyTheme();
   document.documentElement.addEventListener('themechange', applyTheme, { signal });
@@ -1146,8 +1159,57 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       footLocal,
       halfWLocal,
       mats: collectMats(group),
+      halo: null,
+      slot: 0,
+      ringX: 1,
+      ringZ: 2,
     });
   });
+
+  // Glow: an additive halo behind each object in its own colour, and one
+  // behind the name. Pale skies wash additive light out, so they stay dark-only.
+  const haloTex = nebulaTex('rgba(255,255,255,0.6)');
+  const haloOf = (color: THREE.ColorRepresentation) => {
+    const mat = new THREE.SpriteMaterial({
+      map: haloTex,
+      color,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthWrite: false,
+      fog: false,
+      opacity: 0,
+    });
+    const sprite = new THREE.Sprite(mat);
+    // Light is not a click target.
+    sprite.raycast = () => {};
+    sprite.renderOrder = -1;
+    return { mat, sprite };
+  };
+  if (haloTex) {
+    for (const floater of floaters) {
+      const { mat, sprite } = haloOf(floater.world.accent);
+      sprite.scale.setScalar(floater.span * 2.3);
+      sprite.position.set(0, (floater.crownLocal + floater.footLocal) / 2, -0.4);
+      floater.group.add(sprite);
+      floater.halo = mat;
+    }
+  }
+  const sunGlow = haloTex ? haloOf(0xe0b15c) : null;
+  if (sunGlow) {
+    sunGlow.sprite.scale.set(9, 6.4, 1);
+    sunGlow.sprite.position.set(0, 0.1, -1.4);
+    galaxy.add(sunGlow.sprite);
+  }
+
+  // Orbit slots: the designed arrangement keeps its clockwise order, evenly
+  // spaced, on two rings that alternate so neighbours sit at different depths.
+  [...floaters]
+    .sort((a, b) => Math.atan2(a.deskHome.y, a.deskHome.x) - Math.atan2(b.deskHome.y, b.deskHome.x))
+    .forEach((floater, i, all) => {
+      floater.slot = -Math.PI + ((i + 0.5) / all.length) * Math.PI * 2;
+      floater.ringX = i % 2 ? 0.8 : 1;
+      floater.ringZ = i % 2 ? 1.5 : 2.1;
+    });
 
   const labels = new Map<string, HTMLButtonElement>();
   for (const floater of floaters) {
@@ -1211,6 +1273,15 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     }, { passive: true, signal });
     document.documentElement.addEventListener('pointerleave', () => (lean = { x: 0, y: 0 }), { signal });
   }
+  // Desktop orbit: drag to spin the system. It keeps a slow turn of its own
+  // and carries the momentum of a throw.
+  // `?orbit=` sets the starting angle in dev and in debug builds, for screenshots.
+  let orbit = import.meta.env.DEV || import.meta.env.PUBLIC_GALAXY_DEBUG ? Number(new URLSearchParams(location.search).get('orbit')) || 0 : 0;
+  let orbitVel = 0;
+  let orbitDir = 1;
+  const orbitIdle = 0.000012;
+  let drag: { x: number; at: number; moved: number; vel: number } | null = null;
+  let orbitGeo: { cx: number; cy: number; rx: number; ry: number; unit: number } | null = null;
   // Opening a world swings it round to face you, with a small overshoot.
   const swings = new Map<string, { at: number; from: number }>();
   const swingMs = 1250;
@@ -1549,7 +1620,45 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
   view.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
     press = { x: e.clientX, y: e.clientY };
+    if (deskMode && !focusId) {
+      drag = { x: e.clientX, at: performance.now(), moved: 0, vel: 0 };
+      view.setPointerCapture(e.pointerId);
+    }
     wake(900);
+  }, { signal });
+
+  view.addEventListener('pointermove', (e) => {
+    if (!drag || !orbitGeo) return;
+    const now = performance.now();
+    const dx = e.clientX - drag.x;
+    const dt = Math.max(1, now - drag.at);
+    drag.moved += Math.abs(dx);
+    if (drag.moved < 5) return;
+    // A near object follows the pointer: its ring is `rx` pixels wide.
+    const turn = dx / orbitGeo.rx;
+    orbit += turn;
+    drag.vel = drag.vel * 0.6 + (turn / dt) * 0.4;
+    drag.x = e.clientX;
+    drag.at = now;
+    hoverId = null;
+    view.style.cursor = 'grabbing';
+  }, { signal });
+
+  const endDrag = () => {
+    if (!drag) return;
+    if (drag.moved >= 5) {
+      // A pointer that rested before letting go throws nothing.
+      const thrown = performance.now() - drag.at < 90 && !reduced ? drag.vel : 0;
+      orbitVel = Math.max(-0.004, Math.min(0.004, thrown));
+      if (Math.abs(thrown) > orbitIdle) orbitDir = Math.sign(thrown);
+      view.style.cursor = 'grab';
+    }
+    drag = null;
+  };
+  view.addEventListener('pointerup', endDrag, { signal });
+  view.addEventListener('pointercancel', () => {
+    endDrag();
+    press = null;
   }, { signal });
 
   let lastHoverAt = 0;
@@ -1562,9 +1671,10 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       hoverId = null;
       return;
     }
+    if (drag && drag.moved >= 5) return;
     const floater = pick(e.clientX, e.clientY);
     hoverId = floater?.id ?? null;
-    view.style.cursor = floater ? 'pointer' : 'default';
+    view.style.cursor = floater ? 'pointer' : deskMode ? 'grab' : 'default';
   }, { signal });
 
   view.addEventListener('pointerup', (e) => {
@@ -1599,8 +1709,17 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     const typing = Boolean(target?.closest('input, textarea, select, [contenteditable="true"]'));
     if (e.key === 'Escape' && focusId && !typing) return unfocus();
     if (e.key === 'Escape' && yearFilter !== null) return setYear(null);
-    if (!focusId || typing) return;
+    if (typing) return;
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    if (!focusId) {
+      // Nothing open: the arrows turn the orbit.
+      if (!deskMode || target?.closest('a, button')) return;
+      e.preventDefault();
+      orbitDir = e.key === 'ArrowRight' ? 1 : -1;
+      orbitVel = reduced ? 0 : orbitDir * 0.0016;
+      if (reduced) orbit += orbitDir * (Math.PI / 4);
+      return;
+    }
     const world = floaters.find((item) => item.id === focusId)?.world;
     if (!world || world.aspects.length < 2) return;
     e.preventDefault();
@@ -1701,47 +1820,81 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     chrome = { top, bottom: bottom + 8 };
   }
 
-  function fitDeskFrame() {
+  // Desktop orbit, laid out in pixels: one ellipse through the middle of the
+  // band above the intro and the band below it, as wide as the window allows.
+  // Objects grow to fill those bands, so taller windows get larger worlds.
+  const orbitDist = 10.5;
+  function layoutOrbit() {
+    root.classList.toggle('is-orbit', deskMode);
     if (!deskMode) {
-      restDist = 10.5;
-      restLookY = 0;
+      orbitGeo = null;
       return;
     }
     measureChrome();
+    const width = root.clientWidth || 1;
     const height = root.clientHeight || 1;
-    let minY = Infinity;
-    let maxY = -Infinity;
-    for (const floater of floaters) {
-      minY = Math.min(minY, floater.deskHome.y + floater.footLocal * floater.deskScale);
-      maxY = Math.max(maxY, floater.deskHome.y + floater.crownLocal * floater.deskScale);
-    }
-    const pad = 0.16;
-    minY -= pad;
-    maxY += pad;
-    const span = Math.max(0.8, maxY - minY);
-    const mid = (minY + maxY) / 2;
-    // The top row's names sit above their objects, so they need room under the nav too.
-    const top = chrome.top + labelRoom() + 6;
-    const bottom = chrome.bottom;
-    const usable = Math.max(180, height - top - bottom);
+    const rootTop = root.getBoundingClientRect().top;
     const vFov = (camera.fov * Math.PI) / 180;
-    const distForSpan = (span * height) / (usable * 2 * Math.tan(vFov / 2));
-    const dist = Math.max(10.5, distForSpan);
-    const safeCenter = top + usable / 2;
-    const worldPerPx = (2 * Math.tan(vFov / 2) * dist) / height;
-    const lookY = mid - (height / 2 - safeCenter) * worldPerPx;
-    const basePerPx = (2 * Math.tan(vFov / 2) * 10.5) / height;
-    const footAtBase = height / 2 - minY / basePerPx;
-    const headAtBase = height / 2 - maxY / basePerPx;
-    // Looking at the span's middle pulls the lower worlds onto the name.
-    // Keep the origin when the designed framing already clears the chrome.
-    if (footAtBase <= height - bottom && headAtBase >= top) {
-      restDist = 10.5;
-      restLookY = 0;
-      return;
+    const unit = (2 * Math.tan(vFov / 2) * orbitDist) / height;
+    const room = labelRoom();
+    const topLimit = chrome.top + room + 6;
+    const bottomLimit = height - chrome.bottom;
+    // The intro is hidden while a world is open; keep the last measured orbit then.
+    const introBox = focusId ? null : visibleBox(intro);
+    if (!introBox && orbitGeo) return;
+    const introTop = (introBox ? introBox.top - rootTop : height * 0.34) - 14;
+    const introBottom = (introBox ? introBox.bottom - rootTop : height * 0.66) + 14;
+    const topBand = Math.max(70, introTop - topLimit);
+    const bottomBand = Math.max(70, bottomLimit - introBottom);
+    // Sit toward the outer edge of each band: off the top and bottom of the
+    // turn the ellipse dips back toward the intro's corners.
+    const topMid = introTop - topBand * 0.58;
+    const bottomMid = introBottom + bottomBand * 0.56;
+    let widest = 0;
+    for (const floater of floaters) {
+      const tall = Math.max(0.2, floater.crownLocal - floater.footLocal);
+      const wide = Math.max(0.2, floater.halfWLocal * 2);
+      // Far at the top of the turn, near at the bottom: perspective shrinks and grows them.
+      const far = orbitDist / (orbitDist + floater.ringZ);
+      const near = orbitDist / (orbitDist - floater.ringZ);
+      floater.homeScale = Math.min(
+        floater.deskScale * 1.5,
+        (topBand * 0.76 * unit) / (tall * far),
+        (bottomBand * 0.74 * unit) / (tall * near),
+        (Math.min(300, width * 0.2) * unit) / wide,
+      );
+      floater.label = [0, floater.crownLocal * floater.homeScale + 0.08];
+      widest = Math.max(widest, (floater.halfWLocal * floater.homeScale) / unit);
     }
-    restDist = dist;
-    restLookY = lookY;
+    // The widest world still clears the window edge at the side of the turn.
+    const rx = Math.max(220, Math.min(width * 0.37, width / 2 - widest - 28));
+    orbitGeo = { cx: width / 2, cy: (topMid + bottomMid) / 2, rx, ry: (bottomMid - topMid) / 2, unit };
+  }
+
+  function placeOrbit() {
+    if (!deskMode || !orbitGeo) return;
+    const { cx, cy, rx, ry, unit } = orbitGeo;
+    const width = root.clientWidth || 1;
+    const height = root.clientHeight || 1;
+    for (const floater of floaters) {
+      const a = floater.slot + orbit;
+      const sin = Math.sin(a);
+      const px = cx + rx * floater.ringX * Math.cos(a);
+      const py = cy - ry * sin;
+      const z = -floater.ringZ * sin;
+      // Scale x and y with depth so the object still lands on the ellipse on screen.
+      const f = (orbitDist - z) / orbitDist;
+      const mid = ((floater.crownLocal + floater.footLocal) / 2) * floater.homeScale;
+      floater.home.set((px - width / 2) * unit * f, ((height / 2 - py) * unit - mid) * f, z);
+    }
+  }
+
+  function fitDeskFrame() {
+    // The orbit is fitted in pixels at the landing distance, and grids place
+    // themselves, so the camera always rests at the same spot.
+    restDist = orbitDist;
+    restLookY = 0;
+    measureChrome();
   }
 
   // Labels must never sit on the name, photo, or hiring button.
@@ -1764,6 +1917,8 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       .map((el) => el.getBoundingClientRect())
       .map((r) => new DOMRect(r.left - rootRect.left - 6, r.top - rootRect.top - 6, r.width + 12, r.height + 12));
     labelSize.clear();
+    // The intro settles after the entrance, and fonts can move it: refit the orbit to it.
+    layoutOrbit();
   }
   function resize() {
     const width = root.clientWidth || 1;
@@ -1774,6 +1929,8 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
     renderer.setSize(width, height, false);
     layoutHomes(width, height);
     fitDeskFrame();
+    layoutOrbit();
+    placeOrbit();
     targetDist = focusId ? inspectDist() : idleDist();
     keepoutAt = 0;
   }
@@ -1975,6 +2132,21 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       targetPitch = 0;
     }
     const introK = skipEnter || focusId ? 1 : arrive(now, 0);
+    if (deskMode) {
+      if (!drag || drag.moved < 5) {
+        const settled = skipEnter || now - born > 2200;
+        const idle = !focusId && !hoverId && !reduced && settled ? orbitIdle * orbitDir : 0;
+        const dt = Math.min(64, dtk * 16.667);
+        // A throw coasts down to the slow idle turn; pointing at a world or opening one stops it.
+        orbitVel += (idle - orbitVel) * (1 - Math.exp(-dt / (idle ? 900 : 260)));
+        orbit += orbitVel * dt;
+      }
+      placeOrbit();
+    }
+    if (sunGlow) {
+      const want = isLight ? 0 : (focusId ? 0.12 : 0.42) * introK;
+      sunGlow.mat.opacity += (want - sunGlow.mat.opacity) * ease(0.08);
+    }
     targetDist = (focusId ? inspectDist() : idleDist()) + (focusId ? 0 : (1 - introK) * 2.8) - dive;
     yaw += (targetYaw - yaw) * ease(focusId ? 0.14 : 0.06);
     pitch += (targetPitch - pitch) * ease(focusId ? 0.14 : 0.06);
@@ -2055,6 +2227,12 @@ export function mountFloat(root: HTMLElement, worlds: FloatWorld[]) {
       } else {
         floater.group.rotation.y = restY + Math.sin(t * 0.25 + floater.phase) * 0.08 * drift + (1 - k) * 0.4 + swing;
         floater.group.rotation.z = restZ + Math.sin(t * 0.2 + floater.phase) * 0.03 * drift;
+      }
+      if (floater.halo) {
+        const off = yearFilter !== null && !activeIn(floater.world.when, yearFilter);
+        const level = off ? 0.03 : inspecting ? 0.55 : focusId ? 0.1 : hovering ? 0.8 : 0.42;
+        const want = isLight ? 0 : level * k;
+        floater.halo.opacity += (want - floater.halo.opacity) * ease(0.1);
       }
       const sats = floater.group.userData.sats as THREE.Object3D[] | undefined;
       sats?.forEach((sat, i) => {

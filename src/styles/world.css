@@ -887,3 +887,52 @@ html.world-flat .world-years {
     display: inline;
   }
 }
+
+/* --- Desktop: a slim bar, so the scene keeps the room ---------------------- */
+@media (min-width: 801px) and (pointer: fine) {
+  .world-rail {
+    width: fit-content;
+    max-width: calc(100% - 1.4rem);
+    margin-inline: auto;
+    gap: 0.15rem;
+    padding: 0.25rem 0.35rem;
+    border-radius: 999px;
+  }
+
+  .world-rail button {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    min-height: 30px;
+    padding: 0.3rem 0.6rem;
+    border-top: 0;
+    border-radius: 999px;
+  }
+
+  /* Dates live on each world's card; the bar only names them. */
+  .world-rail button small {
+    display: none;
+  }
+
+  .world-rail button.is-year-on {
+    background: var(--accent-dim);
+  }
+
+  .world-years {
+    padding-left: 0.5rem;
+  }
+
+  .world-years input {
+    width: 6rem;
+  }
+
+  .world.is-orbit .world-canvas {
+    cursor: grab;
+    touch-action: none;
+  }
+}
+
+/* Only the desktop orbit spins; grids on short and narrow windows do not. */
+.world:not(.is-orbit) .hint-orbit {
+  display: none;
+}
